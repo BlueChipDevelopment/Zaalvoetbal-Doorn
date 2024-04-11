@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
-import * as testPlayers from '../assets/test_players.json';
+import * as testPlayers from '../assets/futsal_doorn.json';
 import { Player } from './interfaces/IPlayer';
 import { Positions } from './enums/positions.enum';
 import { Team, Teams } from './interfaces/ITeam';
@@ -28,7 +28,7 @@ export class AppComponent {
   });
 
   constructor(
-    private teamGenereateService: TeamGenerateService
+    private teamGenerateService: TeamGenerateService
   ) {}
 
   protected generateFormFields(): void {
@@ -78,11 +78,11 @@ export class AppComponent {
       //  this.playerForms.controls['players'] as FormArray
       //);
 
-      this.teams = this.teamGenereateService.generate(
+      this.teams = this.teamGenerateService.generate(
         this.playerForms.controls['players'] as FormArray
       );
 
-      this.teamsAlternate = this.teamGenereateService.generate(
+      this.teamsAlternate = this.teamGenerateService.generate(
         this.playerForms.controls['players'] as FormArray
       );
 
@@ -90,7 +90,7 @@ export class AppComponent {
         ([...this.teams.TeamA.squad].sort().join(",") === [...this.teamsAlternate.TeamA.squad].sort().join(",")) ||
         ([...this.teams.TeamA.squad].sort().join(",") === [...this.teamsAlternate.TeamB.squad].sort().join(","))
       ) {
-        this.teamsAlternate = this.teamGenereateService.generate(
+        this.teamsAlternate = this.teamGenerateService.generate(
           this.playerForms.controls['players'] as FormArray
         );
       }

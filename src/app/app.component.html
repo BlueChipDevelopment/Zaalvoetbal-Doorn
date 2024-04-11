@@ -10,7 +10,7 @@
         Create
       </button>
       <button mat-raised-button color="warn" type="button" (click)="test()">
-        Demo
+        Futsal Doorn
       </button>
     </form>
   </div>
@@ -86,11 +86,11 @@
   <hr class="solid" />
   <br />
   <mat-slide-toggle [(ngModel)]="hidePlayerRatings">Hide Player Ratings</mat-slide-toggle>
-  <h1>Main Teams</h1>
+  <h1>Teams</h1>
   <div class="results">
     @for (team of getTeams(); track teams) {
     <div class="each-result">
-      <h2>{{ team }}</h2>
+      <h2>{{ getTeam(team).name }}</h2>
       <div class="results-details">
         <h4>Attack Rate: {{ getTeam(team).attack }}</h4>
         <h4>Defense Rate: {{ getTeam(team).defense }}</h4>
@@ -149,15 +149,4 @@
     }
   </div>
   } }
-  <div id="repoInfo">
-    <a class="github-button" href="https://github.com/Gnyblast"
-      data-color-scheme="no-preference: light; light: light; dark: light;" aria-label="Follow @Gnyblast on GitHub">Follow
-      &#64;Gnyblast</a>
-    <a class="github-button" href="https://github.com/Gnyblast/Futsal-Team-Builder/subscription"
-      data-color-scheme="no-preference: light; light: light; dark: light;" data-icon="octicon-eye"
-      aria-label="Watch Gnyblast/Futsal-Team-Builder on GitHub">Watch</a>
-    <a class="github-button" href="https://github.com/Gnyblast/Futsal-Team-Builder"
-      data-color-scheme="no-preference: light; light: light; dark: light;" data-icon="octicon-star"
-      aria-label="Star Gnyblast/Futsal-Team-Builder on GitHub">Star</a>
-  </div>
 </div>

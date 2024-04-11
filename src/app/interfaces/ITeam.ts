@@ -4,6 +4,7 @@ export interface Teams {
 }
 
 export interface Team {
+  name?: string;
   squad: string[];
   attack: number;
   defense: number;

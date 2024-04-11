@@ -23,8 +23,8 @@ export class TeamGenerateService {
   public generate(playerForms: FormArray): Teams {
     this.players = [];
     this.teams = {
-      TeamA: { squad: [], attack: 0, defense: 0, condition: 0, totalScore: 0 },
-      TeamB: { squad: [], attack: 0, defense: 0, condition: 0, totalScore: 0 },
+      TeamA: { name: 'Team WIT', squad: [], attack: 0, defense: 0, condition: 0, totalScore: 0 },
+      TeamB: { name: 'Team Rood', squad: [], attack: 0, defense: 0, condition: 0, totalScore: 0 },
     };
 
     for (let playerForm of playerForms.controls) {
