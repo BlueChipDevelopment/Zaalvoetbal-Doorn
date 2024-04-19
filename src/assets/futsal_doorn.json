@@ -3,129 +3,97 @@
     {
       "name": "Hans",
       "position": "GK",
-      "attackRating": 6,
-      "defenceRating": 6,
-      "conditionRating": 6,
+      "attackRating": 8,
+      "defenceRating": 8,
+      "conditionRating": 8,
       "totalScore": 0
     },
     {
       "name": "Rik",
       "position": "GK",
-      "attackRating": 5,
-      "defenceRating": 3,
-      "conditionRating": 5,
+      "attackRating": 8,
+      "defenceRating": 8,
+      "conditionRating": 8,
       "totalScore": 0
     },
     {
       "name": "Tim",
-      "position": "Striker",
-      "attackRating": 9,
-      "defenceRating": 5,
+      "position": "Midfielder",
+      "attackRating": 8,
+      "defenceRating": 8,
       "conditionRating": 8,
       "totalScore": 0
     },
     {
       "name": "Chris",
-      "position": "Striker",
-      "attackRating": 8,
-      "defenceRating": 6,
-      "conditionRating": 7,
-      "totalScore": 0
-    },
-    {
-      "name": "Frank",
       "position": "Midfielder",
-      "attackRating": 7,
-      "defenceRating": 3,
-      "conditionRating": 4,
+      "attackRating": 8,
+      "defenceRating": 8,
+      "conditionRating": 8,
       "totalScore": 0
     },
     {
       "name": "Ward",
       "position": "Midfielder",
-      "attackRating": 7,
-      "defenceRating": 7,
+      "attackRating": 8,
+      "defenceRating": 8,
       "conditionRating": 8,
       "totalScore": 0
     },
     {
       "name": "Vincent",
       "position": "Midfielder",
-      "attackRating": 6,
-      "defenceRating": 9,
-      "conditionRating": 10,
+      "attackRating": 8,
+      "defenceRating": 8,
+      "conditionRating": 8,
       "totalScore": 0
     },
     {
       "name": "Ruben",
       "position": "Midfielder",
-      "attackRating": 3,
+      "attackRating": 8,
       "defenceRating": 8,
-      "conditionRating": 6,
-      "totalScore": 0
-    },
-    {
-      "name": "Johan",
-      "position": "Midfielder",
-      "attackRating": 2,
-      "defenceRating": 6,
-      "conditionRating": 6,
+      "conditionRating": 8,
       "totalScore": 0
     },
     {
       "name": "Christian",
       "position": "Midfielder",
-      "attackRating": 2,
-      "defenceRating": 5,
-      "conditionRating": 4,
-      "totalScore": 0
-    },
-    {
-      "name": "Jesper",
-      "position": "Midfielder",
-      "attackRating": 4,
-      "defenceRating": 7,
-      "conditionRating": 7,
-      "totalScore": 0
-    },
-    {
-      "name": "Theun",
-      "position": "Midfielder",
-      "attackRating": 3,
-      "defenceRating": 5,
-      "conditionRating": 4,
+      "attackRating": 8,
+      "defenceRating": 8,
+      "conditionRating": 8,
       "totalScore": 0
     },
     {
       "name": "Nik",
       "position": "Midfielder",
-      "attackRating": 1,
-      "defenceRating": 2,
-      "conditionRating": 2,
+      "attackRating": 8,
+      "defenceRating": 8,
+      "conditionRating": 8,
       "totalScore": 0
     },
     {
       "name": "Jesse",
       "position": "Midfielder",
-      "attackRating": 1,
-      "defenceRating": 3,
-      "conditionRating": 3,
+      "attackRating": 8,
+      "defenceRating": 8,
+      "conditionRating": 8,
       "totalScore": 0
     },
     {
       "name": "Sven",
       "position": "Midfielder",
-      "attackRating": 1,
-      "defenceRating": 3,
-      "conditionRating": 3,
+      "attackRating": 8,
+      "defenceRating": 8,
+      "conditionRating": 8,
       "totalScore": 0
     },
     {
       "name": "Paul",
       "position": "Midfielder",
-      "attackRating": 1,
-      "defenceRating": 3,
-      "conditionRating": 3,
+      "attackRating": 8,
+      "defenceRating": 8,
+      "conditionRating": 8,
       "totalScore": 0
     }
   ]

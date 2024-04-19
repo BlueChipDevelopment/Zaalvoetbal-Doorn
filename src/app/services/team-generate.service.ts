@@ -24,7 +24,7 @@ export class TeamGenerateService {
     this.players = [];
     this.teams = {
       TeamA: { name: 'Team WIT', squad: [], attack: 0, defense: 0, condition: 0, totalScore: 0 },
-      TeamB: { name: 'Team Rood', squad: [], attack: 0, defense: 0, condition: 0, totalScore: 0 },
+      TeamB: { name: 'Team ROOD', squad: [], attack: 0, defense: 0, condition: 0, totalScore: 0 },
     };
 
     for (let playerForm of playerForms.controls) {

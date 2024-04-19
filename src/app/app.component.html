@@ -90,21 +90,39 @@
   <div class="results">
     @for (team of getTeams(); track teams) {
     <div class="each-result">
-      <h2>{{ getTeam(team).name }}</h2>
-      <div class="results-details">
-        <h4>Attack Rate: {{ getTeam(team).attack }}</h4>
-        <h4>Defense Rate: {{ getTeam(team).defense }}</h4>
-        <h4>Condition Rate: {{ getTeam(team).condition }}</h4>
-        <h4>Total Score: {{ getTeam(team).totalScore.toFixed(2) }}</h4>
-      </div>
       @for (player of getTeam(team).squad; track teams;let i = $index) {
+        <mat-card class="player-card">
+          <mat-card-header> 
+            @if(getTeam(team).name == "Team WIT") {
+            <div mat-card-avatar class="player-card-image-white"></div>
+            } 
+            @else
+            {
+              <div mat-card-avatar class="player-card-image-red"></div>
+            }
+            <mat-card-title>{{ getPlayerByName(player).name }}</mat-card-title>
+            <mat-card-subtitle>{{ getPlayerByName(player).position }}</mat-card-subtitle>
+            <div style="margin-left: auto;">
+              <h2>67 %</h2>
+            </div>
+          </mat-card-header>
+          <mat-card-content>
+
+          </mat-card-content>
+          <mat-card-footer>
+
+          </mat-card-footer>
+        </mat-card>
+      }
+
+      <!-- @for (player of getTeam(team).squad; track teams;let i = $index) {
       <span class="each-player" [ngClass]="hidePlayerRatings ? 'center-content' : ''">
         <b>{{ i + 1 }}.</b>
         <span class="position">
           {{ getPlayerByName(player).position }}
         </span>
         <span class="player-name">
-          {{ player }}
+          {{ player }} 
         </span>
         @if(!hidePlayerRatings) {
         <span> A:{{ getPlayerByName(player).attackRating }}</span>
@@ -112,9 +130,10 @@
         <span> C:{{ getPlayerByName(player).conditionRating }}</span>
         }
       </span>
-      }
+      } -->
+
     </div>
-    }
+    } 
   </div>
   <hr class="solid" />
   <h1>Alternate Teams</h1>
@@ -122,14 +141,17 @@
     @for (team of getTeamsAlternate(); track teamsAlternate) {
     <div class="each-result">
       <h2>{{ team }}</h2>
-      <div class="results-details">
+      <!-- <div class="results-details">
         <h4>Attack Rate: {{ getTeamAlternate(team).attack }}</h4>
         <h4>Defense Rate: {{ getTeamAlternate(team).defense }}</h4>
         <h4>Condition Rate: {{ getTeamAlternate(team).condition }}</h4>
         <h4>Total Score: {{ getTeamAlternate(team).totalScore.toFixed(2) }}</h4>
-      </div>
+      </div> -->
       @for (player of getTeamAlternate(team).squad; track teamsAlternate;let i =
       $index) {
+
+     
+
       <span class="each-player" [ngClass]="hidePlayerRatings ? 'center-content' : ''">
         <b>{{ i + 1 }}.</b>
         <span class="position">

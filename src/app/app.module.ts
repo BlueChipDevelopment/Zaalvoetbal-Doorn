@@ -10,9 +10,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import {MatDividerModule} from '@angular/material/divider';
+import { MatDividerModule } from '@angular/material/divider';
 
 import { AppComponent } from './app.component';
+import { MatCardModule } from '@angular/material/card';
 
 @NgModule({
   imports: [
@@ -27,6 +28,7 @@ import { AppComponent } from './app.component';
     MatButtonModule,
     MatIconModule,
     MatSelectModule,
+    MatCardModule,
     RouterModule.forRoot([{ path: '', component: AppComponent }]),
   ],
   declarations: [AppComponent],

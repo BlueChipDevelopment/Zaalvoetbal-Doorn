@@ -119,6 +119,22 @@
   height: 0px !important;
 }
 
+/* Futsal Doorn */
+.player-card {
+  min-width: 300px;
+  margin-bottom: 15px;
+}
+
+.player-card-image-white {
+  background-image: url('/assets/images/football-shirt-white.png');
+  background-size: cover;
+}
+
+.player-card-image-red {
+  background-image: url('/assets/images/football-shirt-red.png');
+  background-size: cover;
+}
+
 /* Extra small devices (phones, 600px and down) */
 @media only screen and (max-width: 600px) {
   .container {
@@ -183,7 +199,7 @@
   }
 
   .each-result {
-    width: 50%;
+    width: 20%;
   }
 }
 
