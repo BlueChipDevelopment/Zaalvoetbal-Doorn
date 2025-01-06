@@ -24,6 +24,9 @@
     "@angular/platform-browser-dynamic": "17.0.0",
     "@angular/router": "17.0.0",
     "angular-in-memory-web-api": "~0.17.0",
+    "gapi-script": "^1.2.0",
+    "google-auth-library": "^9.14.2",
+    "google-spreadsheet": "^4.1.4",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.14.0"
@@ -32,6 +35,8 @@
     "@angular-devkit/build-angular": "17.0.0",
     "@angular/cli": "17.0.0",
     "@angular/compiler-cli": "17.0.0",
+    "@types/gapi": "^0.0.47",
+    "@types/gapi.auth2": "^0.0.61",
     "@types/jasmine": "~5.1.0",
     "@types/node": "^16.11.35",
     "copyfiles": "^2.4.1",

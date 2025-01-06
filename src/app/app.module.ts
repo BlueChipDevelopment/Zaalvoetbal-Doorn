@@ -14,6 +14,7 @@ import { MatDividerModule } from '@angular/material/divider';
 
 import { AppComponent } from './app.component';
 import { MatCardModule } from '@angular/material/card';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   imports: [
@@ -29,6 +30,7 @@ import { MatCardModule } from '@angular/material/card';
     MatIconModule,
     MatSelectModule,
     MatCardModule,
+    HttpClientModule,
     RouterModule.forRoot([{ path: '', component: AppComponent }]),
   ],
   declarations: [AppComponent],
