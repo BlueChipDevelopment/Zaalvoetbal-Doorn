@@ -1,5 +1,5 @@
 # Futsal-Team-Builder
-Live: http://futsal.logeks.com
+Live: https://bluechipdevelopment.github.io/Futsal-Doorn/
 
 This is just a front-end application written with Angular 17 by using Angular Material Components to generate random but as balanced as possible teams for playing football. As much as it tries to make balanced teams, there is always some randomness in the code, so that things will get generated differently everytime. Which brings us to a point that might never exactly balanced but as close as possible.
 
