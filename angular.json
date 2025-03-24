@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "angular.io-example": {
+    "angular-io-example": {
       "projectType": "application",
       "root": "",
       "sourceRoot": "src",
@@ -25,11 +25,16 @@
             "styles": [
               "@angular/material/prebuilt-themes/deeppurple-amber.css",
               "src/styles.css"
-            ],
-            "scripts": []
+            ]
           },
           "configurations": {
             "production": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ],
               "budgets": [
                 {
                   "type": "initial",
@@ -56,10 +61,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "angular.io-example:build:production"
+              "buildTarget": "angular-io-example:build:production"
             },
             "development": {
-              "buildTarget": "angular.io-example:build:development"
+              "buildTarget": "angular-io-example:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -67,7 +72,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "buildTarget": "angular.io-example:build"
+            "buildTarget": "angular-io-example:build"
           }
         },
         "test": {
@@ -90,11 +95,11 @@
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
             "protractorConfig": "e2e/protractor.conf.js",
-            "devServerTarget": "angular.io-example:serve"
+            "devServerTarget": "angular-io-example:serve"
           },
           "configurations": {
             "production": {
-              "devServerTarget": "angular.io-example:serve:production"
+              "devServerTarget": "angular-io-example:serve:production"
             }
           }
         }

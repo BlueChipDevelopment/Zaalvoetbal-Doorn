@@ -2,3 +2,10 @@ node_modules
 dist
 .angular
 .vs
+.env
+# Environment files with sensitive data
+/src/environments/environment.ts
+/src/environments/environment.prod.ts
+# Keep example environment files
+!/src/environments/environment.example.ts
+!/src/environments/environment.prod.example.ts

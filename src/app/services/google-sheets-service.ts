@@ -1,14 +1,15 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class GoogleSheetsService {
-  private baseUrl = 'https://sheets.googleapis.com/v4/spreadsheets';
-  private spreadsheetId = '11xN1m371F8Tj0bX6TTRgnL_x_1_pXipox3giBuuUK1I'; // Replace with your spreadsheet ID
-  private apiKey = 'AIzaSyBrf7c4a5ACoI1reoq5zLYylXzpYxvokWA'; // Replace with your Google API key
+  private baseUrl = environment.googleSheetsBaseUrl;
+  private spreadsheetId = environment.googleSheetsSpreadsheetId;
+  private apiKey = environment.googleApiKey;
 
   constructor(private http: HttpClient) {}
 
