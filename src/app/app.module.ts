@@ -11,6 +11,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { AppComponent } from './app.component';
 import { MatCardModule } from '@angular/material/card';
@@ -30,6 +31,7 @@ import { HttpClientModule } from '@angular/common/http';
     MatIconModule,
     MatSelectModule,
     MatCardModule,
+    MatProgressSpinnerModule,
     HttpClientModule,
     RouterModule.forRoot([{ path: '', component: AppComponent }]),
   ],

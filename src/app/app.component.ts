@@ -1,20 +1,23 @@
 import { Component, OnInit } from '@angular/core';
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
-//import * as testPlayers from '../assets/futsal_doorn.json';
 import { Player } from './interfaces/IPlayer';
 import { Positions } from './enums/positions.enum';
 import { Team, Teams } from './interfaces/ITeam';
 import { TeamGenerateService } from './services/team-generate.service';
 import { GoogleSheetsService } from './services/google-sheets-service';
-import { map } from 'rxjs/operators';
+import { map, catchError, finalize } from 'rxjs/operators';
+import { of, ReplaySubject } from 'rxjs';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
 })
+
 export class AppComponent implements OnInit {
   private mockPlayerList: Player[] = new Array<Player>();
+  private loadingSubject = new ReplaySubject<boolean>(1);
+  loading$ = this.loadingSubject.asObservable();
 
   protected isFirst: boolean = true;
   protected isGenerated: boolean = false;
@@ -24,6 +27,7 @@ export class AppComponent implements OnInit {
   protected teams: Teams = {} as Teams;
   protected teamsAlternate: Teams = {} as Teams;
   protected hidePlayerRatings: boolean = false;
+  protected errorMessage: string | null = null;
 
   protected playerForms: FormGroup = new FormGroup({
     players: new FormArray<FormGroup>([]),
@@ -158,50 +162,45 @@ export class AppComponent implements OnInit {
   }
 
   protected GetFutsalDoornPlayers(): void {
-    const range = 'Bewerken!A3:C28'; 
+    this.loadingSubject.next(true);
+    this.errorMessage = null;
+    const range = 'Bewerken!A3:C28';
+
     this.googleSheetsService
       .getDataFromRange(range)
       .pipe(
         map((response) => {
-          const players: Player[] = []; 
-
+          const players: Player[] = [];
           if (response && response.values) {
-
-            // Loop through response values (rows) one by one
             response.values.forEach((row: string[]) => {
-
-              var naam = row[0]; // Column A: Naam
-              var rating = +row[2]; // Column C: Rating
-
-              var positie = Positions.MIDFIELDER; 
-              if(row[1] === 'Keeper'){
-                positie = Positions.GOAL_KEEPER;
+              if (row[0]) { // Only process rows with a name
+                const player: Player = {
+                  name: row[0],
+                  position: row[1] === 'Keeper' ? Positions.GOAL_KEEPER.toString() : Positions.MIDFIELDER.toString(),
+                  rating: +row[2] || 5, // Default to 5 if rating is invalid
+                  totalScore: 0,
+                };
+                players.push(player);
               }
-
-              // Map each row to a Player object
-              const player: Player = {
-                name: naam,          
-                position: positie.toString(),          
-                rating: rating,         
-                totalScore: 0,  // Default value
-              };
-
-              // Add the player object to the result list
-              players.push(player);
-          });
-        }
-
-        return players;
-      }))
+            });
+          }
+          return players;
+        }),
+        catchError(error => {
+          this.errorMessage = error.message;
+          return of([]); // Return empty array on error
+        }),
+        finalize(() => {
+          this.loadingSubject.next(false);
+        })
+      )
       .subscribe({
         next: (players: Player[]) => {
           this.mockPlayerList = players;
-          console.log('Players:', this.mockPlayerList);
-
-          // Zet players in FormArray
-          this.GenerateFormFields();
-        },
-        error: (e) => console.error('Error loading players:', e),
+          if (players.length > 0) {
+            this.GenerateFormFields();
+          }
+        }
       });
   }
 
