@@ -10,7 +10,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "e2e": "ng e2e",
-    "deploy": "ng deploy --base-href=/Futsal-Doorn/"
+    "deploy": "ng build && npx angular-cli-ghpages --dir=dist/browser"
   },
   "private": true,
   "dependencies": {
