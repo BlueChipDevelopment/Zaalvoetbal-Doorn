@@ -125,12 +125,12 @@
 }
 
 .player-card-image-white {
-  background-image: url('/assets/images/football-shirt-white.png');
+  background-image: url('../assets/images/football-shirt-white.png');
   background-size: cover;
 }
 
 .player-card-image-red {
-  background-image: url('/assets/images/football-shirt-red.png');
+  background-image: url('../assets/images/football-shirt-red.png');
   background-size: cover;
 }
 
