@@ -1,7 +1,7 @@
 {
-  "name": "angular.io-example",
+  "name": "zaalvoetbal-doorn",
   "version": "0.0.0",
-  "description": "Example project from an angular.io guide.",
+  "description": "Zaalvoetbal Doorn Team Generator",
   "license": "MIT",
   "scripts": {
     "ng": "ng",

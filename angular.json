@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "angular-io-example": {
+    "zaalvoetbal-doorn": {
       "projectType": "application",
       "root": "",
       "sourceRoot": "src",
@@ -62,10 +62,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "angular-io-example:build:production"
+              "buildTarget": "zaalvoetbal-doorn:build:production"
             },
             "development": {
-              "buildTarget": "angular-io-example:build:development"
+              "buildTarget": "zaalvoetbal-doorn:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -73,7 +73,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "buildTarget": "angular-io-example:build"
+            "buildTarget": "zaalvoetbal-doorn:build"
           }
         },
         "test": {
@@ -96,11 +96,11 @@
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
             "protractorConfig": "e2e/protractor.conf.js",
-            "devServerTarget": "angular-io-example:serve"
+            "devServerTarget": "zaalvoetbal-doorn:serve"
           },
           "configurations": {
             "production": {
-              "devServerTarget": "angular-io-example:serve:production"
+              "devServerTarget": "zaalvoetbal-doorn:serve:production"
             }
           }
         },

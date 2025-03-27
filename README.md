@@ -1,4 +1,4 @@
-# Futsal-Doorn Team Generator
+# Zaalvoetbal-Doorn Team Generator
 This is a front-end application written with Angular 17 by using Angular Material Components to generate random but as balanced as possible teams for playing football. As much as it tries to make balanced teams, there is always some randomness in the code, so that things will get generated differently everytime. Which brings us to a point that might never exactly balanced but as close as possible.
 
 - Each player will have 3 rates: attack, defense and condition with a position information
