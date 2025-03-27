@@ -173,11 +173,12 @@ export class AppComponent implements OnInit {
           const players: Player[] = [];
           if (response && response.values) {
             response.values.forEach((row: string[]) => {
-              if (row[0]) { // Only process rows with a name
+              // Only process rows with a name and active status is "Ja"
+              if (row[0] && row[2]?.toLowerCase() === 'ja') {
                 const player: Player = {
                   name: row[0],
                   position: row[1] === 'Keeper' ? Positions.GOAL_KEEPER.toString() : Positions.MIDFIELDER.toString(),
-                  rating: +row[3] || 5, // Changed from row[2] to row[3] for column D
+                  rating: +row[3] || 5, // Rating is in column D
                   totalScore: 0,
                 };
                 players.push(player);
