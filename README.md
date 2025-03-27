@@ -17,12 +17,13 @@ This is a front-end application written with Angular 17 by using Angular Materia
 
 ## UI/UX Enhancements
 - [ ] Add drag-and-drop interface for manual team adjustments
-- [ ] Add player profile pictures
 - [ ] Add team lineup visualization with player positions on a field
-
+- [ ] Create a (mobile friendly) ranking page
+- [ ] Add player profile pictures
+ 
 ## Team History & Statistics
 - [ ] Save generated team combinations and their match results
-- [ ] Player Chemistry. Gettings advanced statistics about players 
+- [ ] Player Chemistry. Getting advanced statistics about players
 
 ## Team Balance Improvements
 - [ ] Add team balancing based on player chemistry data

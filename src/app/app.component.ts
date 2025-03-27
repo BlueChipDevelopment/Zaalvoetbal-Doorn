@@ -164,7 +164,7 @@ export class AppComponent implements OnInit {
   protected GetFutsalDoornPlayers(): void {
     this.loadingSubject.next(true);
     this.errorMessage = null;
-    const range = 'Bewerken!A3:C28';
+    const range = 'Bewerken!A3:D28';
 
     this.googleSheetsService
       .getDataFromRange(range)
@@ -177,7 +177,7 @@ export class AppComponent implements OnInit {
                 const player: Player = {
                   name: row[0],
                   position: row[1] === 'Keeper' ? Positions.GOAL_KEEPER.toString() : Positions.MIDFIELDER.toString(),
-                  rating: +row[2] || 5, // Default to 5 if rating is invalid
+                  rating: +row[3] || 5, // Changed from row[2] to row[3] for column D
                   totalScore: 0,
                 };
                 players.push(player);
