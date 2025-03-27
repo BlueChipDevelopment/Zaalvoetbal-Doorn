@@ -15,29 +15,23 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { AppComponent } from './app.component';
 import { MatCardModule } from '@angular/material/card';
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
-@NgModule({
-  imports: [
-    BrowserModule,
-    BrowserAnimationsModule,
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSlideToggleModule,
-    FormsModule,
-    MatDividerModule,
-    MatButtonModule,
-    MatIconModule,
-    MatSelectModule,
-    MatCardModule,
-    MatProgressSpinnerModule,
-    HttpClientModule,
-    RouterModule.forRoot([{ path: '', component: AppComponent }]),
-  ],
-  declarations: [AppComponent],
-  bootstrap: [AppComponent],
-})
+@NgModule({ declarations: [AppComponent],
+    bootstrap: [AppComponent], imports: [BrowserModule,
+        BrowserAnimationsModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSlideToggleModule,
+        FormsModule,
+        MatDividerModule,
+        MatButtonModule,
+        MatIconModule,
+        MatSelectModule,
+        MatCardModule,
+        MatProgressSpinnerModule,
+        RouterModule.forRoot([{ path: '', component: AppComponent }])], providers: [provideHttpClient(withInterceptorsFromDi())] })
 export class AppModule {}
 
 /*
