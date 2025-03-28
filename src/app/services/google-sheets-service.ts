@@ -34,15 +34,15 @@ export class GoogleSheetsService {
   }
 
   getGameStatistics(): Observable<PlayerStats[]> {
-    const range = 'Bewerken!A2:AZ28'; // Extended to column AZ to include more games
+    const range = 'Bewerken!A2:AZ28';
     return this.getDataFromRange(range).pipe(
       map(response => {
         const playerStats: { [name: string]: PlayerStats } = {};
         
         if (response && response.values) {
-          const dateHeaders = response.values[0]; // Row 2 contains headers
+          const dateHeaders = response.values[0];
 
-          response.values.slice(1).forEach((row, index) => { // Start from row 3 (index 1)
+          response.values.slice(1).forEach((row, index) => {
             if (row[0] && row[2]?.toLowerCase() === 'ja') {
               const name = row[0];
               const stats: PlayerStats = {
@@ -51,6 +51,7 @@ export class GoogleSheetsService {
                 gamesPlayed: 0,
                 wins: parseInt(row[4]) || 0,
                 totalPoints: 0,
+                ventielPoints: 0, // Initialize ventiel points
                 gameHistory: [],
                 chemistry: {}
               };
@@ -62,22 +63,18 @@ export class GoogleSheetsService {
 
                 const points = parseInt(row[i]);
                 if (!isNaN(points)) {
-                  if (header === 'Zlatan' || header === 'Ventiel') {
-                    // Add Zlatan/Ventiel points to totalPoints but do not count as a game played
-                    if (header === 'Zlatan') {
-                      stats.zlatanPoints = points;
-                    } else {
-                      stats.ventielPoints = points;
-                    }
+                  if (header === 'Ventiel') {
+                    stats.ventielPoints = points;
+                  } else if (header === 'Zlatan') {
+                    stats.zlatanPoints = points;
                     stats.totalPoints += points;
                   } else {
                     // Regular game points
-                    const date = header; // Use the actual date from the header
                     stats.gamesPlayed++;
                     stats.totalPoints += points;
                     
                     const gameStats: GameStats = {
-                      date: date,
+                      date: header,
                       points: points,
                       playerIds: this.getTeamPlayersFromGame(response.values.slice(1), i, index)
                     };
