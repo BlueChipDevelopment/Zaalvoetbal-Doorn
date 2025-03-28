@@ -1,0 +1,91 @@
+<div class="leaderboard-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Leaderboard</mat-card-title>
+      <mat-card-subtitle>Based on game results</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <mat-table [dataSource]="leaderboard" class="mat-elevation-z8" style="width: 100%;">
+        <!-- Position Column -->
+        <ng-container matColumnDef="position">
+          <mat-header-cell *matHeaderCellDef> # </mat-header-cell>
+          <mat-cell *matCellDef="let player; let i = index">
+            {{getPlayerPosition(player)}}
+          </mat-cell>
+        </ng-container>
+
+        <!-- Games Played Column -->
+        <ng-container matColumnDef="gamesPlayed">
+          <mat-header-cell *matHeaderCellDef> Games </mat-header-cell>
+          <mat-cell *matCellDef="let player"> {{player.gamesPlayed}} </mat-cell>
+        </ng-container>
+
+        <!-- Total Points Column -->
+        <ng-container matColumnDef="totalPoints">
+          <mat-header-cell *matHeaderCellDef> Points </mat-header-cell>
+          <mat-cell *matCellDef="let player"> {{player.totalPoints}} </mat-cell>
+        </ng-container>
+
+        <!-- Games Won Column -->
+        <ng-container matColumnDef="gamesWon">
+          <mat-header-cell *matHeaderCellDef> Won </mat-header-cell>
+          <mat-cell *matCellDef="let player"> {{player.gamesWon}} </mat-cell>
+        </ng-container>
+
+        <!-- Games Lost Column -->
+        <ng-container matColumnDef="gamesLost">
+          <mat-header-cell *matHeaderCellDef> Lost </mat-header-cell>
+          <mat-cell *matCellDef="let player"> {{player.gamesLost}} </mat-cell>
+        </ng-container>
+
+        <!-- Games Tied Column -->
+        <ng-container matColumnDef="gamesTied">
+          <mat-header-cell *matHeaderCellDef> Tie </mat-header-cell>
+          <mat-cell *matCellDef="let player"> {{player.gamesTied}} </mat-cell>
+        </ng-container>
+
+        <!-- Zlatan Points Column -->
+        <ng-container matColumnDef="zlatanPoints">
+          <mat-header-cell *matHeaderCellDef> Zlatan </mat-header-cell>
+          <mat-cell *matCellDef="let player"> {{player.zlatanPoints}} </mat-cell>
+        </ng-container>
+
+        <!-- Ventiel Column -->
+        <ng-container matColumnDef="ventielPoints">
+          <mat-header-cell *matHeaderCellDef> Ventiel </mat-header-cell>
+          <mat-cell *matCellDef="let player"> {{player.ventielPoints || 0}} </mat-cell>
+        </ng-container>
+
+        <!-- Win Ratio Column -->
+        <ng-container matColumnDef="winRatio">
+          <mat-header-cell *matHeaderCellDef> Win % </mat-header-cell>
+          <mat-cell *matCellDef="let player"> {{player.winRatio | number:'1.1-1'}}% </mat-cell>
+        </ng-container>
+
+        <!-- Name Column with Trophy Icon for 1st Place -->
+        <ng-container matColumnDef="name">
+          <mat-header-cell *matHeaderCellDef style="padding-right: 20px;"> Name </mat-header-cell>
+          <mat-cell *matCellDef="let player; let i = index" style="padding-right: 20px;">
+            {{player.name}}
+            <ng-container *ngIf="i === 0">
+              <mat-icon style="font-size: 30px; color: gold; margin-left: 5px; vertical-align: middle;">emoji_events</mat-icon>
+            </ng-container>
+            <ng-container *ngIf="i === 1">
+              <mat-icon style="font-size: 30px; color: silver; margin-left: 5px; vertical-align: middle;">emoji_events</mat-icon>
+            </ng-container>
+            <ng-container *ngIf="i === 2">
+              <mat-icon style="font-size: 30px; color: #CE8946; margin-left: 5px; vertical-align: middle;">emoji_events</mat-icon>
+            </ng-container>
+          </mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+        <mat-row *matRowDef="let player; columns: displayedColumns;" 
+                 (click)="openChemistryModal(player)"
+                 [class.selected-row]="player === selectedPlayer"
+                 style="cursor: pointer;">
+        </mat-row>
+      </mat-table>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { GoogleSheetsResponse, GoogleSheetsCellResponse } from '../interfaces/IGoogleSheets';
+import { PlayerStats, GameStats } from '../interfaces/IGameStats';
 
 @Injectable({
   providedIn: 'root',
@@ -19,11 +20,6 @@ export class GoogleSheetsService {
     }
   }
 
-  /**
-   * Fetches data from a specific range in the Google Sheet.
-   * @param range The A1 notation range (e.g., "Sheet1!A1:B10").
-   * @returns Observable of the sheet data.
-   */
   getDataFromRange(range: string): Observable<GoogleSheetsResponse> {
     const url = `${this.baseUrl}/${this.spreadsheetId}/values/${range}?key=${this.apiKey}`;
     return this.http.get<GoogleSheetsResponse>(url).pipe(
@@ -31,24 +27,121 @@ export class GoogleSheetsService {
     );
   }
 
-  /**
-   * Fetches a single cell's value from the Google Sheet.
-   * @param cell The A1 notation of the cell (e.g., "Sheet1!A1").
-   * @returns Observable of the cell data.
-   */
   getDataFromCell(cell: string): Observable<GoogleSheetsCellResponse> {
     return this.http.get<GoogleSheetsCellResponse>(`${this.baseUrl}/${this.spreadsheetId}/values/${cell}?key=${this.apiKey}`).pipe(
       catchError(this.handleError)
     );
   }
 
+  getGameStatistics(): Observable<PlayerStats[]> {
+    const range = 'Bewerken!A2:AZ28'; // Extended to column AZ to include more games
+    return this.getDataFromRange(range).pipe(
+      map(response => {
+        const playerStats: { [name: string]: PlayerStats } = {};
+        
+        if (response && response.values) {
+          const dateHeaders = response.values[0]; // Row 2 contains headers
+
+          response.values.slice(1).forEach((row, index) => { // Start from row 3 (index 1)
+            if (row[0] && row[2]?.toLowerCase() === 'ja') {
+              const name = row[0];
+              const stats: PlayerStats = {
+                playerId: index.toString(),
+                name: name,
+                gamesPlayed: 0,
+                wins: parseInt(row[4]) || 0,
+                totalPoints: 0,
+                gameHistory: [],
+                chemistry: {}
+              };
+
+              // Iterate through each column
+              dateHeaders.forEach((header, i) => {
+                // Skip non-date columns
+                if (i < 8) return;
+
+                const points = parseInt(row[i]);
+                if (!isNaN(points)) {
+                  if (header === 'Zlatan' || header === 'Ventiel') {
+                    // Add Zlatan/Ventiel points to totalPoints but do not count as a game played
+                    if (header === 'Zlatan') {
+                      stats.zlatanPoints = points;
+                    } else {
+                      stats.ventielPoints = points;
+                    }
+                    stats.totalPoints += points;
+                  } else {
+                    // Regular game points
+                    const date = header; // Use the actual date from the header
+                    stats.gamesPlayed++;
+                    stats.totalPoints += points;
+                    
+                    const gameStats: GameStats = {
+                      date: date,
+                      points: points,
+                      playerIds: this.getTeamPlayersFromGame(response.values.slice(1), i, index)
+                    };
+                    stats.gameHistory.push(gameStats);
+                  }
+                }
+              });
+
+              stats.chemistry = this.calculatePlayerChemistry(stats.gameHistory);
+              playerStats[name] = stats;
+            }
+          });
+        }
+        return Object.values(playerStats);
+      })
+    );
+  }
+
+  private getDateFromColumnIndex(columnIndex: number): string {
+    const baseDate = new Date(2024, 0, 1);
+    const date = new Date(baseDate);
+    date.setDate(baseDate.getDate() + (columnIndex - 8) * 7);
+    return date.toISOString().split('T')[0];
+  }
+
+  private getTeamPlayersFromGame(values: string[][], columnIndex: number, playerRowIndex: number): string[] {
+    const playerIds: string[] = [];
+    const playerPoints = values[playerRowIndex][columnIndex];
+    
+    values.forEach((row, index) => {
+      if (index !== playerRowIndex && row[columnIndex] === playerPoints) {
+        playerIds.push(index.toString());
+      }
+    });
+    
+    return playerIds;
+  }
+
+  private calculatePlayerChemistry(gameHistory: GameStats[]): { [playerId: string]: { gamesPlayed: number; gamesWon: number } } {
+    const chemistry: { [playerId: string]: { gamesPlayed: number; gamesWon: number } } = {};
+
+    gameHistory.forEach(game => {
+      game.playerIds.forEach(playerId => {
+        if (!chemistry[playerId]) {
+          chemistry[playerId] = { gamesPlayed: 0, gamesWon: 0 };
+        }
+
+        chemistry[playerId].gamesPlayed += 1; // Increment gamesPlayed
+
+        // Count as a win if the player scored 3 points in the game
+        if (game.points === 3) {
+          chemistry[playerId].gamesWon += 1; // Increment gamesWon
+        }
+      });
+    });
+
+    return chemistry;
+  }
+
   private handleError(error: HttpErrorResponse) {
     let errorMessage = 'An error occurred while fetching data from Google Sheets';
     if (error.error instanceof ErrorEvent) {
-      // Client-side error
       errorMessage = `Error: ${error.error.message}`;
     } else {
-      // Server-side error
       errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
     }
     console.error(errorMessage);

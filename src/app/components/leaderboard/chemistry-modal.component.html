@@ -1,0 +1,23 @@
+<h2 mat-dialog-title>Chemistry Information</h2>
+<mat-dialog-content>
+  <p><strong>Player:</strong> {{ data.player.name }}</p>
+  <p><strong>Best Chemistry:</strong></p>
+  <ul>
+    <li><strong>Player:</strong> {{ data.bestTeammates.best.name }}</li>
+    <li><strong>Games Played:</strong> {{ data.bestTeammates.best.gamesPlayed }}</li>
+    <li><strong>Games Won:</strong> {{ data.bestTeammates.best.gamesWon }}</li>
+    <li><strong>Games Lost:</strong> {{ data.bestTeammates.best.gamesPlayed - data.bestTeammates.best.gamesWon - data.bestTeammates.best.gamesTied }}</li>
+    <li><strong>Games Tied:</strong> {{ data.bestTeammates.best.gamesTied }}</li>
+  </ul>
+  <p><strong>Worst Chemistry:</strong></p>
+  <ul>
+    <li><strong>Player:</strong> {{ data.bestTeammates.worst.name }}</li>
+    <li><strong>Games Played:</strong> {{ data.bestTeammates.worst.gamesPlayed }}</li>
+    <li><strong>Games Won:</strong> {{ data.bestTeammates.worst.gamesWon }}</li>
+    <li><strong>Games Lost:</strong> {{ data.bestTeammates.worst.gamesPlayed - data.bestTeammates.worst.gamesWon - data.bestTeammates.worst.gamesTied }}</li>
+    <li><strong>Games Tied:</strong> {{ data.bestTeammates.worst.gamesTied }}</li>
+  </ul>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-button mat-dialog-close>Close</button>
+</mat-dialog-actions>

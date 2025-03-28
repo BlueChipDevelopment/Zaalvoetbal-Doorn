@@ -1,0 +1,40 @@
+.leaderboard-container {
+  overflow-x: auto; /* Allow horizontal scrolling if content overflows */
+}
+
+mat-table {
+  table-layout: auto; /* Allow flexible column widths */
+  width: 100%;
+  overflow: visible; /* Prevent clipping of icons */
+}
+
+.mat-cell, .mat-header-cell {
+  white-space: nowrap; /* Prevent wrapping of content */
+  overflow: visible; /* Ensure icons are fully visible */
+  padding-right: 50px; /* Add more space for icons */
+}
+
+.mat-row {
+  display: flex;
+  align-items: center;
+}
+
+.mat-cell {
+  display: flex;
+  align-items: center;
+}
+
+.mat-icon {
+  font-size: 30px !important; /* Ensure the icons are large enough */
+  height: 30px !important; /* Override default height */
+  width: 30px !important; /* Override default width */
+}
+
+.mat-list-item span[matListItemLine] {
+  display: flex;
+  align-items: center;
+}
+
+.mat-list-item span[matListItemLine] mat-icon {
+  margin-left: 8px; /* Add spacing between the score and the icon */
+}

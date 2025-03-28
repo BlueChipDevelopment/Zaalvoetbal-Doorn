@@ -12,26 +12,53 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-
-import { AppComponent } from './app.component';
+import { MatTableModule } from '@angular/material/table';
+import { MatListModule } from '@angular/material/list';
 import { MatCardModule } from '@angular/material/card';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatDialogModule } from '@angular/material/dialog';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
-@NgModule({ declarations: [AppComponent],
-    bootstrap: [AppComponent], imports: [BrowserModule,
-        BrowserAnimationsModule,
-        ReactiveFormsModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatSlideToggleModule,
-        FormsModule,
-        MatDividerModule,
-        MatButtonModule,
-        MatIconModule,
-        MatSelectModule,
-        MatCardModule,
-        MatProgressSpinnerModule,
-        RouterModule.forRoot([{ path: '', component: AppComponent }])], providers: [provideHttpClient(withInterceptorsFromDi())] })
+import { AppComponent } from './app.component';
+import { LeaderboardComponent } from './components/leaderboard/leaderboard.component';
+import { TeamGeneratorComponent } from './components/team-generator/team-generator.component';
+import { ChemistryModalComponent } from './components/leaderboard/chemistry-modal.component';
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    LeaderboardComponent,
+    TeamGeneratorComponent,
+    ChemistryModalComponent
+  ],
+  bootstrap: [AppComponent],
+  imports: [
+    BrowserModule,
+    BrowserAnimationsModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSlideToggleModule,
+    FormsModule,
+    MatDividerModule,
+    MatButtonModule,
+    MatIconModule,
+    MatSelectModule,
+    MatCardModule,
+    MatProgressSpinnerModule,
+    MatTableModule,
+    MatListModule,
+    MatTooltipModule,
+    MatMenuModule,
+    MatDialogModule,
+    RouterModule.forRoot([
+      { path: '', component: TeamGeneratorComponent },
+      { path: 'leaderboard', component: LeaderboardComponent }
+    ])
+  ],
+  providers: [provideHttpClient(withInterceptorsFromDi())]
+})
 export class AppModule {}
 
 /*
