@@ -13,6 +13,7 @@ export class GoogleSheetsService {
   private baseUrl = environment.googleSheetsBaseUrl;
   private spreadsheetId = environment.googleSheetsSpreadsheetId;
   private apiKey = environment.googleApiKey;
+  private _playerStats: PlayerStats[] | null = null;
 
   constructor(private http: HttpClient) {
     if (!this.baseUrl || !this.spreadsheetId || !this.apiKey) {
@@ -88,29 +89,10 @@ export class GoogleSheetsService {
             }
           });
         }
-        return Object.values(playerStats);
+        this._playerStats = Object.values(playerStats);
+        return this._playerStats;
       })
     );
-  }
-
-  private getDateFromColumnIndex(columnIndex: number): string {
-    const baseDate = new Date(2024, 0, 1);
-    const date = new Date(baseDate);
-    date.setDate(baseDate.getDate() + (columnIndex - 8) * 7);
-    return date.toISOString().split('T')[0];
-  }
-
-  private getTeamPlayersFromGame(values: string[][], columnIndex: number, playerRowIndex: number): string[] {
-    const playerIds: string[] = [];
-    const playerPoints = values[playerRowIndex][columnIndex];
-    
-    values.forEach((row, index) => {
-      if (index !== playerRowIndex && row[columnIndex] === playerPoints) {
-        playerIds.push(index.toString());
-      }
-    });
-    
-    return playerIds;
   }
 
   private calculatePlayerChemistry(gameHistory: GameStats[]): { [playerId: string]: { gamesPlayed: number; gamesWon: number } } {
@@ -132,6 +114,70 @@ export class GoogleSheetsService {
     });
 
     return chemistry;
+  }
+
+  getPlayerStatsByName(playerName: string): any {
+    if (!this._playerStats) {
+      // Fetch player stats if not already cached
+      this.getGameStatistics().subscribe({
+        next: (stats) => {
+          this._playerStats = stats;
+        },
+        error: (err) => {
+          console.error('Error fetching player stats:', err);
+        }
+      });
+    }
+
+    // Check again after fetching
+    if (this._playerStats) {
+      const playerStat = this._playerStats.find(stat => stat.name === playerName);
+      if (playerStat) {
+        // Recalculate chemistry data from game history if available
+        playerStat.chemistry = this.calculatePlayerChemistry(playerStat.gameHistory || []);
+        return playerStat;
+      }
+    }
+
+    console.warn(`Player stats not found for: ${playerName}`);
+    return null;
+  }
+
+  // Synchronously get player stats (using cached data)
+  getPlayerStatsByNameSync(playerName: string): any {
+    // Check if we have cached stats
+    if (this._playerStats) {
+      const playerStat = this._playerStats.find(stat => stat.name === playerName);
+      if (playerStat) {
+        return playerStat;
+      }
+    }
+    return null;
+  }
+
+  // Ensure player stats are loaded before accessing
+  ensurePlayerStatsLoaded(): Observable<PlayerStats[]> {
+    if (this._playerStats) {
+      return new Observable(observer => {
+        observer.next(this._playerStats as PlayerStats[]);
+        observer.complete();
+      });
+    } else {
+      return this.getGameStatistics();
+    }
+  }
+
+  private getTeamPlayersFromGame(values: string[][], columnIndex: number, playerRowIndex: number): string[] {
+    const playerIds: string[] = [];
+    const playerPoints = values[playerRowIndex][columnIndex];
+    
+    values.forEach((row, index) => {
+      if (index !== playerRowIndex && row[columnIndex] === playerPoints) {
+        playerIds.push(index.toString());
+      }
+    });
+    
+    return playerIds;
   }
 
   private handleError(error: HttpErrorResponse) {

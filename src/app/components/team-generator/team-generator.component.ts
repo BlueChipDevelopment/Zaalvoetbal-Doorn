@@ -11,20 +11,22 @@ import { of, ReplaySubject } from 'rxjs';
 @Component({
   selector: 'app-team-generator',
   templateUrl: './team-generator.component.html',
-  styleUrls: ['./team-generator.component.css']
+  styleUrls: ['./team-generator.component.scss']
 })
 export class TeamGeneratorComponent implements OnInit {
   private mockPlayerList: Player[] = new Array<Player>();
   private loadingSubject = new ReplaySubject<boolean>(1);
   loading$ = this.loadingSubject.asObservable();
 
-  protected isFirst: boolean = true;
-  protected isGenerated: boolean = false;
+  public isFirst: boolean = true;
+  public isGenerated = false;
+  public isGenerating = false;
+  public algorithmExplanation = '';
+  
   protected positions: string[] = Object.values(Positions);
   protected ratings: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
   protected numOfPlayers: number = 0;
   protected teams: Teams = {} as Teams;
-  protected teamsAlternate: Teams = {} as Teams;
   protected hidePlayerRatings: boolean = false;
   protected errorMessage: string | null = null;
 
@@ -47,41 +49,61 @@ export class TeamGeneratorComponent implements OnInit {
     return fromGroup as FormGroup;
   }
 
-  protected async generateTeams(): Promise<void> {
-    let isAllValid = true;
-    for (let playerForm of (this.playerForms.controls['players'] as FormArray).controls) {
-      if (!playerForm.valid) {
-        playerForm.markAllAsTouched();
-        isAllValid = false;
-      }
-    }
+  generateTeams() {
+    this.isGenerating = true;
+    this.teamGenerateService.cleanGeneratedTeams();
 
-    if (isAllValid) {
+    // Use setTimeout to allow UI to update with spinner before heavy computation
+    setTimeout(() => {
+      const values = this.playerForms.value;
+      if (!values.players || values.players.length === 0) {
+        this.errorMessage = 'Please add players first.';
+        this.isGenerating = false;
+        return;
+      }
+
+      // Extract players directly from the form array to ensure only present players are included
+      const selectedPlayers = this.getAsFormArray(this.playerForms.controls['players']).controls
+        .map((control) => control.value)
+        .filter((player: Player) => player && player.name && player.name.trim() !== '' && player.position && player.rating);
+
+      console.log('Selected players for team generation:', selectedPlayers);
+
+      // Generate teams with only selected players
+      this.teamGenerateService.generateTeams(selectedPlayers);
+      const generatedTeams = this.teamGenerateService.getGeneratedTeams();
+
+      // Initialize teams object
+      this.teams = {} as Teams;
+
+      // Properly assign teams by index
+      if (generatedTeams.length >= 2) {
+        this.teams = {
+          teamWhite: generatedTeams[0],
+          teamRed: generatedTeams[1]
+        };
+      }
+
       this.isGenerated = true;
-      
-      this.teams = await this.teamGenerateService.generate(
-        this.playerForms.controls['players'] as FormArray
-      );
 
-      this.teamsAlternate = await this.teamGenerateService.generate(
-        this.playerForms.controls['players'] as FormArray
-      );
+      // Generate explanation for the team balancing algorithm
+      this.createAlgorithmExplanation();
 
-      while (
-        ([...this.teams.TeamA.squad].sort().join(",") === [...this.teamsAlternate.TeamA.squad].sort().join(",")) ||
-        ([...this.teams.TeamA.squad].sort().join(",") === [...this.teamsAlternate.TeamB.squad].sort().join(","))
-      ) {
-        this.teamsAlternate = await this.teamGenerateService.generate(
-          this.playerForms.controls['players'] as FormArray
-        );
-      }
-
-      setTimeout(() => {
-        let resultsHeight = document.querySelector<HTMLElement>(".results")?.offsetHeight;
-        let generateButtonPosition = document.querySelector<HTMLElement>("#generate")?.offsetTop;
-        window.scrollTo(0, ((generateButtonPosition?generateButtonPosition:0)-(resultsHeight?resultsHeight:0)/5));
-      }, 200);
-    }
+      this.isGenerating = false;
+    }, 100);
+  }
+  
+  private createAlgorithmExplanation() {
+    const teams = this.teamGenerateService.getGeneratedTeams();
+    if (!teams || teams.length < 2) return;
+    
+    const team1Score = teams[0].totalScore.toFixed(2);
+    const team2Score = teams[1].totalScore.toFixed(2);
+    const scoreDiff = Math.abs(parseFloat(team1Score) - parseFloat(team2Score)).toFixed(2);
+    
+    this.algorithmExplanation = `De teams zijn in balans met een puntenverschil van slechts ${scoreDiff} punten. 
+      Ons algoritme houdt rekening met spelersbeoordelingen, posities en historische chemiegegevens om gelijkwaardige teams te creëren.
+      De bijdrage van elke speler wordt gewogen op basis van hun prestaties in eerdere wedstrijden.`;
   }
 
   protected clean(): void {
@@ -115,16 +137,8 @@ export class TeamGeneratorComponent implements OnInit {
     return Object.keys(this.teams);
   }
 
-  protected getTeamsAlternate(): string[] {
-    return Object.keys(this.teamsAlternate);
-  }
-
   protected getTeam(teamName: string): Team {
     return this.teams[teamName as keyof Teams] as Team;
-  }
-
-  protected getTeamAlternate(teamName: string): Team {
-    return this.teamsAlternate[teamName as keyof Teams] as Team;
   }
 
   protected getPlayerByName(playerName: string): Player {
@@ -160,12 +174,12 @@ export class TeamGeneratorComponent implements OnInit {
           const players: Player[] = [];
           if (response && response.values) {
             response.values.forEach((row: string[]) => {
+              // Only include players who are active (ja) and have a name
               if (row[0] && row[2]?.toLowerCase() === 'ja') {
                 const player: Player = {
                   name: row[0],
                   position: row[1] === 'Keeper' ? Positions.GOAL_KEEPER.toString() : Positions.MIDFIELDER.toString(),
-                  rating: +row[3] || 5,
-                  totalScore: 0,
+                  rating: +row[3] || 5
                 };
                 players.push(player);
               }

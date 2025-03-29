@@ -8,17 +8,16 @@ This is a front-end application written with Angular 17 by using Angular Materia
 - You can just clone and run `npm install && npm run start` to start the test server, if you have `npm` and `angular 17` pre-installed
 
 ## General improvements
-- [ ] Set players to active/inactive
 - [ ] Adding a feature for limited access with a pincode
 
 ## Ease-of-use
 - [ ] Read attendance based on a whatsapp poll 
 - [ ] Add polling mechanism to replace using whatsapp
+- [ ] Add method for inputting the scores and set results in Google Sheet
 
 ## UI/UX Enhancements
 - [ ] Add drag-and-drop interface for manual team adjustments
 - [ ] Add team lineup visualization with player positions on a field
-- [ ] Create a (mobile friendly) ranking page
 - [ ] Add player profile pictures
  
 ## Team History & Statistics

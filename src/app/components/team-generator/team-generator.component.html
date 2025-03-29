@@ -15,7 +15,7 @@
 @if(isFirst){
   <div class="pre-generate-player-forms">
     <form (submit)="createPlayerForms()"> 
-      <mat-form-field appearance="outline">
+      <mat-form-field subscriptSizing="dynamic" appearance="outline">
         <mat-label># of Players</mat-label>
         <input matInput type="number" [(ngModel)]="numOfPlayers" name="something" />
       </mat-form-field>
@@ -38,69 +38,78 @@
   </div>
   <ng-container [formGroup]="playerForms">
     <ng-container formArrayName="players">
-      @for (form of getAsFormArray(playerForms.controls['players']).controls;
-      track getAsFormArray(playerForms.controls['players']).controls) {
-      <form [formGroup]="getAsFormGroup(getAsFormArray(playerForms.controls['players']).controls[$index])">
-        <mat-form-field>
-          <mat-label>Player Name {{ $index + 1 }}</mat-label>
-          <input formControlName="name" matInput type="text" />
-        </mat-form-field>
-        <mat-form-field>
-          <mat-label>Position</mat-label>
-          <mat-select formControlName="position">
-            @for (position of positions; track positions) {
-            <mat-option [value]="position">{{ position }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-        <mat-form-field>
-          <mat-label>Rating</mat-label>
-          <mat-select formControlName="rating">
-            @for (rating of ratings; track ratings) {
-            <mat-option [value]="rating">{{ rating }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-        <button mat-mini-fab color="accent" (click)="deletePlayer($index)">
-          <mat-icon>close</mat-icon>
-        </button>
-      </form>
-      <mat-divider class="dividers"></mat-divider>
+      @for (form of getAsFormArray(playerForms.controls['players']).controls; track form) {
+        <form [formGroup]="getAsFormGroup(form)">
+          <mat-form-field subscriptSizing="dynamic">
+            <mat-label>Player Name {{ $index + 1 }}</mat-label>
+            <input formControlName="name" matInput type="text" />
+          </mat-form-field>
+          <mat-form-field subscriptSizing="dynamic">
+            <mat-label>Position</mat-label>
+            <mat-select formControlName="position">
+              @for (position of positions; track $index) {
+              <mat-option [value]="position">{{ position }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field subscriptSizing="dynamic">
+            <mat-label>Rating</mat-label>
+            <mat-select formControlName="rating">
+              @for (rating of ratings; track rating) {
+              <mat-option [value]="rating">{{ rating }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <button mat-mini-fab color="accent" (click)="deletePlayer($index)">
+            <mat-icon>close</mat-icon>
+          </button>
+        </form>
+        <mat-divider class="dividers"></mat-divider>
       }
     </ng-container>
     <div class="button-container">
-      <button mat-raised-button color="accent" (click)="generateTeams()" [disabled]="numOfPlayers < 1" id="generate">
+      <button mat-raised-button color="accent" (click)="generateTeams()" [disabled]="numOfPlayers < 1 || isGenerating" id="generate">
         Generate
       </button>
-      <button mat-raised-button (click)="clean()" [disabled]="numOfPlayers < 1">
+      <button mat-raised-button (click)="clean()" [disabled]="numOfPlayers < 1 || isGenerating">
         Clean
       </button>
     </div>
   </ng-container>
+  
+  <!-- Show spinner during generation -->
+  @if(isGenerating) {
+    <div class="generation-spinner-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Generating balanced teams...</p>
+    </div>
+  }
+  
   @if(isGenerated){
     <hr class="solid" />
-    <br />
-    <h1>Teams</h1>
+    <!-- Team results -->
     <div class="results">
-      @for (team of getTeams(); track teams) {
+      @for (teamKey of getTeams(); track teamKey) {
         <div class="each-result">
-          <h2>{{ getTeam(team).name }}</h2>
+          <h2>{{ getTeam(teamKey).name }}</h2>
           <div class="results-details">
-            <h4>Total Score: {{ getTeam(team).totalScore.toFixed(2) }}</h4>
+            <h4>Total Score: {{ getTeam(teamKey).sumOfRatings.toFixed(2) }}</h4>
           </div>
-          @for (player of getTeam(team).squad; track teams;let i = $index) {
-            <mat-card class="player-card">
-              <mat-card-header> 
-                <div mat-card-avatar [class]="'player-card-image-'+ (getTeam(team).shirtcolor)"></div>
-                <mat-card-title>{{ getPlayerByName(player).name }}</mat-card-title>
-                <mat-card-subtitle>{{ getPlayerByName(player).position }}</mat-card-subtitle>
-                <div style="margin-left: auto;">
-                  <h2>{{ getPlayerByName(player).rating }}</h2>
-                </div>
-              </mat-card-header>
-              <mat-card-content></mat-card-content>
-              <mat-card-footer></mat-card-footer>
-            </mat-card>
+          @for (playerName of getTeam(teamKey).squad; track playerName) {
+            @if (getPlayerByName(playerName)) {
+              <mat-card class="player-card">
+                <mat-card-header> 
+                  <div mat-card-avatar [class]="'player-card-image-'+ (getTeam(teamKey).shirtcolor || 'default')"></div>
+                  <mat-card-title>{{ getPlayerByName(playerName).name }}</mat-card-title>
+                  <mat-card-subtitle>{{ getPlayerByName(playerName).position }}</mat-card-subtitle>
+                  <div style="margin-left: auto;">
+                    <h2>{{ getPlayerByName(playerName).rating }}</h2>
+                  </div>
+                </mat-card-header>
+                <mat-card-content></mat-card-content>
+                <mat-card-footer></mat-card-footer>
+              </mat-card>
+            }
           }
         </div>
       }

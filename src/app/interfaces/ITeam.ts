@@ -1,14 +1,16 @@
-export interface Teams {
-  TeamA: Team;
-  TeamB: Team;
-}
-
 export interface Team {
-  name?: string;
-  shirtcolor: string;
+  name: string;
   squad: string[];
+  totalScore: number;
+  shirtcolor: string;
   attack: number;
   defense: number;
   condition: number;
-  totalScore: number;
+  sumOfRatings: number; // Sum of player ratings
+  chemistryScore: number;  // Chemistry bonus score
+}
+
+export interface Teams {
+  teamWhite: Team;
+  teamRed: Team;
 }
