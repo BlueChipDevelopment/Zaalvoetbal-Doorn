@@ -12,7 +12,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/browser",
+            "outputPath": "dist",
             "baseHref": "/Zaalvoetbal-Doorn/",
             "index": "src/index.html",
             "browser": "src/main.ts",
@@ -107,7 +107,8 @@
         "deploy": {
           "builder": "angular-cli-ghpages:deploy",
           "options": {
-            "baseHref": "/Zaalvoetbal-Doorn/"
+            "baseHref": "/Zaalvoetbal-Doorn/",
+            "dir": "dist/browser"
           }
         }
       }
