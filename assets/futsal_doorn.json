@@ -1,0 +1,154 @@
+{
+  "players": [
+    {
+      "name": "Jesse",
+      "position": "Midfielder",
+      "rating": 3,
+      "totalScore": 0
+    },
+    {
+      "name": "Theun",
+      "position": "Midfielder",
+      "rating": 4,
+      "totalScore": 0
+    },
+    {
+      "name": "Chris",
+      "position": "Midfielder",
+      "rating": 10,
+      "totalScore": 0
+    },
+    {
+      "name": "Christian",
+      "position": "Midfielder",
+      "rating": 5,
+      "totalScore": 0
+    },
+    {
+      "name": "Ruben",
+      "position": "Midfielder",
+      "rating": 7,
+      "totalScore": 0
+    },
+    {
+      "name": "Johan",
+      "position": "Midfielder",
+      "rating": 2,
+      "totalScore": 0
+    },
+    {
+      "name": "Rik",
+      "position": "GK",
+      "rating": 3,
+      "totalScore": 0
+    },
+    {
+      "name": "Sven",
+      "position": "Midfielder",
+      "rating": 6,
+      "totalScore": 0
+    },
+    {
+      "name": "Arnaud (NOL)",
+      "position": "Midfielder",
+      "rating": 2,
+      "totalScore": 0
+    },
+    {
+      "name": "Nik",
+      "position": "Midfielder",
+      "rating": 8,
+      "totalScore": 0    
+    },
+    {
+      "name": "Vincent",
+      "position": "Midfielder",
+      "rating": 6,
+      "totalScore": 0
+    },
+    {
+      "name": "Tom",
+      "position": "Midfielder",
+      "rating": 1,
+      "totalScore": 0    
+    },
+    {
+      "name": "Paul",
+      "position": "Midfielder",
+      "rating": 7,
+      "totalScore": 0
+    },
+    {
+      "name": "Frank",
+      "position": "Midfielder",
+      "rating": 5,
+      "totalScore": 0
+    },
+    {
+      "name": "Eddy",
+      "position": "Midfielder",
+      "rating": 9,
+      "totalScore": 0
+    },
+    {
+      "name": "Ward",
+      "position": "Midfielder",
+      "rating": 8,
+      "totalScore": 0
+    },
+    {
+      "name": "Maarten",
+      "position": "Midfielder",
+      "rating": 10,
+      "totalScore": 0
+    },
+    {
+      "name": "Hans",
+      "position": "GK",
+      "rating": 7,
+      "totalScore": 0
+    },
+    {
+      "name": "Marnix",
+      "position": "Midfielder",
+      "rating": 4,
+      "totalScore": 0
+    },
+    {
+      "name": "Tim",
+      "position": "Midfielder",
+      "rating": 2,
+      "totalScore": 0
+    },
+    {
+      "name": "Jacco",
+      "position": "Midfielder",
+      "rating": 1,
+      "totalScore": 0
+    },
+    {
+      "name": "Zikret",
+      "position": "Midfielder",
+      "rating": 1,
+      "totalScore": 0
+    },
+    {
+      "name": "Jan Willem",
+      "position": "Midfielder",
+      "rating": 1,
+      "totalScore": 0
+    },
+    {
+      "name": "Martijn",
+      "position": "Midfielder",
+      "rating": 1,
+      "totalScore": 0
+    },
+    {
+      "name": "Jesper",
+      "position": "Midfielder",
+      "rating": 1,
+      "totalScore": 0
+    }
+  ]
+}
