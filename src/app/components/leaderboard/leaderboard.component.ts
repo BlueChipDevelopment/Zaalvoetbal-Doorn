@@ -14,7 +14,7 @@ export class LeaderboardComponent implements OnInit {
   leaderboard: PlayerStats[] = [];
   selectedPlayer: PlayerStats | null = null;
   bestTeammates: { playerId: string; name: string; chemistry: number; gamesPlayed: number; gamesWon: number }[] = [];
-  displayedColumns: string[] = ['position', 'name', 'gamesPlayed', 'totalPoints', 'gamesWon', 'gamesTied', 'zlatanPoints', 'ventielPoints', 'winRatio'];
+  displayedColumns: string[] = ['position', 'name', 'gamesPlayed', 'totalPoints', 'gamesWon', 'gamesLost', 'gamesTied', 'zlatanPoints', 'ventielPoints', 'winRatio'];
 
   constructor(private leaderboardService: LeaderboardService, private dialog: MatDialog) {}
 
