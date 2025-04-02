@@ -1,5 +1,5 @@
 import { MatDialog } from '@angular/material/dialog';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { LeaderboardService } from '../../services/leaderboard.service';
 import { PlayerStats } from '../../interfaces/IGameStats';
 import { Observable } from 'rxjs';
@@ -15,11 +15,28 @@ export class LeaderboardComponent implements OnInit {
   selectedPlayer: PlayerStats | null = null;
   bestTeammates: { playerId: string; name: string; chemistry: number; gamesPlayed: number; gamesWon: number }[] = [];
   displayedColumns: string[] = ['position', 'name', 'gamesPlayed', 'totalPoints', 'gamesWon', 'gamesLost', 'gamesTied', 'zlatanPoints', 'ventielPoints', 'winRatio'];
-
-  constructor(private leaderboardService: LeaderboardService, private dialog: MatDialog) {}
+  mobileDisplayedColumns: string[] = ['position', 'name', 'gamesPlayed', 'totalPoints'];
+  isMobile = false;
+  
+  constructor(private leaderboardService: LeaderboardService, private dialog: MatDialog) {
+    this.checkScreenSize();
+  }
 
   ngOnInit(): void {
     this.loadLeaderboard();
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize() {
+    this.checkScreenSize();
+  }
+
+  private checkScreenSize(): void {
+    this.isMobile = window.innerWidth < 768;
+  }
+
+  get currentDisplayColumns(): string[] {
+    return this.isMobile ? this.mobileDisplayedColumns : this.displayedColumns;
   }
 
   private loadLeaderboard(): void {

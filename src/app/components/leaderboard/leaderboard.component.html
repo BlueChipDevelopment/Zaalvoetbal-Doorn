@@ -79,8 +79,8 @@
           </mat-cell>
         </ng-container>
 
-        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-        <mat-row *matRowDef="let player; columns: displayedColumns;" 
+        <mat-header-row *matHeaderRowDef="currentDisplayColumns"></mat-header-row>
+        <mat-row *matRowDef="let player; columns: currentDisplayColumns;" 
                  (click)="openChemistryModal(player)"
                  [class.selected-row]="player === selectedPlayer"
                  style="cursor: pointer;">
