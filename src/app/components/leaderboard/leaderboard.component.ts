@@ -8,14 +8,14 @@ import { ChemistryModalComponent } from './chemistry-modal.component';
 @Component({
   selector: 'app-leaderboard',
   templateUrl: './leaderboard.component.html',
-  styleUrls: ['./leaderboard.component.css']
+  styleUrls: ['./leaderboard.component.scss']
 })
 export class LeaderboardComponent implements OnInit {
   leaderboard: PlayerStats[] = [];
   selectedPlayer: PlayerStats | null = null;
   bestTeammates: { playerId: string; name: string; chemistry: number; gamesPlayed: number; gamesWon: number }[] = [];
-  displayedColumns: string[] = ['position', 'name', 'gamesPlayed', 'totalPoints', 'gamesWon', 'gamesLost', 'gamesTied', 'zlatanPoints', 'ventielPoints', 'winRatio'];
-  mobileDisplayedColumns: string[] = ['position', 'name', 'gamesPlayed', 'totalPoints'];
+  displayedColumns: string[] = ['position', 'name', 'gamesPlayed', 'totalPoints', 'gamesWon', 'gamesLost', 'gamesTied', 'zlatanPoints', 'ventielPoints', 'lastFiveGames', 'winRatio'];
+  mobileDisplayedColumns: string[] = ['position', 'name', 'gamesPlayed', 'totalPoints', 'lastFiveGames'];
   isMobile = false;
   
   constructor(private leaderboardService: LeaderboardService, private dialog: MatDialog) {
@@ -121,5 +121,20 @@ export class LeaderboardComponent implements OnInit {
       best: sortedTeammates.length > 0 ? sortedTeammates[0] : { name: 'No data', gamesPlayed: 0, gamesWon: 0, gamesLost: 0, gamesTied: 0, chemistryScore: 0 },
       worst: sortedTeammates.length > 0 ? sortedTeammates[sortedTeammates.length - 1] : { name: 'No data', gamesPlayed: 0, gamesWon: 0, gamesLost: 0, gamesTied: 0, chemistryScore: 0 }
     };
+  }
+
+  protected getLastFiveGames(player: PlayerStats): { result: number; date: string }[] {
+    if (!player.gameHistory || player.gameHistory.length === 0) {
+      return [];
+    }
+
+    // Sort by date (most recent first) and take the last 5 games
+    return [...player.gameHistory]
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .slice(0, 5)
+      .map(game => ({
+        result: game.points,
+        date: game.date
+      }));
   }
 }
