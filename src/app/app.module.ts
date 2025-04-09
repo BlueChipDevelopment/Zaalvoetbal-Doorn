@@ -19,18 +19,21 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialogModule } from '@angular/material/dialog';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { TitleCasePipe } from '@angular/common';
 
 import { AppComponent } from './app.component';
 import { LeaderboardComponent } from './components/leaderboard/leaderboard.component';
 import { TeamGeneratorComponent } from './components/team-generator/team-generator.component';
 import { ChemistryModalComponent } from './components/leaderboard/chemistry-modal.component';
+import { ExtraLeaderboardComponent } from './components/leaderboard/extra-leaderboard.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     LeaderboardComponent,
     TeamGeneratorComponent,
-    ChemistryModalComponent
+    ChemistryModalComponent,
+    ExtraLeaderboardComponent
   ],
   bootstrap: [AppComponent],
   imports: [
@@ -54,10 +57,11 @@ import { ChemistryModalComponent } from './components/leaderboard/chemistry-moda
     MatDialogModule,
     RouterModule.forRoot([
       { path: '', component: TeamGeneratorComponent },
-      { path: 'leaderboard', component: LeaderboardComponent }
+      { path: 'leaderboard', component: LeaderboardComponent },
+      { path: 'extra-leaderboard', component: ExtraLeaderboardComponent }
     ])
   ],
-  providers: [provideHttpClient(withInterceptorsFromDi())]
+  providers: [provideHttpClient(withInterceptorsFromDi()), TitleCasePipe]
 })
 export class AppModule {}
 

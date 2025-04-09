@@ -44,4 +44,19 @@ export class LeaderboardService {
       })
     );
   }
+
+  getExtraLeaderboard(): Observable<any[]> {
+    return this.googleSheetsService.getSheetData('Wedstrijden').pipe(
+      map(data => {
+        return data.map(row => ({
+          matchNumber: row[0],
+          date: row[1],
+          teamWhitePlayers: row[2],
+          teamRedPlayers: row[3],
+          teamWhiteGoals: row[4],
+          teamRedGoals: row[5]
+        }));
+      })
+    );
+  }
 }

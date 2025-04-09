@@ -34,6 +34,13 @@ export class GoogleSheetsService {
     );
   }
 
+  getSheetData(sheetName: string): Observable<any[][]> {
+    const range = `${sheetName}!A1:F`; // Adjust the range as needed
+    return this.getDataFromRange(range).pipe(
+      map(response => response.values || [])
+    );
+  }
+
   getGameStatistics(): Observable<PlayerStats[]> {
     const range = 'Bewerken!A2:AZ28';
     return this.getDataFromRange(range).pipe(
@@ -80,6 +87,10 @@ export class GoogleSheetsService {
                       playerIds: this.getTeamPlayersFromGame(response.values.slice(1), i, index)
                     };
                     stats.gameHistory.push(gameStats);
+
+                    console.log('Processing player:', name);
+                    console.log('Game stats being added:', gameStats);
+                    console.log('Updated gameHistory:', stats.gameHistory);
                   }
                 }
               });
