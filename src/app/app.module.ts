@@ -19,18 +19,22 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialogModule } from '@angular/material/dialog';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { TitleCasePipe } from '@angular/common';
 
 import { AppComponent } from './app.component';
 import { LeaderboardComponent } from './components/leaderboard/leaderboard.component';
 import { TeamGeneratorComponent } from './components/team-generator/team-generator.component';
 import { ChemistryModalComponent } from './components/leaderboard/chemistry-modal.component';
+import { PincodeComponent } from './components/pincode/pincode.component';
+import { AuthGuard } from './services/auth.guard';
 
 @NgModule({
   declarations: [
     AppComponent,
     LeaderboardComponent,
     TeamGeneratorComponent,
-    ChemistryModalComponent
+    ChemistryModalComponent,
+    PincodeComponent
   ],
   bootstrap: [AppComponent],
   imports: [
@@ -53,11 +57,28 @@ import { ChemistryModalComponent } from './components/leaderboard/chemistry-moda
     MatMenuModule,
     MatDialogModule,
     RouterModule.forRoot([
-      { path: '', component: TeamGeneratorComponent },
-      { path: 'leaderboard', component: LeaderboardComponent }
+      { 
+        path: '', 
+        component: TeamGeneratorComponent,
+        canActivate: [AuthGuard]
+      },
+      { 
+        path: 'leaderboard', 
+        component: LeaderboardComponent,
+        canActivate: [AuthGuard]
+      },
+      {
+        path: 'pincode',
+        component: PincodeComponent
+      },
+      // Redirect to PIN code screen for any unknown routes
+      {
+        path: '**',
+        redirectTo: 'pincode'
+      }
     ])
   ],
-  providers: [provideHttpClient(withInterceptorsFromDi())]
+  providers: [provideHttpClient(withInterceptorsFromDi()), TitleCasePipe, AuthGuard]
 })
 export class AppModule {}
 
