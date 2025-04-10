@@ -26,6 +26,18 @@ th, td {
   display: none;
 }
 
+// Trophy iconen in de naam kolom op desktop
+.name-cell {
+  mat-icon {
+    font-size: 30px;
+    width: 30px !important;
+    height: 30px !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
 // Mobiele stijlen
 @media screen and (max-width: $mobile-breakpoint) {
   .full-header {

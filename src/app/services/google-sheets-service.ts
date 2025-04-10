@@ -35,7 +35,7 @@ export class GoogleSheetsService {
   }
 
   getSheetData(sheetName: string): Observable<any[][]> {
-    const range = `${sheetName}!A1:F`; // Adjust the range as needed
+    const range = `${sheetName}!A1:H`; // Adjusted the range to include column H for Ventiel player data
     return this.getDataFromRange(range).pipe(
       map(response => response.values || [])
     );
@@ -87,10 +87,6 @@ export class GoogleSheetsService {
                       playerIds: this.getTeamPlayersFromGame(response.values.slice(1), i, index)
                     };
                     stats.gameHistory.push(gameStats);
-
-                    console.log('Processing player:', name);
-                    console.log('Game stats being added:', gameStats);
-                    console.log('Updated gameHistory:', stats.gameHistory);
                   }
                 }
               });
@@ -134,9 +130,7 @@ export class GoogleSheetsService {
         next: (stats) => {
           this._playerStats = stats;
         },
-        error: (err) => {
-          console.error('Error fetching player stats:', err);
-        }
+        error: (err) => {}
       });
     }
 
@@ -150,7 +144,6 @@ export class GoogleSheetsService {
       }
     }
 
-    console.warn(`Player stats not found for: ${playerName}`);
     return null;
   }
 
@@ -198,7 +191,6 @@ export class GoogleSheetsService {
     } else {
       errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
     }
-    console.error(errorMessage);
     return throwError(() => new Error(errorMessage));
   }
 }

@@ -30,11 +30,9 @@ export class TeamGenerateService {
           };
         });
 
-        console.log('Player stats cache populated:', this.playerStatsCache);
         this.completeTeamGeneration(players);
       },
       error: (err) => {
-        console.error('Failed to load player stats:', err);
         // Continue with team generation without stats
         this.completeTeamGeneration(players);
       }
@@ -139,8 +137,6 @@ export class TeamGenerateService {
       const player = this.getPlayerByName(name);
       if (player && player.rating) {
         sumOfRatings += player.rating; // Use rating for sum calculation
-      } else {
-        console.warn(`Player not found or missing rating: ${name}`);
       }
     }
     return sumOfRatings;
@@ -148,9 +144,6 @@ export class TeamGenerateService {
 
   private getPlayerByName(name: string): Player | undefined {
     const player = this.playerStatsCache[name];
-    if (!player) {
-      console.warn(`Player not found in cache: ${name}`);
-    }
     return player ? {
       name: player.name,
       position: player.position || Positions.MIDFIELDER, // Default position if unknown
@@ -233,7 +226,6 @@ export class TeamGenerateService {
       }
     }
 
-    console.warn(`No chemistry data found for pair: ${player1} and ${player2}`);
     return 0; // Default neutral chemistry if no history
   }
 
@@ -284,8 +276,6 @@ export class TeamGenerateService {
       const player = this.getPlayerByName(name);
       if (player && player.rating) {
         sumOfRatings += player.rating;
-      } else {
-        console.warn(`Player not found or missing rating: ${name}`);
       }
     }
 

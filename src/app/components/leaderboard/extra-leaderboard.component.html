@@ -96,7 +96,7 @@
               <ng-container *ngFor="let game of getLastFiveGames(player)">
                 <mat-icon 
                   [ngStyle]="{
-                    'color': game.result === 3 ? 'green' : game.result === 1 ? 'red' : 'gray',
+                    'color': game.result === 3 ? 'green' : game.result === 2 ? 'gray' : 'red',
                     'margin-right': '0px'
                   }"
                   [matTooltip]="'Date: ' + game.date + ' - ' + (game.result === 3 ? 'Win' : game.result === 1 ? 'Loss' : 'Tie')"
