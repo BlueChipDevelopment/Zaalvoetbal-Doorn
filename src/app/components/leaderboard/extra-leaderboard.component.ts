@@ -20,6 +20,8 @@ export class ExtraLeaderboardComponent implements OnInit {
   private loadExtraLeaderboard(): void {
     this.leaderboardService.getExtraLeaderboard().pipe(
       map(matches => {
+        matches = matches.filter(match => match.matchNumber !== "Wedstrijd #");
+
         const playerStats: { [player: string]: { gamesPlayed: number; totalPoints: number; wins: number; losses: number; ties: number; gameHistory?: { result: number; date: string }[], zlatanPoints?: number, ventielPoints?: number } } = {};
 
         matches.forEach(match => {
@@ -49,9 +51,9 @@ export class ExtraLeaderboardComponent implements OnInit {
             }
             if (match.ventielPlayer && match.ventielPlayer.trim()) {
               const normalizedVentielPlayer = match.ventielPlayer.trim().toLowerCase();
-              if (normalizedVentielPlayer === normalizedPlayer) {
+                            if (normalizedVentielPlayer === normalizedPlayer) {
                 playerStats[normalizedPlayer].ventielPoints = (playerStats[normalizedPlayer].ventielPoints || 0) + 1;
-              }
+                            }
             }
             // Calculate totalPoints only once after processing all matches
             playerStats[normalizedPlayer].totalPoints =
@@ -84,9 +86,9 @@ export class ExtraLeaderboardComponent implements OnInit {
             }
             if (match.ventielPlayer && match.ventielPlayer.trim()) {
               const normalizedVentielPlayer = match.ventielPlayer.trim().toLowerCase();
-              if (normalizedVentielPlayer === normalizedPlayer) {
+                            if (normalizedVentielPlayer === normalizedPlayer) {
                 playerStats[normalizedPlayer].ventielPoints = (playerStats[normalizedPlayer].ventielPoints || 0) + 1;
-              }
+                            }
             }
             // Calculate totalPoints only once after processing all matches
             playerStats[normalizedPlayer].totalPoints =
