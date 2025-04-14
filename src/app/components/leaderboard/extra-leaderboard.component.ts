@@ -25,8 +25,8 @@ export class ExtraLeaderboardComponent implements OnInit {
         const playerStats: { [player: string]: { gamesPlayed: number; totalPoints: number; wins: number; losses: number; ties: number; gameHistory?: { result: number; date: string }[], zlatanPoints?: number, ventielPoints?: number } } = {};
 
         matches.forEach(match => {
-          const teamWhitePlayers = match.teamWhitePlayers.split(',').filter((player: string) => player.trim() !== 'Team Wit');
-          const teamRedPlayers = match.teamRedPlayers.split(',').filter((player: string) => player.trim() !== 'Team Rood');
+          const teamWhitePlayers = (match.teamWhitePlayers || '').split(',').filter((player: string) => player.trim() !== 'Team Wit');
+          const teamRedPlayers = (match.teamRedPlayers || '').split(',').filter((player: string) => player.trim() !== 'Team Rood');
 
           // Update stats for Team White players
           teamWhitePlayers.forEach((player: string) => {
