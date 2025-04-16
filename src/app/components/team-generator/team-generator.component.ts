@@ -165,15 +165,14 @@ export class TeamGeneratorComponent implements OnInit {
   protected GetFutsalDoornPlayers(): void {
     this.loadingSubject.next(true);
     this.errorMessage = null;
-    const range = 'Bewerken!A3:D28';
 
     this.googleSheetsService
-      .getDataFromRange(range)
+      .getSheetData('Spelers')
       .pipe(
-        map((response) => {
+        map((rows: string[][]) => {
           const players: Player[] = [];
-          if (response && response.values) {
-            response.values.forEach((row: string[]) => {
+          if (rows && rows.length) {
+            rows.forEach((row: string[]) => {
               // Only include players who are active (ja) and have a name
               if (row[0] && row[2]?.toLowerCase() === 'ja') {
                 const player: Player = {

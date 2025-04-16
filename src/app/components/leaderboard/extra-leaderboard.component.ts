@@ -31,6 +31,7 @@ export class ExtraLeaderboardComponent implements OnInit {
           // Update stats for Team White players
           teamWhitePlayers.forEach((player: string) => {
             const normalizedPlayer = player.trim().toLowerCase();
+            if (!normalizedPlayer) return; // Sla lege namen over
             if (!playerStats[normalizedPlayer]) {
               playerStats[normalizedPlayer] = { gamesPlayed: 0, totalPoints: 0, wins: 0, losses: 0, ties: 0, gameHistory: [], zlatanPoints: 0, ventielPoints: 0 };
             }
@@ -66,6 +67,7 @@ export class ExtraLeaderboardComponent implements OnInit {
           // Update stats for Team Red players
           teamRedPlayers.forEach((player: string) => {
             const normalizedPlayer = player.trim().toLowerCase();
+            if (!normalizedPlayer) return; // Sla lege namen over
             if (!playerStats[normalizedPlayer]) {
               playerStats[normalizedPlayer] = { gamesPlayed: 0, totalPoints: 0, wins: 0, losses: 0, ties: 0, gameHistory: [], zlatanPoints: 0, ventielPoints: 0 };
             }

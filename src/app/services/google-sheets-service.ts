@@ -3,54 +3,83 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
-import { GoogleSheetsResponse, GoogleSheetsCellResponse } from '../interfaces/IGoogleSheets';
 import { PlayerStats, GameStats } from '../interfaces/IGameStats';
 
 @Injectable({
   providedIn: 'root',
 })
 export class GoogleSheetsService {
-  private baseUrl = environment.googleSheetsBaseUrl;
-  private spreadsheetId = environment.googleSheetsSpreadsheetId;
-  private apiKey = environment.googleApiKey;
+  private firebaseBaseUrl = environment.firebaseBaseUrl;
+  private firebaseSpreadsheetId = '11xN1m371F8Tj0bX6TTRgnL_x_1_pXipox3giBuuUK1I'; // hardcoded, since only backend needs this
   private _playerStats: PlayerStats[] | null = null;
 
   constructor(private http: HttpClient) {
-    if (!this.baseUrl || !this.spreadsheetId || !this.apiKey) {
-      throw new Error('Google Sheets configuration is incomplete. Check your environment variables.');
+    if (!this.firebaseBaseUrl || !this.firebaseSpreadsheetId) {
+      throw new Error('Firebase configuration is incomplete. Check your environment variables.');
     }
   }
 
-  getDataFromRange(range: string): Observable<GoogleSheetsResponse> {
-    const url = `${this.baseUrl}/${this.spreadsheetId}/values/${range}?key=${this.apiKey}`;
-    return this.http.get<GoogleSheetsResponse>(url).pipe(
-      catchError(this.handleError)
-    );
-  }
-
-  getDataFromCell(cell: string): Observable<GoogleSheetsCellResponse> {
-    return this.http.get<GoogleSheetsCellResponse>(`${this.baseUrl}/${this.spreadsheetId}/values/${cell}?key=${this.apiKey}`).pipe(
-      catchError(this.handleError)
-    );
-  }
-
   getSheetData(sheetName: string): Observable<any[][]> {
-    const range = `${sheetName}!A1:H`; // Adjusted the range to include column H for Ventiel player data
-    return this.getDataFromRange(range).pipe(
-      map(response => response.values || [])
+    const url = `${this.firebaseBaseUrl}/getSheetData?spreadsheetId=${this.firebaseSpreadsheetId}&sheetName=${encodeURIComponent(sheetName)}`;
+    return this.http.get<any[][]>(url).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  appendSheetRow(sheetName: string, row: any[]): Observable<any> {
+    const url = `${this.firebaseBaseUrl}/appendSheetRow`;
+    return this.http.post<any>(url, {
+      spreadsheetId: this.firebaseSpreadsheetId,
+      sheetName,
+      row
+    }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  updateSheetRow(sheetName: string, rowIndex: number, row: any[]): Observable<any> {
+    const url = `${this.firebaseBaseUrl}/updateSheetRow`;
+    return this.http.post<any>(url, {
+      spreadsheetId: this.firebaseSpreadsheetId,
+      sheetName,
+      rowIndex,
+      row
+    }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  batchUpdateSheet(data: { range: string, values: any[][] }[]): Observable<any> {
+    const url = `${this.firebaseBaseUrl}/batchUpdateSheet`;
+    return this.http.post<any>(url, {
+      spreadsheetId: this.firebaseSpreadsheetId,
+      data
+    }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  querySheetData(sheetName: string, query: { colIndex: number, value: any }): Observable<any[][]> {
+    const url = `${this.firebaseBaseUrl}/querySheetData`;
+    return this.http.post<any[][]>(url, {
+      spreadsheetId: this.firebaseSpreadsheetId,
+      sheetName,
+      query
+    }).pipe(
+      catchError(this.handleError)
     );
   }
 
   getGameStatistics(): Observable<PlayerStats[]> {
     const range = 'Bewerken!A2:AZ28';
-    return this.getDataFromRange(range).pipe(
+    return this.getSheetData('Bewerken').pipe(
       map(response => {
         const playerStats: { [name: string]: PlayerStats } = {};
         
-        if (response && response.values) {
-          const dateHeaders = response.values[0];
+        if (response) {
+          const dateHeaders = response[0];
 
-          response.values.slice(1).forEach((row, index) => {
+          response.slice(1).forEach((row, index) => {
             if (row[0] && row[2]?.toLowerCase() === 'ja') {
               const name = row[0];
               const stats: PlayerStats = {
@@ -84,7 +113,7 @@ export class GoogleSheetsService {
                     const gameStats: GameStats = {
                       date: header,
                       points: points,
-                      playerIds: this.getTeamPlayersFromGame(response.values.slice(1), i, index)
+                      playerIds: this.getTeamPlayersFromGame(response.slice(1), i, index)
                     };
                     stats.gameHistory.push(gameStats);
                   }
@@ -185,7 +214,7 @@ export class GoogleSheetsService {
   }
 
   private handleError(error: HttpErrorResponse) {
-    let errorMessage = 'An error occurred while fetching data from Google Sheets';
+    let errorMessage = 'An error occurred while fetching data from Firebase Functions';
     if (error.error instanceof ErrorEvent) {
       errorMessage = `Error: ${error.error.message}`;
     } else {
