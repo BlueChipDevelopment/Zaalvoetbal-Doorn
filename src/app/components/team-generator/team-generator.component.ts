@@ -4,9 +4,8 @@ import { Player } from '../../interfaces/IPlayer';
 import { Positions } from '../../enums/positions.enum';
 import { Team, Teams } from '../../interfaces/ITeam';
 import { TeamGenerateService } from '../../services/team-generate.service';
-import { GoogleSheetsService } from '../../services/google-sheets-service';
-import { map, catchError, finalize } from 'rxjs/operators';
-import { of, ReplaySubject } from 'rxjs';
+import { finalize } from 'rxjs/operators';
+import { ReplaySubject } from 'rxjs';
 
 @Component({
   selector: 'app-team-generator',
@@ -35,9 +34,7 @@ export class TeamGeneratorComponent implements OnInit {
   });
 
   constructor(
-    private teamGenerateService: TeamGenerateService,
-    private googleSheetsService: GoogleSheetsService
-  ) {}
+    private teamGenerateService: TeamGenerateService  ) {}
 
   ngOnInit(): void {}
 
@@ -165,35 +162,9 @@ export class TeamGeneratorComponent implements OnInit {
   protected GetFutsalDoornPlayers(): void {
     this.loadingSubject.next(true);
     this.errorMessage = null;
-    const range = 'Bewerken!A3:D28';
-
-    this.googleSheetsService
-      .getDataFromRange(range)
+    this.teamGenerateService.getPlayersWithCalculatedRatings()
       .pipe(
-        map((response) => {
-          const players: Player[] = [];
-          if (response && response.values) {
-            response.values.forEach((row: string[]) => {
-              // Only include players who are active (ja) and have a name
-              if (row[0] && row[2]?.toLowerCase() === 'ja') {
-                const player: Player = {
-                  name: row[0],
-                  position: row[1] === 'Keeper' ? Positions.GOAL_KEEPER.toString() : Positions.MIDFIELDER.toString(),
-                  rating: +row[3] || 5
-                };
-                players.push(player);
-              }
-            });
-          }
-          return players;
-        }),
-        catchError(error => {
-          this.errorMessage = error.message;
-          return of([]);
-        }),
-        finalize(() => {
-          this.loadingSubject.next(false);
-        })
+        finalize(() => this.loadingSubject.next(false))
       )
       .subscribe({
         next: (players: Player[]) => {
@@ -201,6 +172,9 @@ export class TeamGeneratorComponent implements OnInit {
           if (players.length > 0) {
             this.GenerateFormFields();
           }
+        },
+        error: (err) => {
+          this.errorMessage = err.message || 'Fout bij ophalen spelers.';
         }
       });
   }

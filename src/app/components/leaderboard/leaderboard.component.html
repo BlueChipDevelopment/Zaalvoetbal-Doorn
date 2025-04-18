@@ -1,7 +1,7 @@
 <div class="leaderboard-container">
   <mat-card>
     <mat-card-content>
-      <mat-table [dataSource]="leaderboard" class="mat-elevation-z8 mobile-friendly-table" style="width: 100%;">
+      <mat-table [dataSource]="leaderboard" class="mat-elevation-z8 mobile-friendly-table leaderboard-table">
         <!-- Position Column -->
         <ng-container matColumnDef="position" class="position-column">
           <mat-header-cell *matHeaderCellDef class="position-cell">
@@ -9,7 +9,7 @@
             <span class="mobile-header">#</span>
           </mat-header-cell>
           <mat-cell *matCellDef="let player; let i = index" class="position-cell">
-            {{getPlayerPosition(player)}}
+            {{i + 1}}
           </mat-cell>
         </ng-container>
 
@@ -31,13 +31,22 @@
           <mat-cell *matCellDef="let player" class="total-points-cell"> {{player.totalPoints}} </mat-cell>
         </ng-container>
 
+        <!-- Rating Column -->
+        <ng-container matColumnDef="rating" class="rating-column">
+          <mat-header-cell *matHeaderCellDef class="rating-cell">
+            <span class="full-header">Rating</span>
+            <span class="mobile-header">R</span>
+          </mat-header-cell>
+          <mat-cell *matCellDef="let player" class="rating-cell"> {{player.rating}} </mat-cell>
+        </ng-container>
+
         <!-- Games Won Column -->
         <ng-container matColumnDef="gamesWon">
           <mat-header-cell *matHeaderCellDef>
             <span class="full-header">Winst</span>
             <span class="mobile-header">W</span>
           </mat-header-cell>
-          <mat-cell *matCellDef="let player"> {{player.gamesWon}} </mat-cell>
+          <mat-cell *matCellDef="let player"> {{player.wins}} </mat-cell>
         </ng-container>
 
         <!-- Games Lost Column -->
@@ -46,7 +55,7 @@
             <span class="full-header">Verlies</span>
             <span class="mobile-header">V</span>
           </mat-header-cell>
-          <mat-cell *matCellDef="let player"> {{player.gamesLost}} </mat-cell>
+          <mat-cell *matCellDef="let player"> {{player.losses || 0}} </mat-cell>
         </ng-container>
 
         <!-- Games Tied Column -->
@@ -55,7 +64,16 @@
             <span class="full-header">Gelijk</span>
             <span class="mobile-header">T</span>
           </mat-header-cell>
-          <mat-cell *matCellDef="let player"> {{player.gamesTied}} </mat-cell>
+          <mat-cell *matCellDef="let player"> {{player.ties || 0}} </mat-cell>
+        </ng-container>
+
+        <!-- Win Ratio Column -->
+        <ng-container matColumnDef="winRatio">
+          <mat-header-cell *matHeaderCellDef>
+            <span class="full-header">Win %</span>
+            <span class="mobile-header">W%</span>
+          </mat-header-cell>
+          <mat-cell *matCellDef="let player"> {{player.winRatio | number:'1.1-1'}}% </mat-cell>
         </ng-container>
 
         <!-- Zlatan Points Column -->
@@ -64,10 +82,10 @@
             <span class="full-header">Zlatan</span>
             <span class="mobile-header">Z</span>
           </mat-header-cell>
-          <mat-cell *matCellDef="let player"> {{player.zlatanPoints}} </mat-cell>
+          <mat-cell *matCellDef="let player"> {{player.zlatanPoints || 0}} </mat-cell>
         </ng-container>
 
-        <!-- Ventiel Column -->
+        <!-- Ventiel Points Column -->
         <ng-container matColumnDef="ventielPoints">
           <mat-header-cell *matHeaderCellDef>
             <span class="full-header">Ventiel</span>
@@ -87,7 +105,7 @@
               <ng-container *ngFor="let game of getLastFiveGames(player)">
                 <mat-icon 
                   [ngStyle]="{
-                    'color': game.result === 3 ? 'green' : game.result === 1 ? 'red' : 'gray',
+                    'color': game.result === 3 ? 'green' : game.result === 2 ? 'gray' : 'red',
                     'margin-right': '0px'
                   }"
                   [matTooltip]="'Date: ' + game.date + ' - ' + (game.result === 3 ? 'Win' : game.result === 1 ? 'Loss' : 'Tie')"
@@ -97,40 +115,30 @@
           </mat-cell>
         </ng-container>
 
-        <!-- Win Ratio Column -->
-        <ng-container matColumnDef="winRatio">
-          <mat-header-cell *matHeaderCellDef>
-            <span class="full-header">Win %</span>
-            <span class="mobile-header">W%</span>
-          </mat-header-cell>
-          <mat-cell *matCellDef="let player"> {{player.winRatio | number:'1.1-1'}}% </mat-cell>
-        </ng-container>
-
         <!-- Name Column with Trophy Icon for 1st Place -->
         <ng-container matColumnDef="name" class="name-column">
-          <mat-header-cell *matHeaderCellDef class="name-cell" style="padding-right: 20px;">
+          <mat-header-cell *matHeaderCellDef class="name-cell name-header-cell">
             <span class="full-header">Name</span>
             <span class="mobile-header">Name</span>
           </mat-header-cell>
-          <mat-cell *matCellDef="let player; let i = index" class="name-cell" style="padding-right: 20px;">
-            {{player.name}}
+          <mat-cell *matCellDef="let player; let i = index" class="name-cell name-data-cell">
+            {{player.player}}
             <ng-container *ngIf="i === 0">
-              <mat-icon style="font-size: 30px; color: gold; margin-left: 5px; vertical-align: middle;">emoji_events</mat-icon>
+              <mat-icon class="trophy-gold">emoji_events</mat-icon>
             </ng-container>
             <ng-container *ngIf="i === 1">
-              <mat-icon style="font-size: 30px; color: silver; margin-left: 5px; vertical-align: middle;">emoji_events</mat-icon>
+              <mat-icon class="trophy-silver">emoji_events</mat-icon>
             </ng-container>
             <ng-container *ngIf="i === 2">
-              <mat-icon style="font-size: 30px; color: #CE8946; margin-left: 5px; vertical-align: middle;">emoji_events</mat-icon>
+              <mat-icon class="trophy-bronze">emoji_events</mat-icon>
             </ng-container>
           </mat-cell>
         </ng-container>
 
-        <mat-header-row *matHeaderRowDef="currentDisplayColumns"></mat-header-row>
-        <mat-row *matRowDef="let player; columns: currentDisplayColumns;" 
-                 (click)="openChemistryModal(player)"
-                 [class.selected-row]="player === selectedPlayer"
-                 style="cursor: pointer;">
+        <mat-header-row *matHeaderRowDef="isMobile ? ['position', 'name', 'gamesPlayed', 'totalPoints', 'rating', 'lastFiveGames'] : ['position', 'name', 'gamesPlayed', 'totalPoints', 'rating', 'gamesWon', 'gamesLost', 'gamesTied', 'zlatanPoints', 'ventielPoints', 'lastFiveGames', 'winRatio']"></mat-header-row>
+        <mat-row *matRowDef="let player; columns: isMobile ? ['position', 'name', 'gamesPlayed', 'totalPoints', 'rating', 'lastFiveGames'] : ['position', 'name', 'gamesPlayed', 'totalPoints', 'rating', 'gamesWon', 'gamesLost', 'gamesTied', 'zlatanPoints', 'ventielPoints', 'lastFiveGames', 'winRatio'];"
+          (click)="openChemistryModal(player)"
+          class="clickable-row">
         </mat-row>
       </mat-table>
     </mat-card-content>

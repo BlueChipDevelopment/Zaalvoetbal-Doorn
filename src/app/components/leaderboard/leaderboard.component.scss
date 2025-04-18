@@ -1,14 +1,19 @@
-// Variabelen
 $mobile-breakpoint: 767px;
-$light-hover-bg: rgba(0, 0, 0, 0.04);
-$selected-row-bg: #f5f5f5;
 
-// Algemene stijlen
-.selected-row {
-  background-color: $selected-row-bg;
+table {
+  width: 100%;
+  border-collapse: collapse;
 }
 
-// Header stijlen
+table, th, td {
+  border: 1px solid black;
+}
+
+th, td {
+  padding: 10px;
+  text-align: left;
+}
+
 .full-header {
   display: inline;
 }
@@ -29,15 +34,36 @@ $selected-row-bg: #f5f5f5;
   }
 }
 
-// Algemene tabel verbeteringen
-mat-table {
-  overflow-x: auto;
+.leaderboard-table {
+  width: 100%;
 }
 
-mat-row {
-  &:hover {
-    background-color: $light-hover-bg;
-  }
+.name-header-cell,
+.name-data-cell {
+  padding-right: 20px !important;
+}
+
+.trophy-gold {
+  font-size: 30px !important;
+  color: gold !important;
+  margin-left: 5px !important;
+  vertical-align: middle !important;
+}
+.trophy-silver {
+  font-size: 30px !important;
+  color: silver !important;
+  margin-left: 5px !important;
+  vertical-align: middle !important;
+}
+.trophy-bronze {
+  font-size: 30px !important;
+  color: #CE8946 !important;
+  margin-left: 5px !important;
+  vertical-align: middle !important;
+}
+
+.clickable-row {
+  cursor: pointer;
 }
 
 // Mobiele stijlen
@@ -45,7 +71,7 @@ mat-row {
   .full-header {
     display: none;
   }
-  
+
   .mobile-header {
     display: inline;
   }
@@ -53,26 +79,26 @@ mat-row {
   .leaderboard-container {
     padding: 0;
   }
-  
+
   mat-cell, mat-header-cell {
     padding: 8px 2px !important;
     font-size: 13px;
   }
-  
+
   // Expliciete kolombreedte-verdeling voor mobiel
   .mobile-friendly-table {
     table-layout: fixed !important;
-    
+
     // Override Angular Material flexbox gedrag
     .mat-mdc-row, .mat-mdc-header-row {
       display: flex !important;
-      
+
       // Reset gelijke kolombreedte gedrag
       .mat-mdc-cell, .mat-mdc-header-cell {
         flex: none !important;
       }
     }
-    
+
     // Specifieke breedtes voor alle kolommen
     .position-cell {
       flex: 0 0 10% !important;
@@ -81,18 +107,27 @@ mat-row {
       text-align: center;
       padding: 4px 0 !important;
       overflow: hidden;
-      padding-left: 8px !important; // Voeg links padding toe aan de ranking kolom
+      padding-left: 8px !important;
     }
-    
+
     .name-cell {
-      flex: 0 0 30% !important;
-      max-width: 30% !important;
-      width: 30% !important;
+      flex: 0 0 25% !important;
+      max-width: 25% !important;
+      width: 25% !important;
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    
+
     .games-played-cell, .total-points-cell {
+      flex: 0 0 10% !important;
+      max-width: 10% !important;
+      width: 10% !important;
+      text-align: center;
+      padding: 4px 0 !important;
+      overflow: hidden;
+    }
+
+    .rating-cell {
       flex: 0 0 15% !important;
       max-width: 15% !important;
       width: 15% !important;
@@ -100,7 +135,7 @@ mat-row {
       padding: 4px 0 !important;
       overflow: hidden;
     }
-    
+
     .last-five-games-cell {
       flex: 0 0 30% !important;
       max-width: 30% !important;
@@ -108,20 +143,25 @@ mat-row {
       display: flex;
       padding: 4px 0 !important;
       justify-content: flex-start;
-      
+
       .last-five-games {
         display: flex;
         align-items: center;
       }
     }
+
+    // Verwijder padding-rechts van mat-row op mobiel
+    .mat-mdc-row {
+      padding-right: 0 !important;
+    }
   }
-  
+
   // Trophy en game resultaat icons aanpassingen
   mat-icon {
     font-size: 18px !important;
     margin-left: 2px !important;
   }
-  
+
   .last-five-games {
     mat-icon {
       font-size: 16px !important;
@@ -133,7 +173,7 @@ mat-row {
       justify-content: center !important;
     }
   }
-  
+
   // Zorg ervoor dat de tabel alle beschikbare ruimte gebruikt
   mat-table {
     width: 100% !important;

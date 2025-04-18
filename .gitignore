@@ -9,3 +9,6 @@ dist
 # Keep example environment files
 !/src/environments/environment.example.ts
 !/src/environments/environment.prod.example.ts
+
+# Google service account key (nooit committen!)
+functions/assets/service-account-key.json
