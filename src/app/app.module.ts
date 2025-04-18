@@ -24,14 +24,14 @@ import { TitleCasePipe } from '@angular/common';
 import { AppComponent } from './app.component';
 import { TeamGeneratorComponent } from './components/team-generator/team-generator.component';
 import { ChemistryModalComponent } from './components/leaderboard/chemistry-modal.component';
-import { ExtraLeaderboardComponent } from './components/leaderboard/extra-leaderboard.component';
+import { LeaderboardComponent } from './components/leaderboard/leaderboard.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     TeamGeneratorComponent,
     ChemistryModalComponent,
-    ExtraLeaderboardComponent
+    LeaderboardComponent
   ],
   bootstrap: [AppComponent],
   imports: [
@@ -55,7 +55,7 @@ import { ExtraLeaderboardComponent } from './components/leaderboard/extra-leader
     MatDialogModule,
     RouterModule.forRoot([
       { path: '', component: TeamGeneratorComponent },
-      { path: 'extra-leaderboard', component: ExtraLeaderboardComponent }
+      { path: 'leaderboard', component: LeaderboardComponent }
     ])
   ],
   providers: [provideHttpClient(withInterceptorsFromDi()), TitleCasePipe]

@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { GoogleSheetsService } from './google-sheets-service';
-import { PlayerStats } from '../interfaces/IGameStats';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +9,7 @@ import { PlayerStats } from '../interfaces/IGameStats';
 export class LeaderboardService {
   constructor(private googleSheetsService: GoogleSheetsService) {}
 
-  getExtraLeaderboard(): Observable<any[]> {
+  getLeaderboard(): Observable<any[]> {
     return this.googleSheetsService.getSheetData('Wedstrijden').pipe(
       map(data => {
         return data.map(row => {

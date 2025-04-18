@@ -6,11 +6,11 @@ import { MatDialog } from '@angular/material/dialog';
 import { ChemistryModalComponent } from './chemistry-modal.component';
 
 @Component({
-  selector: 'app-extra-leaderboard',
-  templateUrl: './extra-leaderboard.component.html',
-  styleUrls: ['./extra-leaderboard.component.scss']
+  selector: 'app-leaderboard',
+  templateUrl: './leaderboard.component.html',
+  styleUrls: ['./leaderboard.component.scss']
 })
-export class ExtraLeaderboardComponent implements OnInit {
+export class LeaderboardComponent implements OnInit {
   leaderboard: any[] = [];
   isMobile = false;
 
@@ -27,15 +27,15 @@ export class ExtraLeaderboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.checkScreenSize();
-    this.loadExtraLeaderboard();
+    this.loadLeaderboard();
   }
 
   private checkScreenSize(): void {
     this.isMobile = window.innerWidth < 768;
   }
 
-  private loadExtraLeaderboard(): void {
-    this.leaderboardService.getExtraLeaderboard().pipe(
+  private loadLeaderboard(): void {
+    this.leaderboardService.getLeaderboard().pipe(
       map(matches => {
         matches = matches.filter(match => match.matchNumber !== "Wedstrijd #");
 
