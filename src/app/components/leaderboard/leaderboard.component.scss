@@ -85,14 +85,23 @@ mat-row {
     }
     
     .name-cell {
-      flex: 0 0 30% !important;
-      max-width: 30% !important;
-      width: 30% !important;
+      flex: 0 0 25% !important;
+      max-width: 25% !important;
+      width: 25% !important;
       overflow: hidden;
       text-overflow: ellipsis;
     }
     
     .games-played-cell, .total-points-cell {
+      flex: 0 0 10% !important;
+      max-width: 10% !important;
+      width: 10% !important;
+      text-align: center;
+      padding: 4px 0 !important;
+      overflow: hidden;
+    }
+
+    .rating-cell {
       flex: 0 0 15% !important;
       max-width: 15% !important;
       width: 15% !important;

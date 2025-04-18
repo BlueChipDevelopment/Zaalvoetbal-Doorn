@@ -165,34 +165,9 @@ export class TeamGeneratorComponent implements OnInit {
   protected GetFutsalDoornPlayers(): void {
     this.loadingSubject.next(true);
     this.errorMessage = null;
-
-    this.googleSheetsService
-      .getSheetData('Spelers')
+    this.teamGenerateService.getPlayersWithCalculatedRatings()
       .pipe(
-        map((rows: string[][]) => {
-          const players: Player[] = [];
-          if (rows && rows.length) {
-            rows.forEach((row: string[]) => {
-              // Only include players who are active (ja) and have a name
-              if (row[0] && row[2]?.toLowerCase() === 'ja') {
-                const player: Player = {
-                  name: row[0],
-                  position: row[1] === 'Keeper' ? Positions.GOAL_KEEPER.toString() : Positions.MIDFIELDER.toString(),
-                  rating: +row[3] || 5
-                };
-                players.push(player);
-              }
-            });
-          }
-          return players;
-        }),
-        catchError(error => {
-          this.errorMessage = error.message;
-          return of([]);
-        }),
-        finalize(() => {
-          this.loadingSubject.next(false);
-        })
+        finalize(() => this.loadingSubject.next(false))
       )
       .subscribe({
         next: (players: Player[]) => {
@@ -200,8 +175,20 @@ export class TeamGeneratorComponent implements OnInit {
           if (players.length > 0) {
             this.GenerateFormFields();
           }
+        },
+        error: (err) => {
+          this.errorMessage = err.message || 'Fout bij ophalen spelers.';
         }
       });
+  }
+
+  private getExtraLeaderboardPlayer(name: string): any {
+    // @ts-ignore
+    const leaderboardComponent = window['ng'].getComponent(document.querySelector('app-extra-leaderboard'));
+    if (leaderboardComponent && leaderboardComponent.leaderboard) {
+      return leaderboardComponent.leaderboard.find((p: any) => p.player.toLowerCase() === name.toLowerCase());
+    }
+    return null;
   }
 
   private GenerateFormFields() {

@@ -1,9 +1,5 @@
 $mobile-breakpoint: 767px;
 
-.leaderboard-container {
-  margin: 20px;
-}
-
 table {
   width: 100%;
   border-collapse: collapse;
@@ -36,6 +32,38 @@ th, td {
     align-items: center;
     justify-content: center;
   }
+}
+
+.leaderboard-table {
+  width: 100%;
+}
+
+.name-header-cell,
+.name-data-cell {
+  padding-right: 20px !important;
+}
+
+.trophy-gold {
+  font-size: 30px !important;
+  color: gold !important;
+  margin-left: 5px !important;
+  vertical-align: middle !important;
+}
+.trophy-silver {
+  font-size: 30px !important;
+  color: silver !important;
+  margin-left: 5px !important;
+  vertical-align: middle !important;
+}
+.trophy-bronze {
+  font-size: 30px !important;
+  color: #CE8946 !important;
+  margin-left: 5px !important;
+  vertical-align: middle !important;
+}
+
+.clickable-row {
+  cursor: pointer;
 }
 
 // Mobiele stijlen
@@ -79,18 +107,27 @@ th, td {
       text-align: center;
       padding: 4px 0 !important;
       overflow: hidden;
-      padding-left: 8px !important; // Voeg links padding toe aan de ranking kolom
+      padding-left: 8px !important;
     }
 
     .name-cell {
-      flex: 0 0 30% !important;
-      max-width: 30% !important;
-      width: 30% !important;
+      flex: 0 0 25% !important;
+      max-width: 25% !important;
+      width: 25% !important;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
     .games-played-cell, .total-points-cell {
+      flex: 0 0 10% !important;
+      max-width: 10% !important;
+      width: 10% !important;
+      text-align: center;
+      padding: 4px 0 !important;
+      overflow: hidden;
+    }
+
+    .rating-cell {
       flex: 0 0 15% !important;
       max-width: 15% !important;
       width: 15% !important;
@@ -111,6 +148,11 @@ th, td {
         display: flex;
         align-items: center;
       }
+    }
+
+    // Verwijder padding-rechts van mat-row op mobiel
+    .mat-mdc-row {
+      padding-right: 0 !important;
     }
   }
 
