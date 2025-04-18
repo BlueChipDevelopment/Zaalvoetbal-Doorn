@@ -4,9 +4,8 @@ import { Player } from '../../interfaces/IPlayer';
 import { Positions } from '../../enums/positions.enum';
 import { Team, Teams } from '../../interfaces/ITeam';
 import { TeamGenerateService } from '../../services/team-generate.service';
-import { GoogleSheetsService } from '../../services/google-sheets-service';
-import { map, catchError, finalize } from 'rxjs/operators';
-import { of, ReplaySubject } from 'rxjs';
+import { finalize } from 'rxjs/operators';
+import { ReplaySubject } from 'rxjs';
 
 @Component({
   selector: 'app-team-generator',
@@ -35,9 +34,7 @@ export class TeamGeneratorComponent implements OnInit {
   });
 
   constructor(
-    private teamGenerateService: TeamGenerateService,
-    private googleSheetsService: GoogleSheetsService
-  ) {}
+    private teamGenerateService: TeamGenerateService  ) {}
 
   ngOnInit(): void {}
 
@@ -180,15 +177,6 @@ export class TeamGeneratorComponent implements OnInit {
           this.errorMessage = err.message || 'Fout bij ophalen spelers.';
         }
       });
-  }
-
-  private getExtraLeaderboardPlayer(name: string): any {
-    // @ts-ignore
-    const leaderboardComponent = window['ng'].getComponent(document.querySelector('app-extra-leaderboard'));
-    if (leaderboardComponent && leaderboardComponent.leaderboard) {
-      return leaderboardComponent.leaderboard.find((p: any) => p.player.toLowerCase() === name.toLowerCase());
-    }
-    return null;
   }
 
   private GenerateFormFields() {

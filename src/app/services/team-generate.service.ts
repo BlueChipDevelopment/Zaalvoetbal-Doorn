@@ -3,6 +3,7 @@ import { Player } from '../interfaces/IPlayer';
 import { Positions } from '../enums/positions.enum';
 import { Team } from '../interfaces/ITeam';
 import { GoogleSheetsService } from './google-sheets-service';
+import { GameStatisticsService } from './game.statistics.service';
 import { Observable, forkJoin } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -12,33 +13,14 @@ import { map } from 'rxjs/operators';
 export class TeamGenerateService {
   private generatedTeams: Team[] = [];
 
-  constructor(private googleSheetsService: GoogleSheetsService) {}
+  constructor(private googleSheetsService: GoogleSheetsService, private gameStatisticsService: GameStatisticsService) {}
 
   generateTeams(players: Player[]): void {
     if (!players || players.length === 0) {
       return;
     }
-
-    // First ensure player stats are loaded before team generation
-    this.googleSheetsService.ensurePlayerStatsLoaded().subscribe({
-      next: (stats) => {
-        // Populate the playerStatsCache with the provided players
-        this.playerStatsCache = {};
-        players.forEach(player => {
-          const stats = this.googleSheetsService.getPlayerStatsByNameSync(player.name);
-          this.playerStatsCache[player.name] = {
-            ...player,
-            chemistry: stats?.chemistry || {} // Ensure chemistry data is included
-          };
-        });
-
-        this.completeTeamGeneration(players);
-      },
-      error: (err) => {
-        // Continue with team generation without stats
-        this.completeTeamGeneration(players);
-      }
-    });
+    // Direct teamgeneratie
+    this.completeTeamGeneration(players);
   }
 
   private completeTeamGeneration(players: Player[]): void {
@@ -66,6 +48,10 @@ export class TeamGenerateService {
 
   getGeneratedTeams(): Team[] {
     return this.generatedTeams;
+  }
+
+  getPlayersWithCalculatedRatings(): Observable<Player[]> {
+    return this.gameStatisticsService.getPlayersWithCalculatedRatings();
   }
 
   // Helper method to shuffle an array
@@ -145,11 +131,11 @@ export class TeamGenerateService {
   }
 
   private getPlayerByName(name: string): Player | undefined {
-    const player = this.playerStatsCache[name];
-    return player ? {
-      name: player.name,
-      position: player.position || Positions.MIDFIELDER, // Default position if unknown
-      rating: player.rating || 5 // Default rating if unknown
+    const playerStats = this.getPlayerStatsFromCache(name);
+    return playerStats ? {
+      name: playerStats.name,
+      position: playerStats.position || Positions.MIDFIELDER, // Default position if unknown
+      rating: playerStats.rating || 5 // Default rating if unknown
     } : undefined;
   }
 
@@ -192,28 +178,8 @@ export class TeamGenerateService {
     return 0;
   }
   
-  // Cache player stats to avoid redundant calculations
-  private playerStatsCache: {[playerName: string]: any} = {};
-  
   private getPlayerStatsFromCache(playerName: string): any {
-    if (!this.playerStatsCache[playerName]) {
-      // Find player in stats data or create empty record
-      const stats = this.googleSheetsService.getPlayerStatsByName(playerName);
-      if (stats) {
-        this.playerStatsCache[playerName] = {
-          ...stats,
-          chemistry: stats.chemistry || {} // Ensure chemistry object exists
-        };
-      } else {
-        this.playerStatsCache[playerName] = { 
-          gamesPlayed: 0, 
-          totalPoints: 0, 
-          chemistry: {} 
-        };
-      }
-    }
-
-    return this.playerStatsCache[playerName];
+    return this.gameStatisticsService.getPlayerStatsByName(playerName);
   }
 
   private getPlayerPairChemistry(player1: string, player2: string): number {
@@ -282,57 +248,5 @@ export class TeamGenerateService {
     }
 
     return sumOfRatings;
-  }
-
-  /**
-   * Haal spelers op uit Google Sheets, filter op actief, haal wedstrijden op en bereken rating per speler.
-   * Geeft een lijst van Player-objecten met actuele rating (zoals extra leaderboard) terug.
-   */
-  getPlayersWithCalculatedRatings(): Observable<Player[]> {
-    return forkJoin({
-      spelers: this.googleSheetsService.getSheetData('Spelers'),
-      wedstrijden: this.googleSheetsService.getSheetData('Wedstrijden')
-    }).pipe(
-      map(({ spelers, wedstrijden }) => {
-        // Filter actieve spelers
-        const actieveSpelers = (spelers || []).filter(row => row[0] && row[2]?.toLowerCase() === 'ja');
-        // Maak een map van actieve spelers op genormaliseerde naam
-        const actieveSpelersMap: { [naam: string]: any } = {};
-        actieveSpelers.forEach((row: any) => {
-          actieveSpelersMap[row[0].trim().toLowerCase()] = row;
-        });
-        // Bereken rating per speler op basis van wedstrijden
-        const spelerStats: { [naam: string]: { gamesPlayed: number, totalPoints: number } } = {};
-        (wedstrijden || []).forEach(match => {
-          const teamWhitePlayers = (match[2] || '').split(',').map((p: string) => p.trim().toLowerCase()).filter(Boolean);
-          const teamRedPlayers = (match[3] || '').split(',').map((p: string) => p.trim().toLowerCase()).filter(Boolean);
-          const teamWhitePoints = parseInt(match[4]) > parseInt(match[5]) ? 3 : parseInt(match[4]) === parseInt(match[5]) ? 2 : 1;
-          const teamRedPoints = parseInt(match[5]) > parseInt(match[4]) ? 3 : parseInt(match[5]) === parseInt(match[4]) ? 2 : 1;
-          teamWhitePlayers.forEach((player: string) => {
-            if (!spelerStats[player]) spelerStats[player] = { gamesPlayed: 0, totalPoints: 0 };
-            spelerStats[player].gamesPlayed++;
-            spelerStats[player].totalPoints += teamWhitePoints;
-          });
-          teamRedPlayers.forEach((player: string) => {
-            if (!spelerStats[player]) spelerStats[player] = { gamesPlayed: 0, totalPoints: 0 };
-            spelerStats[player].gamesPlayed++;
-            spelerStats[player].totalPoints += teamRedPoints;
-          });
-        });
-        const maxPoints = Math.max(...Object.values(spelerStats).map(s => s.totalPoints), 1);
-        // Maak Player[] met rating, altijd op basis van actieve spelers
-        return Object.values(actieveSpelersMap).map((row: any) => {
-          const naam = row[0].trim().toLowerCase();
-          const stats = spelerStats[naam] || { gamesPlayed: 0, totalPoints: 0 };
-          let rating = Math.round((stats.totalPoints / (maxPoints / 10)));
-          rating = Math.max(1, Math.min(10, rating));
-          return {
-            name: row[0],
-            position: row[1] === 'Keeper' ? Positions.GOAL_KEEPER.toString() : Positions.MIDFIELDER.toString(),
-            rating
-          } as Player;
-        });
-      })
-    );
   }
 }

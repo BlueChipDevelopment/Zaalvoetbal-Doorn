@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { LeaderboardService } from '../../services/leaderboard.service';
 import { map } from 'rxjs/operators';
 import { TitleCasePipe } from '@angular/common';
@@ -29,8 +29,6 @@ export class ExtraLeaderboardComponent implements OnInit {
     this.checkScreenSize();
     this.loadExtraLeaderboard();
   }
-
-
 
   private checkScreenSize(): void {
     this.isMobile = window.innerWidth < 768;

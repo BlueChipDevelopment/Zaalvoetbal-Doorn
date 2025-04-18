@@ -22,7 +22,6 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 import { TitleCasePipe } from '@angular/common';
 
 import { AppComponent } from './app.component';
-import { LeaderboardComponent } from './components/leaderboard/leaderboard.component';
 import { TeamGeneratorComponent } from './components/team-generator/team-generator.component';
 import { ChemistryModalComponent } from './components/leaderboard/chemistry-modal.component';
 import { ExtraLeaderboardComponent } from './components/leaderboard/extra-leaderboard.component';
@@ -30,7 +29,6 @@ import { ExtraLeaderboardComponent } from './components/leaderboard/extra-leader
 @NgModule({
   declarations: [
     AppComponent,
-    LeaderboardComponent,
     TeamGeneratorComponent,
     ChemistryModalComponent,
     ExtraLeaderboardComponent
@@ -57,7 +55,6 @@ import { ExtraLeaderboardComponent } from './components/leaderboard/extra-leader
     MatDialogModule,
     RouterModule.forRoot([
       { path: '', component: TeamGeneratorComponent },
-      { path: 'leaderboard', component: LeaderboardComponent },
       { path: 'extra-leaderboard', component: ExtraLeaderboardComponent }
     ])
   ],
