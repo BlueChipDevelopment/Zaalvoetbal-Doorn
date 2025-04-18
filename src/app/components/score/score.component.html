@@ -1,0 +1,74 @@
+<div class="score-container">
+
+  <div *ngIf="isLoading" class="loading-spinner">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Laden van volgende wedstrijd...</p>
+  </div>
+
+  <div *ngIf="errorMessage" class="error-message">
+    <p>{{ errorMessage }}</p>
+  </div>
+
+  <div *ngIf="!isLoading && !errorMessage && nextMatch">
+    <h3>Wedstrijd # {{ nextMatch.matchNumber }}</h3>
+    <h2>{{ nextMatch.date }}</h2>
+
+    <!-- Score Inputs and Button -->
+    <div class="score-inputs">
+      <mat-form-field subscriptSizing="dynamic" appearance="fill">
+        <mat-label>Score Wit</mat-label>
+        <input matInput type="number" [(ngModel)]="whiteGoals" placeholder="0">
+      </mat-form-field>
+      <mat-form-field subscriptSizing="dynamic" appearance="fill">
+        <mat-label>Score Rood</mat-label>
+        <input matInput type="number" [(ngModel)]="redGoals" placeholder="0">
+      </mat-form-field>
+      <!-- Button Moved Here and Class Added -->
+      <button mat-fab extended class="futsal-doorn-btn" (click)="submitScores()" [disabled]="whiteGoals === null || redGoals === null">
+        <mat-icon>sports_soccer</mat-icon>
+        Scores Opslaan
+      </button>
+    </div>
+
+    <div class="teams-container">
+      <mat-card class="team-card">
+        <mat-card-header>
+          <div mat-card-title>Team Wit</div>
+        </mat-card-header>
+        <mat-card-content>
+          <!-- Player Cards for Team White -->
+          <div *ngFor="let player of teamWhitePlayers">
+            <mat-card class="player-card">
+              <mat-card-header>
+                <div mat-card-avatar class="player-card-image-white"></div>
+                <div mat-card-title>{{ player }}</div>
+              </mat-card-header>
+            </mat-card>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="team-card">
+        <mat-card-header>
+          <div mat-card-title>Team Rood</div>
+        </mat-card-header>
+        <mat-card-content>
+          <!-- Player Cards for Team Red -->
+          <div *ngFor="let player of teamRedPlayers">
+            <mat-card class="player-card">
+              <mat-card-header>
+                <div mat-card-avatar class="player-card-image-red"></div>
+                <div mat-card-title>{{ player }}</div>
+              </mat-card-header>
+            </mat-card>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+  </div>
+
+  <div *ngIf="!isLoading && !errorMessage && !nextMatch">
+    <p>Alle wedstrijden zijn gespeeld of er zijn geen wedstrijden gepland.</p>
+  </div>
+</div>

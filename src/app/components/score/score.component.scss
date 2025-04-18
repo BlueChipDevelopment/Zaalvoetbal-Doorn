@@ -1,0 +1,109 @@
+.score-container {
+}
+
+.score-container h2, h3 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.score-inputs {
+  display: flex;
+  justify-content: center; // Center the items horizontally
+  align-items: center; // Align items vertically in the center
+  gap: 15px; // Adjust gap between items
+  margin-bottom: 20px;
+  flex-wrap: wrap; // Allow items to wrap onto the next line
+
+  mat-form-field {
+    // Adjust width or min-width as needed for responsiveness
+    min-width: 150px; // Example: set a minimum width
+  }
+
+  button {
+    // Ensure button wraps nicely
+  }
+}
+
+// Media query for smaller screens
+@media (max-width: 600px) { // Adjust breakpoint as needed
+  .score-inputs {
+    flex-direction: column; // Stack items vertically
+    align-items: center; // Center items in the column
+
+    button {
+      margin-top: 10px; // Add space above the button when stacked
+    }
+  }
+}
+
+.player-card {
+  width: 300px; // Set explicit width instead of min-width
+  margin-bottom: 10px;
+  margin-left: auto; // Center the card within its container if needed
+  margin-right: auto;
+  // Player cards will retain their default mat-card box-shadow
+}
+
+.player-card-image-white {
+  background-image: url('../../../assets/images/football-shirt-white.png');
+  background-size: cover;
+}
+
+.player-card-image-red {
+  background-image: url('../../../assets/images/football-shirt-red.png');
+  background-size: cover;
+}
+
+// Ensure mat-card-header elements align items correctly
+.player-card mat-card-header .mat-card-header-text {
+  margin: 0 8px; // Adjust spacing if needed
+}
+
+.teams-container {
+    display: flex; // Restore display: flex
+    justify-content: center; // Restore justify-content
+    gap: 20px; // Restore gap
+    flex-wrap: wrap; // Restore flex-wrap
+    margin-bottom: 20px; // Restore margin-bottom
+}
+
+.team-card {
+    min-width: 300px; // Keep minimum width
+    width: fit-content; // Set width based on content
+    margin-bottom: 20px; // Add margin below cards
+    box-shadow: none; // Remove box-shadow from team cards
+
+    mat-card-header {
+        div[mat-card-title] { // Target the title div specifically
+            padding-bottom: 15px; // Add padding below the title text
+        }
+    }
+}
+
+// Adjustments for list items inside cards if needed
+.team-card mat-list-item {
+    height: auto; // Adjust height if player names wrap
+    padding: 5px 0; // Add some padding
+}
+
+.loading-spinner {
+  display: flex;
+  flex-direction: column; // Stack spinner and text vertically
+  justify-content: center;
+  align-items: center;
+  position: absolute; // Position relative to the container
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); // Center precisely
+  z-index: 1000; // Ensure it's on top
+
+  p {
+    margin-top: 1rem; // Add space between spinner and text
+  }
+}
+
+.futsal-doorn-btn {
+  min-width: 200px;
+  width: auto;
+  padding: 0 24px;
+}

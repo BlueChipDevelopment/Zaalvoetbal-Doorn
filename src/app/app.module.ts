@@ -25,13 +25,15 @@ import { AppComponent } from './app.component';
 import { TeamGeneratorComponent } from './components/team-generator/team-generator.component';
 import { ChemistryModalComponent } from './components/leaderboard/chemistry-modal.component';
 import { LeaderboardComponent } from './components/leaderboard/leaderboard.component';
+import { ScoreComponent } from './components/score/score.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     TeamGeneratorComponent,
     ChemistryModalComponent,
-    LeaderboardComponent
+    LeaderboardComponent,
+    ScoreComponent
   ],
   bootstrap: [AppComponent],
   imports: [
@@ -55,7 +57,8 @@ import { LeaderboardComponent } from './components/leaderboard/leaderboard.compo
     MatDialogModule,
     RouterModule.forRoot([
       { path: '', component: TeamGeneratorComponent },
-      { path: 'leaderboard', component: LeaderboardComponent }
+      { path: 'leaderboard', component: LeaderboardComponent },
+      { path: 'score', component: ScoreComponent }
     ])
   ],
   providers: [provideHttpClient(withInterceptorsFromDi()), TitleCasePipe]
