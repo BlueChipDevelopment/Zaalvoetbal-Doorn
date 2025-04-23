@@ -1,10 +1,34 @@
-<div class="container">
-  <nav class="navigation">
-    <a mat-button routerLink="/">Team Generator</a>
-    <a mat-button routerLink="/leaderboard">Klassement</a>
-    <a mat-button routerLink="/score">Score Invoeren</a> <!-- Add link to ScoreComponent -->
-  </nav>
-  <div class="content">
-    <router-outlet></router-outlet>
-  </div>
-</div>
+<mat-sidenav-container class="sidenav-container">
+  <mat-sidenav #sidenav mode="over" class="sidenav" [fixedInViewport]="true">
+    <mat-toolbar>Menu</mat-toolbar>
+    <mat-nav-list>
+      <a mat-list-item routerLink="/leaderboard" (click)="sidenav.close()">Leaderboard</a>
+      <a mat-list-item routerLink="/score" (click)="sidenav.close()">Score Invoeren</a>
+      <a mat-list-item routerLink="/team-generator" (click)="sidenav.close()">Team Generator</a>
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <mat-toolbar>
+      <button
+        type="button"
+        aria-label="Toggle sidenav"
+        mat-icon-button
+        (click)="sidenav.toggle()"
+        class="menu-button">
+        <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
+      </button>
+      <span>Zaalvoetbal Doorn</span>
+      <span class="spacer"></span>
+      <div class="desktop-navigation">
+        <button mat-button routerLink="/leaderboard">Leaderboard</button>
+        <button mat-button routerLink="/score">Score Invoeren</button>
+        <button mat-button routerLink="/team-generator">Team Generator</button>
+      </div>
+    </mat-toolbar>
+
+    
+      <router-outlet></router-outlet>
+    
+  </mat-sidenav-content>
+</mat-sidenav-container>

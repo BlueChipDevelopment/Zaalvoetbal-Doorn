@@ -66,6 +66,23 @@ th, td {
   cursor: pointer;
 }
 
+.leaderboard-container {
+  padding: 0;
+}
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column; /* Stack spinner and text vertically */
+  height: 80vh; /* Adjust height as needed for vertical centering */
+  width: 100%;
+
+  p {
+    margin-top: 10px; /* Add some space between spinner and text */
+  }
+}
+
 // Mobiele stijlen
 @media screen and (max-width: $mobile-breakpoint) {
   .full-header {

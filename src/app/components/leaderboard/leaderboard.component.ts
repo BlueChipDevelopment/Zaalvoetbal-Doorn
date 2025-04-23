@@ -13,6 +13,7 @@ import { ChemistryModalComponent } from './chemistry-modal.component';
 export class LeaderboardComponent implements OnInit {
   leaderboard: any[] = [];
   isMobile = false;
+  isLoading = true; 
 
   constructor(
     private titleCasePipe: TitleCasePipe,
@@ -35,6 +36,7 @@ export class LeaderboardComponent implements OnInit {
   }
 
   private loadLeaderboard(): void {
+    this.isLoading = true; 
     this.leaderboardService.getLeaderboard().pipe(
       map(matches => {
         matches = matches.filter(match => match.matchNumber !== "Wedstrijd #");
@@ -142,9 +144,17 @@ export class LeaderboardComponent implements OnInit {
           };
         }).sort((a, b) => b.totalPoints - a.totalPoints);
       })
-    ).subscribe(leaderboard => {
-      this.leaderboard = leaderboard;
-      console.log('Final Leaderboard Data:', this.leaderboard);
+    ).subscribe({
+      next: (leaderboard) => {
+        this.leaderboard = leaderboard;
+        console.log('Final Leaderboard Data:', this.leaderboard);
+        this.isLoading = false; 
+      },
+      error: (error) => {
+        console.error('Error loading leaderboard:', error);
+        // Optionally add error message handling here
+        this.isLoading = false; 
+      }
     });
   }
 

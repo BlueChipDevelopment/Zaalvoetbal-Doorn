@@ -23,10 +23,22 @@
         <mat-label>Score Rood</mat-label>
         <input matInput type="number" [(ngModel)]="redGoals" placeholder="0">
       </mat-form-field>
+
+      <!-- Zlatan Dropdown -->
+      <mat-form-field subscriptSizing="dynamic" appearance="fill">
+        <mat-label>Zlatan</mat-label>
+        <mat-select [(ngModel)]="selectedZlatan" name="zlatanSelect">
+          <mat-option [value]="null">-- Geen --</mat-option>
+          <mat-option *ngFor="let player of participatingPlayers" [value]="player">
+            {{ player }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
       <!-- Button Moved Here and Class Added -->
       <button mat-fab extended class="futsal-doorn-btn" (click)="submitScores()" [disabled]="whiteGoals === null || redGoals === null">
         <mat-icon>sports_soccer</mat-icon>
-        Scores Opslaan
+        OPSLAAN
       </button>
     </div>
 

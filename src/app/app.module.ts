@@ -18,8 +18,13 @@ import { MatCardModule } from '@angular/material/card';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBarModule } from '@angular/material/snack-bar'; 
+import { MatToolbarModule } from '@angular/material/toolbar'; 
+import { MatSidenavModule } from '@angular/material/sidenav'; 
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { TitleCasePipe } from '@angular/common';
+
+import { AppRoutingModule } from './app-routing.module';
 
 import { AppComponent } from './app.component';
 import { TeamGeneratorComponent } from './components/team-generator/team-generator.component';
@@ -55,6 +60,10 @@ import { ScoreComponent } from './components/score/score.component';
     MatTooltipModule,
     MatMenuModule,
     MatDialogModule,
+    MatSnackBarModule, 
+    MatToolbarModule, 
+    MatSidenavModule, 
+    AppRoutingModule, 
     RouterModule.forRoot([
       { path: '', component: TeamGeneratorComponent },
       { path: 'leaderboard', component: LeaderboardComponent },

@@ -1,5 +1,13 @@
 <div class="leaderboard-container">
-  <mat-card>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="isLoading" class="loading-spinner">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Klassement laden...</p>
+  </div>
+
+  <!-- Leaderboard Table (only shown when not loading) -->
+  <mat-card *ngIf="!isLoading">
     <mat-card-content>
       <mat-table [dataSource]="leaderboard" class="mat-elevation-z8 mobile-friendly-table leaderboard-table">
         <!-- Position Column -->
