@@ -34,6 +34,7 @@
   margin-bottom: 10px;
   margin-left: auto; // Center the card within its container if needed
   margin-right: auto;
+  background-color: white; // Ensure white background
   // Player cards will retain their default mat-card box-shadow
 }
 
@@ -64,6 +65,7 @@
     min-width: 300px; // Keep minimum width
     width: fit-content; // Set width based on content
     margin-bottom: 20px; // Add margin below cards
+    background-color: transparent; // Remove white background
     box-shadow: none; // Remove box-shadow from team cards
 
     mat-card-header {
