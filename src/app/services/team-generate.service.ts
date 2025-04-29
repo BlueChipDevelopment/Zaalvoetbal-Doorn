@@ -26,16 +26,12 @@ export class TeamGenerateService {
   private completeTeamGeneration(players: Player[]): void {
     // Sort players by position for efficient team distribution
     const goalKeepers = players.filter(player => player.position === Positions.GOAL_KEEPER);
-    const defenders = players.filter(player => player.position === Positions.DEFENDER);
-    const midfielders = players.filter(player => player.position === Positions.MIDFIELDER);
-    const strikers = players.filter(player => player.position === Positions.STRIKER);
+    const fieldPlayers = players.filter(player => player.position !== Positions.GOAL_KEEPER);
 
     // Create teams with optimized distribution
     const [teamWhite, teamRed] = this.createTeamsV2(
       goalKeepers,
-      defenders,
-      midfielders,
-      strikers
+      fieldPlayers,
     );
 
     // Set results
@@ -71,9 +67,7 @@ export class TeamGenerateService {
   // Optimized team creation algorithm with better performance
   private createTeamsV2(
     goalKeepers: Player[],
-    defenders: Player[],
-    midfielders: Player[],
-    strikers: Player[]
+    players: Player[],
   ): [Team, Team] {
     const teamWhite: Team = {
       name: 'Team White',
@@ -103,38 +97,25 @@ export class TeamGenerateService {
     this.distributePlayersByPosition(goalKeepers, teamWhite, teamRed);
     
     // For better performance, distribute players in batches by position
-    this.distributePlayersByPosition(defenders, teamWhite, teamRed);
-    this.distributePlayersByPosition(midfielders, teamWhite, teamRed);
-    this.distributePlayersByPosition(strikers, teamWhite, teamRed);
+    this.distributePlayersByPosition(players, teamWhite, teamRed);
 
     // Calculate final scores as the sum of individual player ratings
-    teamWhite.sumOfRatings = this.calculateSumOfRatings(teamWhite.squad);
-    teamWhite.chemistryScore = this.calculateTeamChemistry(teamWhite.squad); // Chemistry is no longer included
+    teamWhite.sumOfRatings = teamWhite.squad.reduce((sum, player) => sum + (player.rating || 0), 0);
+    teamWhite.chemistryScore = this.calculateTeamChemistry(teamWhite.squad.map(player => player.name));
     teamWhite.totalScore = teamWhite.sumOfRatings;
 
-    teamRed.sumOfRatings = this.calculateSumOfRatings(teamRed.squad);
-    teamRed.chemistryScore = this.calculateTeamChemistry(teamRed.squad); // Chemistry is no longer included
+    teamRed.sumOfRatings = teamRed.squad.reduce((sum, player) => sum + (player.rating || 0), 0);
+    teamRed.chemistryScore = this.calculateTeamChemistry(teamRed.squad.map(player => player.name));
     teamRed.totalScore = teamRed.sumOfRatings;
 
     return [teamWhite, teamRed];
-  }
-
-  private calculateSumOfRatings(playerNames: string[]): number {
-    let sumOfRatings = 0;
-    for (const name of playerNames) {
-      const player = this.getPlayerByName(name);
-      if (player && player.rating) {
-        sumOfRatings += player.rating; // Use rating for sum calculation
-      }
-    }
-    return sumOfRatings;
   }
 
   private getPlayerByName(name: string): Player | undefined {
     const playerStats = this.getPlayerStatsFromCache(name);
     return playerStats ? {
       name: playerStats.name,
-      position: playerStats.position || Positions.MIDFIELDER, // Default position if unknown
+      position: playerStats.position || Positions.PLAYER, // Default position if unknown
       rating: playerStats.rating || 5 // Default rating if unknown
     } : undefined;
   }
@@ -147,18 +128,18 @@ export class TeamGenerateService {
     for (const player of shuffledPlayers) {
       // Ensure even distribution of players between teams
       if (teamWhite.squad.length < teamRed.squad.length) {
-        teamWhite.squad.push(player.name);
+        teamWhite.squad.push(player);
       } else if (teamRed.squad.length < teamWhite.squad.length) {
-        teamRed.squad.push(player.name);
+        teamRed.squad.push(player);
       } else {
         // If both teams have equal players, add to the team with lower score
-        const whiteScore = this.calculateTeamScore(teamWhite.squad);
-        const redScore = this.calculateTeamScore(teamRed.squad);
+        const whiteScore = this.calculateTeamScore(teamWhite.squad.map(p => p.name));
+        const redScore = this.calculateTeamScore(teamRed.squad.map(p => p.name));
 
         if (whiteScore <= redScore) {
-          teamWhite.squad.push(player.name);
+          teamWhite.squad.push(player);
         } else {
-          teamRed.squad.push(player.name);
+          teamRed.squad.push(player);
         }
       }
     }
@@ -212,12 +193,8 @@ export class TeamGenerateService {
         // Different positions contribute differently to team chemistry
         if (player.position === Positions.GOAL_KEEPER.toString()) {
           positionBonus += 0.2;  // Goalkeepers add less to chemistry
-        } else if (player.position === Positions.DEFENDER.toString()) {
-          positionBonus += 0.4;  // Defenders add moderate chemistry
-        } else if (player.position === Positions.MIDFIELDER.toString()) {
+        } else if (player.position === Positions.PLAYER.toString()) {
           positionBonus += 0.5;  // Midfielders add good chemistry
-        } else if (player.position === Positions.STRIKER.toString()) {
-          positionBonus += 0.3;  // Strikers add moderate chemistry
         }
         
         ratingSum += player.rating;

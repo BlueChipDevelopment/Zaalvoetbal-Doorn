@@ -1,6 +1,8 @@
+import { Player } from './IPlayer';
+
 export interface Team {
   name: string;
-  squad: string[];
+  squad: Player[];
   totalScore: number;
   shirtcolor: string;
   attack: number;

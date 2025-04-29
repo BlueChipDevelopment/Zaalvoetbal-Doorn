@@ -121,9 +121,11 @@ export class GameStatisticsService {
         return Object.entries(playerStats).map(([player, stats]) => {
           let rating = Math.round((stats.totalPoints / (maxTotalPoints / 10)));
           rating = Math.max(1, Math.min(10, rating));
-          const spelerRow = actieveSpelersMap[player];
+          // Zoek altijd de spelerRow op in de originele spelerslijst
+          const spelerRow = (spelers || []).find((row: any) => row[0] && row[0].trim().toLowerCase() === player);
           return {
             player: spelerRow ? spelerRow[0] : player,
+            position: spelerRow ? spelerRow[1] : null, // 2e kolom is positie
             gamesPlayed: stats.gamesPlayed,
             totalPoints: stats.totalPoints,
             rating: rating,
@@ -133,7 +135,8 @@ export class GameStatisticsService {
             winRatio: stats.gamesPlayed > 0 ? (stats.wins / stats.gamesPlayed) * 100 : 0,
             gameHistory: stats.gameHistory || [],
             zlatanPoints: stats.zlatanPoints || 0,
-            ventielPoints: stats.ventielPoints || 0
+            ventielPoints: stats.ventielPoints || 0,
+            actief: spelerRow ? (spelerRow[2]?.toLowerCase() === 'ja') : false // Eigenschap actief toevoegen
           };
         }).sort((a, b) => b.totalPoints - a.totalPoints);
       })

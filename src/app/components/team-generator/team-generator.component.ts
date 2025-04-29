@@ -93,14 +93,15 @@ export class TeamGeneratorComponent implements OnInit {
   private createAlgorithmExplanation() {
     const teams = this.teamGenerateService.getGeneratedTeams();
     if (!teams || teams.length < 2) return;
-    
-    const team1Score = teams[0].totalScore.toFixed(2);
-    const team2Score = teams[1].totalScore.toFixed(2);
+    // Gebruik direct de ratings uit de Player-objecten in squad
+    const team1Score = teams[0].squad && Array.isArray(teams[0].squad)
+      ? teams[0].squad.reduce((sum, p) => sum + (p && p.rating ? p.rating : 0), 0).toFixed(2)
+      : '0.00';
+    const team2Score = teams[1].squad && Array.isArray(teams[1].squad)
+      ? teams[1].squad.reduce((sum, p) => sum + (p && p.rating ? p.rating : 0), 0).toFixed(2)
+      : '0.00';
     const scoreDiff = Math.abs(parseFloat(team1Score) - parseFloat(team2Score)).toFixed(2);
-    
-    this.algorithmExplanation = `De teams zijn in balans met een puntenverschil van slechts ${scoreDiff} punten. 
-      Ons algoritme houdt rekening met spelersbeoordelingen, posities en historische chemiegegevens om gelijkwaardige teams te creëren.
-      De bijdrage van elke speler wordt gewogen op basis van hun prestaties in eerdere wedstrijden.`;
+    this.algorithmExplanation = `De teams zijn in balans met een puntenverschil van slechts ${scoreDiff} punten.\nOns algoritme houdt rekening met spelersbeoordelingen, posities en historische chemiegegevens om gelijkwaardige teams te creëren.\nDe bijdrage van elke speler wordt gewogen op basis van hun prestaties in eerdere wedstrijden.`;
   }
 
   protected clean(): void {
@@ -116,7 +117,7 @@ export class TeamGeneratorComponent implements OnInit {
   protected addNewPlayer(): void {
     let form = new FormGroup({
       name: new FormControl<string | null>(null, [Validators.required]),
-      position: new FormControl<string | null>(Positions.MIDFIELDER.toString(), [Validators.required]),
+      position: new FormControl<string | null>(Positions.PLAYER.toString(), [Validators.required]),
       rating: new FormControl<number | null>(null, [Validators.required]),
     });
     (this.playerForms.controls['players'] as FormArray).push(form);
@@ -167,8 +168,9 @@ export class TeamGeneratorComponent implements OnInit {
         finalize(() => this.loadingSubject.next(false))
       )
       .subscribe((players: any[]) => {
-        this.mockPlayerList = players;
-        if (players.length > 0) {
+        // Filter alleen actieve spelers
+        this.mockPlayerList = players.filter(p => p.actief);
+        if (this.mockPlayerList.length > 0) {
           this.GenerateFormFields();
         }
       }, error => {
@@ -180,9 +182,19 @@ export class TeamGeneratorComponent implements OnInit {
     this.numOfPlayers = this.mockPlayerList.length;
     let formArr = new FormArray<FormGroup>([]);
     for (let player of this.mockPlayerList) {
+      const playerName = (player as any).name || (player as any).player || '';
+      // Normaliseer positie zodat deze overeenkomt met de enum waarden
+      let playerPosition = (player as any).position || null;
+      if (playerPosition) {
+        // Zoek een match in Positions enum (case-insensitive)
+        const match = this.positions.find(
+          pos => pos.toLowerCase() === playerPosition.toLowerCase()
+        );
+        playerPosition = match || playerPosition;
+      }
       let form = new FormGroup({
-        name: new FormControl<string | null>(player.name, [Validators.required]),
-        position: new FormControl<string | null>(player.position, [Validators.required]),
+        name: new FormControl<string | null>(playerName, [Validators.required]),
+        position: new FormControl<string | null>(playerPosition, [Validators.required]),
         rating: new FormControl<number | null>(player.rating, [Validators.required]),
       });
       formArr.push(form);
