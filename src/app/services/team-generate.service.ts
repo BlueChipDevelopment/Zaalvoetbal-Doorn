@@ -50,8 +50,8 @@ export class TeamGenerateService {
     return this.generatedTeams;
   }
 
-  getPlayersWithCalculatedRatings(): Observable<Player[]> {
-    return this.gameStatisticsService.getPlayersWithCalculatedRatings();
+  getPlayersWithCalculatedRatings(): Observable<any[]> {
+    return this.gameStatisticsService.getFullPlayerStats();
   }
 
   // Helper method to shuffle an array

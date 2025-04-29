@@ -1,6 +1,5 @@
 import { Component, OnInit, HostListener } from '@angular/core';
-import { LeaderboardService } from '../../services/leaderboard.service';
-import { map } from 'rxjs/operators';
+import { GameStatisticsService } from '../../services/game.statistics.service';
 import { TitleCasePipe } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import { ChemistryModalComponent } from './chemistry-modal.component';
@@ -17,7 +16,7 @@ export class LeaderboardComponent implements OnInit {
 
   constructor(
     private titleCasePipe: TitleCasePipe,
-    private leaderboardService: LeaderboardService,
+    private gameStatisticsService: GameStatisticsService,
     private dialog: MatDialog
   ) {}
 
@@ -36,141 +35,51 @@ export class LeaderboardComponent implements OnInit {
   }
 
   private loadLeaderboard(): void {
-    this.isLoading = true; 
-    this.leaderboardService.getLeaderboard().pipe(
-      map(matches => {
-        matches = matches.filter(match => match.matchNumber !== "Wedstrijd #");
-
-        const playerStats: { [player: string]: { gamesPlayed: number; totalPoints: number; wins: number; losses: number; ties: number; gameHistory?: { result: number; date: string; playerIds: string[] }[], zlatanPoints?: number, ventielPoints?: number } } = {};
-
-        matches.forEach(match => {
-          const teamWhitePlayers = (match.teamWhitePlayers || '').split(',').filter((player: string) => player.trim() !== 'Team Wit');
-          const teamRedPlayers = (match.teamRedPlayers || '').split(',').filter((player: string) => player.trim() !== 'Team Rood');
-          const allPlayers = [...teamWhitePlayers, ...teamRedPlayers].map((p: string) => p.trim().toLowerCase()).filter(Boolean);
-
-          // Update stats for Team White players
-          teamWhitePlayers.forEach((player: string) => {
-            const normalizedPlayer = player.trim().toLowerCase();
-            if (!normalizedPlayer) return; // Sla lege namen over
-            if (!playerStats[normalizedPlayer]) {
-              playerStats[normalizedPlayer] = { gamesPlayed: 0, totalPoints: 0, wins: 0, losses: 0, ties: 0, gameHistory: [], zlatanPoints: 0, ventielPoints: 0 };
-            }
-            playerStats[normalizedPlayer].gamesPlayed++;
-            if (match.teamWhiteGoals > match.teamRedGoals) {
-              playerStats[normalizedPlayer].wins++;
-            } else if (match.teamWhiteGoals < match.teamRedGoals) {
-              playerStats[normalizedPlayer].losses++;
-            } else {
-              playerStats[normalizedPlayer].ties++;
-            }
-            playerStats[normalizedPlayer].gameHistory?.push({
-              result: match.teamWhiteGoals > match.teamRedGoals ? 3 : match.teamWhiteGoals === match.teamRedGoals ? 2 : 1,
-              date: match.date,
-              playerIds: allPlayers // voeg alle spelers toe aan deze game
-            });
-            if (match.zlatanPlayer && match.zlatanPlayer.trim().toLowerCase() === normalizedPlayer) {
-              playerStats[normalizedPlayer].zlatanPoints = (playerStats[normalizedPlayer].zlatanPoints || 0) + 1;
-            }
-            if (match.ventielPlayer && match.ventielPlayer.trim()) {
-              const normalizedVentielPlayer = match.ventielPlayer.trim().toLowerCase();
-              if (normalizedVentielPlayer === normalizedPlayer) {
-                playerStats[normalizedPlayer].ventielPoints = (playerStats[normalizedPlayer].ventielPoints || 0) + 1;
-              }
-            }
-            playerStats[normalizedPlayer].totalPoints =
-              (playerStats[normalizedPlayer].wins * 3) +
-              (playerStats[normalizedPlayer].ties * 2) +
-              (playerStats[normalizedPlayer].losses * 1) +
-              (playerStats[normalizedPlayer].zlatanPoints || 0);
-          });
-
-          // Update stats for Team Red players
-          teamRedPlayers.forEach((player: string) => {
-            const normalizedPlayer = player.trim().toLowerCase();
-            if (!normalizedPlayer) return; // Sla lege namen over
-            if (!playerStats[normalizedPlayer]) {
-              playerStats[normalizedPlayer] = { gamesPlayed: 0, totalPoints: 0, wins: 0, losses: 0, ties: 0, gameHistory: [], zlatanPoints: 0, ventielPoints: 0 };
-            }
-            playerStats[normalizedPlayer].gamesPlayed++;
-            if (match.teamRedGoals > match.teamWhiteGoals) {
-              playerStats[normalizedPlayer].wins++;
-            } else if (match.teamRedGoals < match.teamWhiteGoals) {
-              playerStats[normalizedPlayer].losses++;
-            } else {
-              playerStats[normalizedPlayer].ties++;
-            }
-            playerStats[normalizedPlayer].gameHistory?.push({
-              result: match.teamRedGoals > match.teamWhiteGoals ? 3 : match.teamRedGoals === match.teamWhiteGoals ? 2 : 1,
-              date: match.date,
-              playerIds: allPlayers // voeg alle spelers toe aan deze game
-            });
-            if (match.zlatanPlayer && match.zlatanPlayer.trim().toLowerCase() === normalizedPlayer) {
-              playerStats[normalizedPlayer].zlatanPoints = (playerStats[normalizedPlayer].zlatanPoints || 0) + 1;
-            }
-            if (match.ventielPlayer && match.ventielPlayer.trim()) {
-              const normalizedVentielPlayer = match.ventielPlayer.trim().toLowerCase();
-              if (normalizedVentielPlayer === normalizedPlayer) {
-                playerStats[normalizedPlayer].ventielPoints = (playerStats[normalizedPlayer].ventielPoints || 0) + 1;
-              }
-            }
-            playerStats[normalizedPlayer].totalPoints =
-              (playerStats[normalizedPlayer].wins * 3) +
-              (playerStats[normalizedPlayer].ties * 2) +
-              (playerStats[normalizedPlayer].losses * 1) +
-              (playerStats[normalizedPlayer].zlatanPoints || 0);
-          });
-        });
-
-        // Bepaal het hoogste aantal punten
-        const maxTotalPoints = Math.max(...Object.values(playerStats).map(stats => stats.totalPoints || 0), 1);
-
-        // Convert playerStats object to an array for display and add rating
-        return Object.entries(playerStats).map(([player, stats]) => {
-          // Nieuwe rating formule: schaal 1-10, hoogste punten = 10
-          let rating = Math.round((stats.totalPoints / (maxTotalPoints / 10)));
-          rating = Math.max(1, Math.min(10, rating));
-          return {
-            player: this.titleCasePipe.transform(player),
-            gamesPlayed: stats.gamesPlayed,
-            totalPoints: stats.totalPoints,
-            rating: rating,
-            wins: stats.wins,
-            losses: stats.losses,
-            ties: stats.ties,
-            winRatio: stats.gamesPlayed > 0 ? (stats.wins / stats.gamesPlayed) * 100 : 0,
-            gameHistory: stats.gameHistory || [],
-            zlatanPoints: stats.zlatanPoints || 0,
-            ventielPoints: stats.ventielPoints || 0
-          };
-        }).sort((a, b) => b.totalPoints - a.totalPoints);
-      })
-    ).subscribe({
-      next: (leaderboard) => {
+    this.isLoading = true;
+    this.gameStatisticsService.getFullPlayerStats().subscribe({
+      next: (leaderboard: any[]) => {
         this.leaderboard = leaderboard;
-        console.log('Final Leaderboard Data:', this.leaderboard);
-        this.isLoading = false; 
+        this.isLoading = false;
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Error loading leaderboard:', error);
-        // Optionally add error message handling here
-        this.isLoading = false; 
+        this.isLoading = false;
       }
     });
   }
 
-  protected getLastFiveGames(player: any): { result: number; date: string }[] {
+  protected getLastFiveGames(player: any): { result: number; date: string; dateDisplay: string }[] {
     if (!player.gameHistory || player.gameHistory.length === 0) {
       return [];
     }
-
-    // Sort by date (most recent first) and take the last 5 games
     return [...player.gameHistory]
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      .slice(0, 5)
-      .map(game => ({
-        result: game.result, // Use the correct field for result
-        date: game.date
-      }));
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .slice(-5)
+      .map(game => {
+        let dateDisplay = game.date;
+        if (game.date) {
+          const dateParts = game.date.split('-');
+          if (dateParts.length === 3) {
+            if (dateParts[0].length === 4) {
+              // YYYY-MM-DD → DD-MM-YYYY
+              dateDisplay = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
+            } else {
+              // DD-MM-YYYY of andere volgorde, laat staan
+              dateDisplay = game.date;
+            }
+          }
+        }
+        return {
+          result: game.result,
+          date: game.date,
+          dateDisplay
+        };
+      });
+  }
+
+  getLastFiveGamesTooltip(game: { result: number; date: string; dateDisplay: string }): string {
+    const resultText = game.result === 3 ? 'Winst' : game.result === 1 ? 'Verlies' : 'Gelijkspel';
+    return `Datum: ${game.dateDisplay} - ${resultText}`;
   }
 
   protected openChemistryModal(player: any): void {
@@ -223,5 +132,10 @@ export class LeaderboardComponent implements OnInit {
       best: sorted.length > 0 ? sorted[0] : { name: 'No data', gamesPlayed: 0, gamesWon: 0, gamesTied: 0, gamesLost: 0, chemistryScore: 0 },
       worst: sorted.length > 0 ? sorted[sorted.length - 1] : { name: 'No data', gamesPlayed: 0, gamesWon: 0, gamesTied: 0, gamesLost: 0, chemistryScore: 0 }
     };
+  }
+
+  trackByGame(index: number, game: any): string {
+    // Combineer datum en resultaat voor een unieke key
+    return `${game.date}-${game.result}`;
   }
 }

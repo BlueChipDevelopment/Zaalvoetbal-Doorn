@@ -166,16 +166,13 @@ export class TeamGeneratorComponent implements OnInit {
       .pipe(
         finalize(() => this.loadingSubject.next(false))
       )
-      .subscribe({
-        next: (players: Player[]) => {
-          this.mockPlayerList = players;
-          if (players.length > 0) {
-            this.GenerateFormFields();
-          }
-        },
-        error: (err) => {
-          this.errorMessage = err.message || 'Fout bij ophalen spelers.';
+      .subscribe((players: any[]) => {
+        this.mockPlayerList = players;
+        if (players.length > 0) {
+          this.GenerateFormFields();
         }
+      }, error => {
+        this.errorMessage = error.message || 'Fout bij ophalen spelers.';
       });
   }
 

@@ -110,13 +110,16 @@
           </mat-header-cell>
           <mat-cell *matCellDef="let player" class="last-five-games-cell">
             <div class="last-five-games">
-              <ng-container *ngFor="let game of getLastFiveGames(player)">
+              <ng-container *ngFor="let game of getLastFiveGames(player); trackBy: trackByGame">
                 <mat-icon 
-                  [ngStyle]="{
-                    'color': game.result === 3 ? 'green' : game.result === 2 ? 'gray' : 'red',
-                    'margin-right': '0px'
+                  [ngClass]="{
+                    'game-win': game.result === 3,
+                    'game-tie': game.result === 2,
+                    'game-loss': game.result === 1
                   }"
-                  [matTooltip]="'Date: ' + game.date + ' - ' + (game.result === 3 ? 'Win' : game.result === 1 ? 'Loss' : 'Tie')"
+                  [matTooltip]="getLastFiveGamesTooltip(game) || 'Geen info'"
+                  tabindex="0"
+                  aria-label="wedstrijdresultaat"
                 >check_circle</mat-icon>
               </ng-container>
             </div>
@@ -129,7 +132,7 @@
             <span class="full-header">Name</span>
             <span class="mobile-header">Name</span>
           </mat-header-cell>
-          <mat-cell *matCellDef="let player; let i = index" class="name-cell name-data-cell">
+          <mat-cell *matCellDef="let player; let i = index" class="name-cell name-data-cell clickable-name" (click)="openChemistryModal(player)">
             {{player.player}}
             <ng-container *ngIf="i === 0">
               <mat-icon class="trophy-gold">emoji_events</mat-icon>
@@ -145,8 +148,7 @@
 
         <mat-header-row *matHeaderRowDef="isMobile ? ['position', 'name', 'gamesPlayed', 'totalPoints', 'rating', 'lastFiveGames'] : ['position', 'name', 'gamesPlayed', 'totalPoints', 'rating', 'gamesWon', 'gamesLost', 'gamesTied', 'zlatanPoints', 'ventielPoints', 'lastFiveGames', 'winRatio']"></mat-header-row>
         <mat-row *matRowDef="let player; columns: isMobile ? ['position', 'name', 'gamesPlayed', 'totalPoints', 'rating', 'lastFiveGames'] : ['position', 'name', 'gamesPlayed', 'totalPoints', 'rating', 'gamesWon', 'gamesLost', 'gamesTied', 'zlatanPoints', 'ventielPoints', 'lastFiveGames', 'winRatio'];"
-          (click)="openChemistryModal(player)"
-          class="clickable-row">
+          class="mat-row-no-pointer">
         </mat-row>
       </mat-table>
     </mat-card-content>

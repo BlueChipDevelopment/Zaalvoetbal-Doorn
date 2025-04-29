@@ -43,6 +43,10 @@ th, td {
   padding-right: 20px !important;
 }
 
+.name-data-cell.clickable-name {
+  cursor: pointer;
+}
+
 .trophy-gold {
   font-size: 30px !important;
   color: gold !important;
@@ -60,10 +64,6 @@ th, td {
   color: #CE8946 !important;
   margin-left: 5px !important;
   vertical-align: middle !important;
-}
-
-.clickable-row {
-  cursor: pointer;
 }
 
 .leaderboard-container {
@@ -188,6 +188,7 @@ th, td {
       display: inline-flex !important; /* Zorgt voor een betere uitlijning */
       align-items: center !important;
       justify-content: center !important;
+      pointer-events: auto !important;
     }
   }
 
@@ -203,3 +204,15 @@ th, td {
     height: auto !important;
   }
 }
+
+// Win/tie/loss kleuren voor de mat-icon in de laatste vijf kolom
+.game-win {
+  color: green !important;
+}
+.game-tie {
+  color: gray !important;
+}
+.game-loss {
+  color: red !important;
+}
+

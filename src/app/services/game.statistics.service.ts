@@ -15,64 +15,6 @@ export class GameStatisticsService {
 
   constructor(private googleSheetsService: GoogleSheetsService) {}
 
-  getPlayersWithCalculatedRatings(): Observable<Player[]> {
-    const now = Date.now();
-    if (this.ratingsCache && this.cacheTimestamp && (now - this.cacheTimestamp < this.cacheDurationMs)) {
-      return new Observable(observer => {
-        observer.next(this.ratingsCache!);
-        observer.complete();
-      });
-    }
-    return forkJoin({
-      spelers: this.googleSheetsService.getSheetData('Spelers'),
-      wedstrijden: this.googleSheetsService.getSheetData('Wedstrijden')
-    }).pipe(
-      map(({ spelers, wedstrijden }) => {
-        // Filter actieve spelers
-        const actieveSpelers = (spelers || []).filter(row => row[0] && row[2]?.toLowerCase() === 'ja');
-        // Maak een map van actieve spelers op genormaliseerde naam
-        const actieveSpelersMap: { [naam: string]: any } = {};
-        actieveSpelers.forEach((row: any) => {
-          actieveSpelersMap[row[0].trim().toLowerCase()] = row;
-        });
-        // Bereken rating per speler op basis van wedstrijden
-        const spelerStats: { [naam: string]: { gamesPlayed: number, totalPoints: number } } = {};
-        (wedstrijden || []).forEach(match => {
-          const teamWhitePlayers = (match[2] || '').split(',').map((p: string) => p.trim().toLowerCase()).filter(Boolean);
-          const teamRedPlayers = (match[3] || '').split(',').map((p: string) => p.trim().toLowerCase()).filter(Boolean);
-          const teamWhitePoints = parseInt(match[4]) > parseInt(match[5]) ? 3 : parseInt(match[4]) === parseInt(match[5]) ? 2 : 1;
-          const teamRedPoints = parseInt(match[5]) > parseInt(match[4]) ? 3 : parseInt(match[5]) === parseInt(match[4]) ? 2 : 1;
-          teamWhitePlayers.forEach((player: string) => {
-            if (!spelerStats[player]) spelerStats[player] = { gamesPlayed: 0, totalPoints: 0 };
-            spelerStats[player].gamesPlayed++;
-            spelerStats[player].totalPoints += teamWhitePoints;
-          });
-          teamRedPlayers.forEach((player: string) => {
-            if (!spelerStats[player]) spelerStats[player] = { gamesPlayed: 0, totalPoints: 0 };
-            spelerStats[player].gamesPlayed++;
-            spelerStats[player].totalPoints += teamRedPoints;
-          });
-        });
-        const maxPoints = Math.max(...Object.values(spelerStats).map(s => s.totalPoints), 1);
-        // Maak Player[] met rating, altijd op basis van actieve spelers
-        const result = Object.values(actieveSpelersMap).map((row: any) => {
-          const naam = row[0].trim().toLowerCase();
-          const stats = spelerStats[naam] || { gamesPlayed: 0, totalPoints: 0 };
-          let rating = Math.round((stats.totalPoints / (maxPoints / 10)));
-          rating = Math.max(1, Math.min(10, rating));
-          return {
-            name: row[0],
-            position: row[1] === 'Keeper' ? Positions.GOAL_KEEPER.toString() : Positions.MIDFIELDER.toString(),
-            rating
-          } as Player;
-        });
-        this.ratingsCache = result;
-        this.cacheTimestamp = Date.now();
-        return result;
-      })
-    );
-  }
-
   getPlayerStatsByName(playerName: string): Player | null {
     const now = Date.now();
     if (this.ratingsCache && this.cacheTimestamp && (now - this.cacheTimestamp < this.cacheDurationMs)) {
@@ -80,9 +22,121 @@ export class GameStatisticsService {
     }
     // Geen cache: synchroniseer ophalen (let op: asynchroon is beter, maar voor compatibiliteit)
     let found: Player | null = null;
-    this.getPlayersWithCalculatedRatings().subscribe(players => {
+    this.getFullPlayerStats().subscribe(players => {
       found = players.find(p => p.name === playerName) || null;
     });
     return found;
+  }
+
+  /**
+   * Geeft uitgebreide statistieken voor alle spelers, incl. gamesPlayed, totalPoints, wins, losses, ties, rating, winRatio, gameHistory, zlatanPoints, ventielPoints
+   */
+  getFullPlayerStats(): Observable<any[]> {
+    return forkJoin({
+      spelers: this.googleSheetsService.getSheetData('Spelers'),
+      wedstrijden: this.googleSheetsService.getSheetData('Wedstrijden')
+    }).pipe(
+      map(({ spelers, wedstrijden }) => {
+        const actieveSpelers = (spelers || []).filter(row => row[0] && row[2]?.toLowerCase() === 'ja');
+        const actieveSpelersMap: { [naam: string]: any } = {};
+        actieveSpelers.forEach((row: any) => {
+          actieveSpelersMap[row[0].trim().toLowerCase()] = row;
+        });
+        const geldigeWedstrijden = (wedstrijden || []).filter(match => {
+          const wit = match[4];
+          const rood = match[5];
+          return wit != null && wit !== '' && rood != null && rood !== '';
+        });
+        // Sorteer geldigeWedstrijden op datum (oud -> nieuw) zodat gameHistory altijd chronologisch is
+        const geldigeWedstrijdenSorted = [...geldigeWedstrijden].sort((a, b) => {
+          // Verwacht: match[1] is datum in DD-MM-YYYY of YYYY-MM-DD
+          const parseDate = (d: string) => {
+            const parts = d.split('-');
+            if (parts.length === 3) {
+              if (parts[0].length === 4) {
+                // YYYY-MM-DD
+                return new Date(d);
+              } else {
+                // DD-MM-YYYY
+                return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+              }
+            }
+            return new Date(d);
+          };
+          return parseDate(a[1]).getTime() - parseDate(b[1]).getTime();
+        });
+        // Statistieken per speler
+        const playerStats: { [player: string]: { gamesPlayed: number; totalPoints: number; wins: number; losses: number; ties: number; gameHistory: any[]; zlatanPoints: number; ventielPoints: number } } = {};
+        geldigeWedstrijdenSorted.forEach(match => {
+          const teamWhitePlayers = (match[2] || '').split(',').map((p: string) => p.trim().toLowerCase()).filter((p: string) => p && p !== 'team wit');
+          const teamRedPlayers = (match[3] || '').split(',').map((p: string) => p.trim().toLowerCase()).filter((p: string) => p && p !== 'team rood');
+          const allPlayers = [...teamWhitePlayers, ...teamRedPlayers];
+          const teamWhiteGoals = parseInt(match[4]);
+          const teamRedGoals = parseInt(match[5]);
+          // White
+          teamWhitePlayers.forEach((player: string) => {
+            if (!playerStats[player]) playerStats[player] = { gamesPlayed: 0, totalPoints: 0, wins: 0, losses: 0, ties: 0, gameHistory: [], zlatanPoints: 0, ventielPoints: 0 };
+            playerStats[player].gamesPlayed++;
+            if (teamWhiteGoals > teamRedGoals) playerStats[player].wins++;
+            else if (teamWhiteGoals < teamRedGoals) playerStats[player].losses++;
+            else playerStats[player].ties++;
+            playerStats[player].gameHistory.push({
+              result: teamWhiteGoals > teamRedGoals ? 3 : teamWhiteGoals === teamRedGoals ? 2 : 1,
+              date: match[1],
+              playerIds: allPlayers
+            });
+            if (match[6] && match[6].trim().toLowerCase() === player) {
+              playerStats[player].zlatanPoints = (playerStats[player].zlatanPoints || 0) + 1;
+            }
+            if (match[7] && match[7].trim().toLowerCase() === player) {
+              playerStats[player].ventielPoints = (playerStats[player].ventielPoints || 0) + 1;
+            }
+          });
+          // Red
+          teamRedPlayers.forEach((player: string) => {
+            if (!playerStats[player]) playerStats[player] = { gamesPlayed: 0, totalPoints: 0, wins: 0, losses: 0, ties: 0, gameHistory: [], zlatanPoints: 0, ventielPoints: 0 };
+            playerStats[player].gamesPlayed++;
+            if (teamRedGoals > teamWhiteGoals) playerStats[player].wins++;
+            else if (teamRedGoals < teamWhiteGoals) playerStats[player].losses++;
+            else playerStats[player].ties++;
+            playerStats[player].gameHistory.push({
+              result: teamRedGoals > teamWhiteGoals ? 3 : teamRedGoals === teamWhiteGoals ? 2 : 1,
+              date: match[1],
+              playerIds: allPlayers
+            });
+            if (match[6] && match[6].trim().toLowerCase() === player) {
+              playerStats[player].zlatanPoints = (playerStats[player].zlatanPoints || 0) + 1;
+            }
+            if (match[7] && match[7].trim().toLowerCase() === player) {
+              playerStats[player].ventielPoints = (playerStats[player].ventielPoints || 0) + 1;
+            }
+          });
+        });
+        // Total points en max
+        Object.values(playerStats).forEach((stats: any) => {
+          stats.totalPoints = (stats.wins * 3) + (stats.ties * 2) + (stats.losses * 1) + (stats.zlatanPoints || 0);
+        });
+        const maxTotalPoints = Math.max(...Object.values(playerStats).map((stats: any) => stats.totalPoints || 0), 1);
+        // Maak array met alle info
+        return Object.entries(playerStats).map(([player, stats]) => {
+          let rating = Math.round((stats.totalPoints / (maxTotalPoints / 10)));
+          rating = Math.max(1, Math.min(10, rating));
+          const spelerRow = actieveSpelersMap[player];
+          return {
+            player: spelerRow ? spelerRow[0] : player,
+            gamesPlayed: stats.gamesPlayed,
+            totalPoints: stats.totalPoints,
+            rating: rating,
+            wins: stats.wins,
+            losses: stats.losses,
+            ties: stats.ties,
+            winRatio: stats.gamesPlayed > 0 ? (stats.wins / stats.gamesPlayed) * 100 : 0,
+            gameHistory: stats.gameHistory || [],
+            zlatanPoints: stats.zlatanPoints || 0,
+            ventielPoints: stats.ventielPoints || 0
+          };
+        }).sort((a, b) => b.totalPoints - a.totalPoints);
+      })
+    );
   }
 }
