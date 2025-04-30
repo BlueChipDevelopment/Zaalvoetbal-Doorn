@@ -23,6 +23,11 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSidenavModule } from '@angular/material/sidenav'; 
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { TitleCasePipe } from '@angular/common';
+import { registerLocaleData } from '@angular/common';
+import localeNl from '@angular/common/locales/nl';
+import { LOCALE_ID } from '@angular/core';
+
+registerLocaleData(localeNl);
 
 import { AppRoutingModule } from './app-routing.module';
 
@@ -35,10 +40,8 @@ import { ScoreComponent } from './components/score/score.component';
 @NgModule({
   declarations: [
     AppComponent,
-    TeamGeneratorComponent,
     ChemistryModalComponent,
     LeaderboardComponent,
-    ScoreComponent
   ],
   bootstrap: [AppComponent],
   imports: [
@@ -70,7 +73,7 @@ import { ScoreComponent } from './components/score/score.component';
       { path: 'score', component: ScoreComponent }
     ])
   ],
-  providers: [provideHttpClient(withInterceptorsFromDi()), TitleCasePipe]
+  providers: [provideHttpClient(withInterceptorsFromDi()), TitleCasePipe, { provide: LOCALE_ID, useValue: 'nl' }]
 })
 export class AppModule {}
 

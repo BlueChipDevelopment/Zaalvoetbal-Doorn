@@ -9,7 +9,7 @@ import { environment } from '../../environments/environment';
 })
 export class GoogleSheetsService {
   private firebaseBaseUrl = environment.firebaseBaseUrl;
-  private firebaseSpreadsheetId = '11xN1m371F8Tj0bX6TTRgnL_x_1_pXipox3giBuuUK1I'; // hardcoded, since only backend needs this
+  private firebaseSpreadsheetId = '11xN1m371F8Tj0bX6TTRgnL_x_1_pXipox3giBuuUK1I';
 
   constructor(private http: HttpClient) {
     if (!this.firebaseBaseUrl || !this.firebaseSpreadsheetId) {
@@ -75,6 +75,7 @@ export class GoogleSheetsService {
     } else {
       errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
     }
+    console.error(errorMessage);
     return throwError(() => new Error(errorMessage));
   }
 }

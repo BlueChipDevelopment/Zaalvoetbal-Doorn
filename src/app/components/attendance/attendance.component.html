@@ -1,0 +1,67 @@
+<mat-card class="attendance-card">
+  <mat-card-header>
+    <mat-card-title>Aanwezigheid</mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content>
+    <div *ngIf="isLoadingPlayers && !isLoadingStatus" class="loading-spinner">
+      <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+    </div>
+
+
+    <div *ngIf="!isLoadingPlayers">
+      <app-next-match-info [nextMatchInfo]="nextMatchInfo"></app-next-match-info>
+
+      <mat-form-field appearance="fill" class="player-select">
+        <mat-label>Selecteer Speler</mat-label>
+        <mat-select [(ngModel)]="selectedPlayer" (selectionChange)="onPlayerSelectionChange()" name="player" [disabled]="isLoadingStatus">
+          <mat-option *ngFor="let player of players" [value]="player">
+            {{ player }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <div *ngIf="selectedPlayer" class="attendance-buttons">
+        <div *ngIf="isLoadingStatus" class="saving-indicator">
+          <mat-progress-spinner mode="indeterminate" diameter="30"></mat-progress-spinner>
+          <span>Opslaan...</span>
+        </div>
+
+        <button mat-fab extended color="primary" class="btn-yes" (click)="setAttendance('Ja')" [disabled]="isLoadingStatus || attendanceStatus === 'Ja'">
+          <mat-icon>check_circle</mat-icon> Ik doe mee
+        </button>
+        <button mat-fab extended color="warn" class="btn-no" (click)="setAttendance('Nee')" [disabled]="isLoadingStatus || attendanceStatus === 'Nee'">
+          <mat-icon>cancel</mat-icon> Ik kan niet
+        </button>
+
+        <div *ngIf="attendanceStatus && !isLoadingStatus" class="status-confirmation">
+           <span *ngIf="attendanceStatus === 'Ja'">✅ Je hebt aangegeven aanwezig te zijn.</span>
+           <span *ngIf="attendanceStatus === 'Nee'">❌ Je hebt aangegeven afwezig te zijn.</span>
+        </div>
+      </div>
+
+       <div *ngIf="!selectedPlayer && players.length > 0 && !isLoadingStatus" class="select-prompt">
+         <p>Selecteer je naam om je aanwezigheid door te geven.</p>
+       </div>
+
+       <div *ngIf="players.length === 0 && !isLoadingPlayers">
+         <p>Geen spelers gevonden.</p>
+       </div>
+    </div>
+
+    <div class="attendance-overview" *ngIf="attendanceList.length > 0">
+      <div class="attendance-col">
+        <h3>Aanwezig</h3>
+        <ul>
+          <li *ngFor="let item of attendanceList" [hidden]="item.status !== 'Ja'">{{ item.speler }}</li>
+        </ul>
+      </div>
+      <div class="attendance-col">
+        <h3>Afwezig</h3>
+        <ul>
+          <li *ngFor="let item of attendanceList" [hidden]="item.status !== 'Nee'">{{ item.speler }}</li>
+        </ul>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>

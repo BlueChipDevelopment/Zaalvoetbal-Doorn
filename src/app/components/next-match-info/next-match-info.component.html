@@ -1,0 +1,16 @@
+<div class="next-match-box" *ngIf="nextMatchInfo && nextMatchInfo.parsedDate">
+  <div class="next-match-header">
+    <mat-icon class="next-match-icon">event</mat-icon>
+    <span class="next-match-title">Volgende wedstrijd</span>
+  </div>
+  <div class="next-match-details">
+    <div class="next-match-number" *ngIf="nextMatchInfo?.matchNumber">Wedstrijd #{{ nextMatchInfo?.matchNumber }}</div>
+    <div class="next-match-date">{{ nextMatchInfo?.parsedDate | date:'EEEE d MMMM yyyy' }} <b>om {{ nextMatchInfo?.time }}</b></div>
+    <div class="next-match-location">
+      <span class="next-match-location-icon">
+        <mat-icon fontIcon="location_on"></mat-icon>
+      </span>
+      <span>{{ nextMatchInfo?.location }}</span>
+    </div>
+  </div>
+</div>

@@ -10,13 +10,13 @@
   </div>
 
   <div *ngIf="!isLoading && !errorMessage && nextMatch">
-    <h3>Wedstrijd # {{ nextMatch.matchNumber }}</h3>
-    <h2>{{ nextMatch.date }}</h2>
 
-    <!-- Score Inputs and Button -->
+    <app-next-match-info [nextMatchInfo]="nextMatchInfo" [matchNumber]="nextMatch?.matchNumber ?? null"></app-next-match-info>
+
+      <!-- Score Inputs and Button -->
     <div class="score-inputs">
       <mat-form-field subscriptSizing="dynamic" appearance="fill">
-        <mat-label>Score Wit</mat-label>
+    <mat-label>Score Wit</mat-label>
         <input matInput type="number" [(ngModel)]="whiteGoals" placeholder="0">
       </mat-form-field>
       <mat-form-field subscriptSizing="dynamic" appearance="fill">
@@ -40,23 +40,23 @@
         <mat-icon>sports_soccer</mat-icon>
         OPSLAAN
       </button>
-    </div>
+  </div>
 
-    <div class="teams-container">
+      <div class="teams-container">
       <mat-card class="team-card">
         <mat-card-header>
           <div mat-card-title>Team Wit</div>
         </mat-card-header>
         <mat-card-content>
           <!-- Player Cards for Team White -->
-          <div *ngFor="let player of teamWhitePlayers">
+            <div *ngFor="let player of teamWhitePlayers">
             <mat-card class="player-card">
               <mat-card-header>
                 <div mat-card-avatar class="player-card-image-white"></div>
                 <div mat-card-title>{{ player }}</div>
               </mat-card-header>
             </mat-card>
-          </div>
+            </div>
         </mat-card-content>
       </mat-card>
 
@@ -66,19 +66,19 @@
         </mat-card-header>
         <mat-card-content>
           <!-- Player Cards for Team Red -->
-          <div *ngFor="let player of teamRedPlayers">
+            <div *ngFor="let player of teamRedPlayers">
             <mat-card class="player-card">
               <mat-card-header>
                 <div mat-card-avatar class="player-card-image-red"></div>
                 <div mat-card-title>{{ player }}</div>
-              </mat-card-header>
-            </mat-card>
+</mat-card-header>
+          </mat-card>
           </div>
         </mat-card-content>
       </mat-card>
     </div>
 
-  </div>
+    </div>
 
   <div *ngIf="!isLoading && !errorMessage && !nextMatch">
     <p>Alle wedstrijden zijn gespeeld of er zijn geen wedstrijden gepland.</p>

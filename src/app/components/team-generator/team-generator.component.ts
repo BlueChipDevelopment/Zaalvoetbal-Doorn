@@ -4,16 +4,45 @@ import { Player } from '../../interfaces/IPlayer';
 import { Positions } from '../../enums/positions.enum';
 import { Team, Teams } from '../../interfaces/ITeam';
 import { TeamGenerateService } from '../../services/team-generate.service';
+import { GoogleSheetsService } from '../../services/google-sheets-service';
 import { finalize } from 'rxjs/operators';
 import { ReplaySubject } from 'rxjs';
+import { NextMatchService, NextMatchInfo } from '../../services/next-match.service';
+import { NextMatchInfoComponent } from '../next-match-info/next-match-info.component';
+import { AsyncPipe, CommonModule } from '@angular/common';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatSelectModule } from '@angular/material/select';
+import { MatIconModule } from '@angular/material/icon';
+import { MatCardModule } from '@angular/material/card';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDividerModule } from '@angular/material/divider';
 
 @Component({
   selector: 'app-team-generator',
+  standalone: true, 
   templateUrl: './team-generator.component.html',
-  styleUrls: ['./team-generator.component.scss']
+  styleUrls: ['./team-generator.component.scss'],
+  imports: [
+    CommonModule,
+    AsyncPipe,
+    FormsModule,
+    ReactiveFormsModule,
+    NextMatchInfoComponent,
+    MatProgressSpinnerModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatIconModule,
+    MatCardModule,
+    MatButtonModule,
+    MatDividerModule,
+  ],
 })
 export class TeamGeneratorComponent implements OnInit {
-  private mockPlayerList: Player[] = new Array<Player>();
+  private activePlayersList: Player[] = new Array<Player>();
   private loadingSubject = new ReplaySubject<boolean>(1);
   loading$ = this.loadingSubject.asObservable();
 
@@ -33,10 +62,19 @@ export class TeamGeneratorComponent implements OnInit {
     players: new FormArray<FormGroup>([]),
   });
 
-  constructor(
-    private teamGenerateService: TeamGenerateService  ) {}
+  nextMatchInfo: NextMatchInfo | null = null;
 
-  ngOnInit(): void {}
+  constructor(
+    private teamGenerateService: TeamGenerateService,
+    private nextMatchService: NextMatchService,
+    private googleSheetsService: GoogleSheetsService  
+  ) {}
+
+  ngOnInit(): void {
+    this.nextMatchService.getNextMatchInfo().subscribe(info => {
+      this.nextMatchInfo = info;
+    });
+  }
 
   protected getAsFormArray(formArray: any): FormArray {
     return formArray as FormArray;
@@ -160,17 +198,67 @@ export class TeamGeneratorComponent implements OnInit {
     this.isFirst = false;
   }
 
-  protected GetFutsalDoornPlayers(): void {
+  protected GetAanwezigSpelers(): void {
     this.loadingSubject.next(true);
     this.errorMessage = null;
-    this.teamGenerateService.getPlayersWithCalculatedRatings()
+    this.nextMatchService.getNextMatchInfo().subscribe({
+      next: (matchInfo) => {
+        if (!matchInfo) {
+          this.errorMessage = 'Geen aankomende wedstrijd gevonden.';
+          this.loadingSubject.next(false);
+          return;
+        }
+        const dateString = matchInfo.parsedDate ? `${matchInfo.parsedDate.getFullYear()}-${(matchInfo.parsedDate.getMonth() + 1).toString().padStart(2, '0')}-${matchInfo.parsedDate.getDate().toString().padStart(2, '0')}` : matchInfo.date;
+        this.googleSheetsService.getSheetData('Aanwezigheid').pipe(
+          finalize(() => this.loadingSubject.next(false))
+        ).subscribe({
+          next: (aanwezigheidData: any[][]) => {
+            const aanwezigen = aanwezigheidData
+              .filter((row, idx) => idx > 0 && row[0] === dateString && row[2] === 'Ja')
+              .map(row => row[1]);
+            if (aanwezigen.length === 0) {
+              this.errorMessage = 'Geen aanwezige spelers gevonden voor de volgende wedstrijd.';
+              return;
+            }
+            let formArr = new FormArray<FormGroup>([]);
+            for (let name of aanwezigen) {
+              let form = new FormGroup({
+                name: new FormControl<string | null>(name, [Validators.required]),
+                position: new FormControl<string | null>(Positions.PLAYER.toString(), [Validators.required]),
+                rating: new FormControl<number | null>(null, [Validators.required]),
+              });
+              formArr.push(form);
+            }
+            this.playerForms.controls['players'] = formArr;
+            this.numOfPlayers = aanwezigen.length;
+            this.isFirst = false;
+            this.isGenerated = false;
+            this.errorMessage = null;
+          },
+          error: (err) => {
+            this.errorMessage = 'Fout bij ophalen aanwezigheid: ' + (err.message || err);
+          }
+        });
+      },
+      error: (err) => {
+        this.errorMessage = 'Fout bij ophalen wedstrijden: ' + (err.message || err);
+        this.loadingSubject.next(false);
+      }
+    });
+  }
+  
+
+  protected GetAlleActieveSpelers(): void {
+    this.loadingSubject.next(true);
+    this.errorMessage = null;
+    this.teamGenerateService.getFullPlayerStats()
       .pipe(
         finalize(() => this.loadingSubject.next(false))
       )
       .subscribe((players: any[]) => {
         // Filter alleen actieve spelers
-        this.mockPlayerList = players.filter(p => p.actief);
-        if (this.mockPlayerList.length > 0) {
+        this.activePlayersList = players.filter(p => p.actief);
+        if (this.activePlayersList.length > 0) {
           this.GenerateFormFields();
         }
       }, error => {
@@ -179,9 +267,9 @@ export class TeamGeneratorComponent implements OnInit {
   }
 
   private GenerateFormFields() {
-    this.numOfPlayers = this.mockPlayerList.length;
+    this.numOfPlayers = this.activePlayersList.length;
     let formArr = new FormArray<FormGroup>([]);
-    for (let player of this.mockPlayerList) {
+    for (let player of this.activePlayersList) {
       const playerName = (player as any).name || (player as any).player || '';
       // Normaliseer positie zodat deze overeenkomt met de enum waarden
       let playerPosition = (player as any).position || null;

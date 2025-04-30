@@ -1,0 +1,130 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  justify-content: center;
+  align-items: center;
+}
+
+.attendance-card {
+  max-width: 500px;
+  margin: 20px auto;
+  padding: 20px;
+}
+
+mat-card-header {
+  margin-bottom: 24px;
+}
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 150px; // Ensure spinner is visible
+}
+
+.player-select {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.attendance-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch; // Make buttons full width within container
+  gap: 15px; // Space between buttons
+
+  p {
+    text-align: center;
+    font-size: 1.1em;
+    margin-bottom: 15px;
+  }
+
+  button {
+    padding: 15px 10px; // Make buttons taller
+    font-size: 1.1em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    mat-icon {
+      margin-right: 8px;
+    }
+  }
+
+  .btn-yes {
+    background-color: #4CAF50; // Green
+    color: white;
+  }
+
+  .btn-no {
+    background-color: #f44336; // Red
+    color: white;
+  }
+
+  .btn-maybe {
+    background-color: #ff9800; // Orange
+    color: white;
+  }
+
+  // Style for disabled buttons to keep colors
+  button:disabled {
+    opacity: 0.7;
+    &.btn-yes { background-color: #4CAF50; color: white; }
+    &.btn-no { background-color: #f44336; color: white; }
+    &.btn-maybe { background-color: #ff9800; color: white; }
+  }
+}
+
+.status-confirmation {
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #e0e0e0;
+    border-radius: 4px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.select-prompt {
+    text-align: center;
+    color: grey;
+    margin-top: 20px;
+}
+
+.next-match-box {
+  background-color: #e3f2fd;
+  padding: 1.5rem;
+  padding-top: 0.5rem;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  border: 1px solid #90caf9;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.next-match-title {
+  font-size: 2rem;
+  font-weight: 500;
+  text-align: center;
+  margin-bottom: 15px;
+  font-family: 'Roboto', Arial, sans-serif;
+  letter-spacing: 0.0125em;
+  line-height: 2.5rem;
+}
+
+.next-match-date {
+  font-weight: 600;
+}
+
+.next-match-location {
+  margin-bottom: 0;
+}
+
+// Responsive adjustments if needed
+@media (max-width: 600px) {
+  .attendance-card {
+    margin: 10px;
+  }
+}

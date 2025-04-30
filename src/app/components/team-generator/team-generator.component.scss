@@ -10,18 +10,28 @@
 
 .pre-generate-player-forms {
   display: flex;
-  flex-direction: row;
-  gap: 20px;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 20px;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  flex-direction: column;
+  gap: 1.2rem;
+  align-items: flex-start;
+
+  form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+
+  mat-form-field {
+    width: 100%;
+    min-width: 180px;
+    max-width: 300px;
+  }
+
+  button {
+    margin-right: 12px;
+    margin-bottom: 8px;
+    width: fit-content;
+  }
 }
 
 .add-new-form-container {

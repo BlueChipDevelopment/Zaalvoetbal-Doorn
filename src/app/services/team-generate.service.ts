@@ -46,7 +46,7 @@ export class TeamGenerateService {
     return this.generatedTeams;
   }
 
-  getPlayersWithCalculatedRatings(): Observable<any[]> {
+  getFullPlayerStats(): Observable<any[]> {
     return this.gameStatisticsService.getFullPlayerStats();
   }
 

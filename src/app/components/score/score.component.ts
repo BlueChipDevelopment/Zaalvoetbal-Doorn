@@ -2,9 +2,20 @@ import { Component, OnInit } from '@angular/core';
 import { GoogleSheetsService } from '../../services/google-sheets-service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
+import { NextMatchService, NextMatchInfo } from '../../services/next-match.service';
+import { NextMatchInfoComponent } from '../next-match-info/next-match-info.component';
+import { CommonModule } from '@angular/common';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { FormsModule } from '@angular/forms';
+import { MatSelectModule } from '@angular/material/select';
+import { MatIconModule } from '@angular/material/icon';
+import { MatCardModule } from '@angular/material/card';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
 
 interface Match {
-  rowNumber: number;
+  rowNumber?: number; // Make optional
   matchNumber: number | string;
   date: string;
   teamWhitePlayers: string;
@@ -17,10 +28,24 @@ interface Match {
 @Component({
   selector: 'app-score',
   templateUrl: './score.component.html',
-  styleUrls: ['./score.component.scss']
+  styleUrls: ['./score.component.scss'],
+  standalone: true, 
+  imports: [
+    CommonModule,
+    FormsModule,
+    NextMatchInfoComponent,
+    MatProgressSpinnerModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatIconModule,
+    MatCardModule,
+    MatButtonModule,
+  ],
 })
 export class ScoreComponent implements OnInit {
   nextMatch: Match | null = null;
+  nextMatchInfo: NextMatchInfo | null = null;
   teamWhitePlayers: string[] = [];
   teamRedPlayers: string[] = [];
   participatingPlayers: string[] = [];
@@ -30,18 +55,11 @@ export class ScoreComponent implements OnInit {
   isLoading: boolean = true;
   errorMessage: string | null = null;
 
-  private readonly MATCH_NUMBER_COL = 0;
-  private readonly DATE_COL = 1;
-  private readonly WHITE_PLAYERS_COL = 2;
-  private readonly RED_PLAYERS_COL = 3;
-  private readonly WHITE_GOALS_COL = 4;
-  private readonly RED_GOALS_COL = 5;
-  private readonly ZLATAN_COL = 6;
-
   constructor(
     private googleSheetsService: GoogleSheetsService,
     private _snackBar: MatSnackBar,
-    private router: Router
+    private router: Router,
+    private nextMatchService: NextMatchService
   ) {}
 
   ngOnInit(): void {
@@ -57,48 +75,30 @@ export class ScoreComponent implements OnInit {
     this.selectedZlatan = null;
     this.participatingPlayers = [];
 
-    this.googleSheetsService.getSheetData('Wedstrijden').subscribe({
-      next: (data: any[][]) => {
-        console.log('Wedstrijden Sheet Data:', data);
-        const nextMatchRowIndex = data.findIndex((row, index) => index > 0 && !row[this.WHITE_GOALS_COL] && !row[this.RED_GOALS_COL]);
-
-        if (nextMatchRowIndex > 0) {
-          const matchRow = data[nextMatchRowIndex];
-          const rowNumber = nextMatchRowIndex + 1;
-
-          console.log(`Raw data for date column (${this.DATE_COL}) in row ${rowNumber}:`, matchRow[this.DATE_COL]);
-
+    this.nextMatchService.getNextMatchInfo().subscribe({
+      next: (info) => {
+        this.nextMatchInfo = info;
+        if (info && info.row) {
+          const matchRow = info.row;
           this.nextMatch = {
-            rowNumber: rowNumber,
-            matchNumber: matchRow[this.MATCH_NUMBER_COL],
-            date: matchRow[this.DATE_COL],
-            teamWhitePlayers: matchRow[this.WHITE_PLAYERS_COL] || '',
-            teamRedPlayers: matchRow[this.RED_PLAYERS_COL] || '',
-            teamWhiteGoals: matchRow[this.WHITE_GOALS_COL],
-            teamRedGoals: matchRow[this.RED_GOALS_COL],
-            zlatan: matchRow[this.ZLATAN_COL]
+            matchNumber: matchRow[0],
+            date: info.parsedDate ? info.parsedDate.toISOString() : info.date,
+            teamWhitePlayers: matchRow[2] ?? '',
+            teamRedPlayers: matchRow[3] ?? '',
+            teamWhiteGoals: matchRow[4],
+            teamRedGoals: matchRow[5],
+            zlatan: matchRow[6]
           };
-
-          console.log('Assigned date value to nextMatch.date:', this.nextMatch.date);
-
-          this.teamWhitePlayers = (this.nextMatch.teamWhitePlayers).split(',').map((player: string) => player.trim()).filter(p => p);
-          this.teamRedPlayers = (this.nextMatch.teamRedPlayers).split(',').map((player: string) => player.trim()).filter(p => p);
-
+          this.teamWhitePlayers = (this.nextMatch.teamWhitePlayers ?? '').split(',').map((player: string) => player.trim()).filter(p => p);
+          this.teamRedPlayers = (this.nextMatch.teamRedPlayers ?? '').split(',').map((player: string) => player.trim()).filter(p => p);
           const combinedPlayers = [...new Set([...this.teamWhitePlayers, ...this.teamRedPlayers])];
           this.participatingPlayers = combinedPlayers.filter(player => !!player);
-
-          console.log('Next Match Found:', this.nextMatch);
-          console.log('Team White Players:', this.teamWhitePlayers);
-          console.log('Team Red Players:', this.teamRedPlayers);
-          console.log('Participating Players:', this.participatingPlayers);
         } else {
-          console.log('No upcoming match found.');
           this.errorMessage = 'Geen aankomende wedstrijd gevonden.';
         }
         this.isLoading = false;
       },
       error: error => {
-        console.error('Error loading Wedstrijden sheet', error);
         this.errorMessage = 'Fout bij het laden van wedstrijden.';
         this.isLoading = false;
       }

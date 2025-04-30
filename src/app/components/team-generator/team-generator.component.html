@@ -13,8 +13,19 @@
 }
 
 @if(isFirst){
+
+  <app-next-match-info [nextMatchInfo]="nextMatchInfo"></app-next-match-info>
+
   <div class="pre-generate-player-forms">
     <form (submit)="createPlayerForms()"> 
+      <button mat-fab extended class="futsal-doorn-btn" type="button" (click)="GetAanwezigSpelers()">
+        <mat-icon>sports_soccer</mat-icon>
+        Aanwezige Spelers
+      </button>
+      <button mat-fab extended class="futsal-doorn-btn" type="button" (click)="GetAlleActieveSpelers()">
+        <mat-icon>sports_soccer</mat-icon>
+        Actieve Spelers
+      </button>
       <mat-form-field subscriptSizing="dynamic" appearance="outline">
         <mat-label># of Players</mat-label>
         <input matInput type="number" [(ngModel)]="numOfPlayers" name="something" />
@@ -22,10 +33,6 @@
       <button mat-fab extended color="accent" type="submit" [disabled]="numOfPlayers < 1">
         <mat-icon>sports_soccer</mat-icon>
         Nieuw
-      </button>
-      <button mat-fab extended class="futsal-doorn-btn" type="button" (click)="GetFutsalDoornPlayers()">
-        <mat-icon>sports_soccer</mat-icon>
-        Zaalvoetbal Doorn
       </button>
     </form>
   </div>

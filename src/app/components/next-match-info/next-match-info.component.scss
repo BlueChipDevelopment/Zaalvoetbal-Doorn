@@ -1,0 +1,70 @@
+.next-match-box {
+  background: #e3f2fd;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.08);
+  padding: 1.5rem 2rem;
+  margin-bottom: 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.next-match-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.next-match-icon {
+  color: #1976d2;
+}
+
+.next-match-title {
+  font-size: 2rem;
+  font-weight: 500;
+  font-family: 'Roboto', Arial, sans-serif;
+  letter-spacing: 0.0125em;
+  line-height: 2.5rem;
+}
+
+.next-match-details {
+  font-size: 1.1rem;
+}
+
+.next-match-date {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.next-match-location {
+  color: #1976d2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+
+.next-match-number {
+  color: #888;
+  font-size: 0.95rem;
+  margin-top: 2px;
+}
+
+.next-match-location-icon {
+  display: flex;
+  align-items: center;
+  margin-right: 4px;
+  font-size: 1.1em;
+  height: 20px;
+
+  mat-icon {
+    font-size: 20px;
+    vertical-align: middle;
+    line-height: 1;
+  }
+}
