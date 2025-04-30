@@ -7,9 +7,29 @@
 }
 
 .attendance-card {
-  max-width: 500px;
+  background: transparent;
+  box-shadow: none;
+  border: none;
+  max-width: 700px;
+  width: 100%;
   margin: 20px auto;
   padding: 20px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 900px) {
+  .attendance-card {
+    max-width: 98vw;
+    padding: 10px;
+  }
+}
+
+@media (max-width: 600px) {
+  .attendance-card {
+    max-width: 100vw;
+    margin: 10px 0;
+    padding: 6px;
+  }
 }
 
 mat-card-header {
@@ -77,12 +97,38 @@ mat-card-header {
 }
 
 .status-confirmation {
-    margin-top: 20px;
-    padding: 10px;
-    background-color: #e0e0e0;
-    border-radius: 4px;
-    text-align: center;
-    font-weight: bold;
+  margin-top: 20px;
+  padding: 16px 20px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  font-size: 1.1rem;
+  gap: 12px;
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.08);
+
+  .status-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  &.status-yes {
+    background: #e8f5e9;
+    color: #388e3c;
+    border: 1px solid #81c784;
+  }
+  &.status-no {
+    background: #ffebee;
+    color: #c62828;
+    border: 1px solid #e57373;
+  }
+  &.status-maybe {
+    background: #fff8e1;
+    color: #ff9800;
+    border: 1px solid #ffd54f;
+  }
 }
 
 .select-prompt {
@@ -122,9 +168,6 @@ mat-card-header {
   margin-bottom: 0;
 }
 
-// Responsive adjustments if needed
-@media (max-width: 600px) {
-  .attendance-card {
-    margin: 10px;
-  }
+.icon-green {
+  color: #4CAF50;
 }

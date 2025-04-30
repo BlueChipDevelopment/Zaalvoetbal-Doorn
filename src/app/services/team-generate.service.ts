@@ -111,13 +111,8 @@ export class TeamGenerateService {
     return [teamWhite, teamRed];
   }
 
-  private getPlayerByName(name: string): Player | undefined {
-    const playerStats = this.getPlayerStatsFromCache(name);
-    return playerStats ? {
-      name: playerStats.name,
-      position: playerStats.position || Positions.PLAYER, // Default position if unknown
-      rating: playerStats.rating || 5 // Default rating if unknown
-    } : undefined;
+  private getPlayerByName(name: string): Player | null {
+    return this.getPlayerStatsFromCache(name);
   }
 
   // Helper to distribute players efficiently
@@ -159,23 +154,8 @@ export class TeamGenerateService {
     return 0;
   }
   
-  private getPlayerStatsFromCache(playerName: string): any {
-    return this.gameStatisticsService.getPlayerStatsByName(playerName);
-  }
-
-  private getPlayerPairChemistry(player1: string, player2: string): number {
-    const player1Stats = this.getPlayerStatsFromCache(player1);
-
-    if (player1Stats && player1Stats.chemistry && typeof player1Stats.chemistry === 'object') {
-      const chemData = player1Stats.chemistry[player2];
-
-      if (chemData && chemData.gamesPlayed > 0) {
-        // Chemistry score based on win ratio when playing together
-        return (chemData.gamesWon / chemData.gamesPlayed) * 10; // Scale from 0-10
-      }
-    }
-
-    return 0; // Default neutral chemistry if no history
+  private getPlayerStatsFromCache(playerName: string): Player | null {
+    return this.gameStatisticsService.getPlayerStatsByName(playerName) || null;
   }
 
   // Instead of relying on cached chemistry data which might not exist,

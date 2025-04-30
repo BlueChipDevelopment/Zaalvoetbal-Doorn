@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Player } from '../interfaces/IPlayer';
-import { Positions } from '../enums/positions.enum';
+import { PlayerStats } from '../interfaces/IGameStats';
 import { Observable, forkJoin } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { GoogleSheetsService } from './google-sheets-service';
@@ -15,15 +15,15 @@ export class GameStatisticsService {
 
   constructor(private googleSheetsService: GoogleSheetsService) {}
 
-  getPlayerStatsByName(playerName: string): Player | null {
+  getPlayerStatsByName(playerName: string): Player | undefined {
     const now = Date.now();
     if (this.ratingsCache && this.cacheTimestamp && (now - this.cacheTimestamp < this.cacheDurationMs)) {
-      return this.ratingsCache.find(p => p.name === playerName) || null;
+      return this.ratingsCache.find(p => p.name === playerName);
     }
     // Geen cache: synchroniseer ophalen (let op: asynchroon is beter, maar voor compatibiliteit)
-    let found: Player | null = null;
+    let found: Player | undefined = undefined;
     this.getFullPlayerStats().subscribe(players => {
-      found = players.find(p => p.name === playerName) || null;
+      found = players.find(p => p.name === playerName);
     });
     return found;
   }
@@ -31,7 +31,7 @@ export class GameStatisticsService {
   /**
    * Geeft uitgebreide statistieken voor alle spelers, incl. gamesPlayed, totalPoints, wins, losses, ties, rating, winRatio, gameHistory, zlatanPoints, ventielPoints
    */
-  getFullPlayerStats(): Observable<any[]> {
+  getFullPlayerStats(): Observable<Player[]> {
     return forkJoin({
       spelers: this.googleSheetsService.getSheetData('Spelers'),
       wedstrijden: this.googleSheetsService.getSheetData('Wedstrijden')
@@ -124,11 +124,11 @@ export class GameStatisticsService {
           // Zoek altijd de spelerRow op in de originele spelerslijst
           const spelerRow = (spelers || []).find((row: any) => row[0] && row[0].trim().toLowerCase() === player);
           return {
-            player: spelerRow ? spelerRow[0] : player,
+            name: spelerRow ? spelerRow[0] : player,
             position: spelerRow ? spelerRow[1] : null, // 2e kolom is positie
+            rating: rating,
             gamesPlayed: stats.gamesPlayed,
             totalPoints: stats.totalPoints,
-            rating: rating,
             wins: stats.wins,
             losses: stats.losses,
             ties: stats.ties,
@@ -136,8 +136,8 @@ export class GameStatisticsService {
             gameHistory: stats.gameHistory || [],
             zlatanPoints: stats.zlatanPoints || 0,
             ventielPoints: stats.ventielPoints || 0,
-            actief: spelerRow ? (spelerRow[2]?.toLowerCase() === 'ja') : false // Eigenschap actief toevoegen
-          };
+            actief: spelerRow ? (spelerRow[2]?.toLowerCase() === 'ja') : false
+          } as Player;
         }).sort((a, b) => b.totalPoints - a.totalPoints);
       })
     );

@@ -13,6 +13,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { PlayerCardComponent } from '../player-card/player-card.component';
+import { GameStatisticsService } from '../../services/game.statistics.service';
+import { Player } from '../../interfaces/IPlayer';
 
 interface Match {
   rowNumber?: number; // Make optional
@@ -41,13 +44,14 @@ interface Match {
     MatIconModule,
     MatCardModule,
     MatButtonModule,
+    PlayerCardComponent,
   ],
 })
 export class ScoreComponent implements OnInit {
   nextMatch: Match | null = null;
   nextMatchInfo: NextMatchInfo | null = null;
-  teamWhitePlayers: string[] = [];
-  teamRedPlayers: string[] = [];
+  teamWhitePlayers: Player[] = [];
+  teamRedPlayers: Player[] = [];
   participatingPlayers: string[] = [];
   whiteGoals: number | null = null;
   redGoals: number | null = null;
@@ -59,7 +63,8 @@ export class ScoreComponent implements OnInit {
     private googleSheetsService: GoogleSheetsService,
     private _snackBar: MatSnackBar,
     private router: Router,
-    private nextMatchService: NextMatchService
+    private nextMatchService: NextMatchService,
+    private gameStatisticsService: GameStatisticsService 
   ) {}
 
   ngOnInit(): void {
@@ -75,34 +80,75 @@ export class ScoreComponent implements OnInit {
     this.selectedZlatan = null;
     this.participatingPlayers = [];
 
-    this.nextMatchService.getNextMatchInfo().subscribe({
-      next: (info) => {
-        this.nextMatchInfo = info;
-        if (info && info.row) {
-          const matchRow = info.row;
-          this.nextMatch = {
-            matchNumber: matchRow[0],
-            date: info.parsedDate ? info.parsedDate.toISOString() : info.date,
-            teamWhitePlayers: matchRow[2] ?? '',
-            teamRedPlayers: matchRow[3] ?? '',
-            teamWhiteGoals: matchRow[4],
-            teamRedGoals: matchRow[5],
-            zlatan: matchRow[6]
-          };
-          this.teamWhitePlayers = (this.nextMatch.teamWhitePlayers ?? '').split(',').map((player: string) => player.trim()).filter(p => p);
-          this.teamRedPlayers = (this.nextMatch.teamRedPlayers ?? '').split(',').map((player: string) => player.trim()).filter(p => p);
-          const combinedPlayers = [...new Set([...this.teamWhitePlayers, ...this.teamRedPlayers])];
-          this.participatingPlayers = combinedPlayers.filter(player => !!player);
-        } else {
-          this.errorMessage = 'Geen aankomende wedstrijd gevonden.';
-        }
-        this.isLoading = false;
+    // Haal eerst alle spelersstats op via gameStatisticsService
+    this.gameStatisticsService.getFullPlayerStats().subscribe({
+      next: (playerStats: Player[]) => {
+        console.log('playerStats:', playerStats);
+        this.nextMatchService.getNextMatchInfo().subscribe({
+          next: (info) => {
+            this.nextMatchInfo = info;
+            if (info && info.row) {
+              const matchRow = info.row;
+              this.nextMatch = {
+                matchNumber: matchRow[0],
+                date: info.parsedDate ? info.parsedDate.toISOString() : info.date,
+                teamWhitePlayers: matchRow[2] ?? '',
+                teamRedPlayers: matchRow[3] ?? '',
+                teamWhiteGoals: matchRow[4],
+                teamRedGoals: matchRow[5],
+                zlatan: matchRow[6]
+              };
+              // Bouw de player objecten voor de cards
+              this.teamWhitePlayers = this.parsePlayers(this.nextMatch.teamWhitePlayers, playerStats);
+              this.teamRedPlayers = this.parsePlayers(this.nextMatch.teamRedPlayers, playerStats);
+              console.log('teamWhitePlayers:', this.teamWhitePlayers);
+              console.log('teamRedPlayers:', this.teamRedPlayers);
+              console.log('teamWhitePlayers string:', this.nextMatch.teamWhitePlayers);
+              console.log('teamWhitePlayers split:', (this.nextMatch.teamWhitePlayers ?? '').split(',').map((p: string) => p.trim()));
+              console.log('teamRedPlayers string:', this.nextMatch.teamRedPlayers);
+              console.log('teamRedPlayers split:', (this.nextMatch.teamRedPlayers ?? '').split(',').map((p: string) => p.trim()));
+              const combinedPlayers = [...new Set([
+                ...this.teamWhitePlayers.map(p => p.name),
+                ...this.teamRedPlayers.map(p => p.name)
+              ])];
+              this.participatingPlayers = combinedPlayers.filter(player => !!player);
+            } else {
+              this.errorMessage = 'Geen aankomende wedstrijd gevonden.';
+            }
+            this.isLoading = false;
+          },
+          error: error => {
+            this.errorMessage = 'Fout bij het laden van wedstrijden.';
+            this.isLoading = false;
+          }
+        });
       },
       error: error => {
-        this.errorMessage = 'Fout bij het laden van wedstrijden.';
+        this.errorMessage = 'Fout bij het laden van spelers.';
         this.isLoading = false;
       }
     });
+  }
+
+  /**
+   * Zet een comma separated string van spelersnamen om naar een array van Player objecten
+   */
+  private parsePlayers(playerString: string, playerStats: any[]): Player[] {
+    return (playerString ?? '')
+      .split(',')
+      .map((player: string) => player.trim())
+      .map((trimmed: string) => {
+        const match = playerStats.find(p =>
+          (p.name && p.name.trim().toLowerCase() === trimmed.toLowerCase()) ||
+          (p.player && p.player.trim().toLowerCase() === trimmed.toLowerCase())
+        );
+        if (!match) {
+          console.warn('No match for:', trimmed, 'in playerStats:', playerStats.map(p => p.name || p.player));
+        } else {
+          console.log('Match found for:', trimmed, match);
+        }
+        return match || { name: trimmed, position: '', rating: null };
+      });
   }
 
   submitScores(): void {

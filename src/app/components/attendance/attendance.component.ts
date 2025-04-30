@@ -12,6 +12,7 @@ import { FormsModule } from '@angular/forms';
 import { finalize, Observable } from 'rxjs';
 import { NextMatchService, NextMatchInfo } from '../../services/next-match.service';
 import { NextMatchInfoComponent } from '../next-match-info/next-match-info.component';
+import { PlayerCardComponent } from '../player-card/player-card.component';
 
 @Component({
   selector: 'app-attendance',
@@ -25,8 +26,8 @@ import { NextMatchInfoComponent } from '../next-match-info/next-match-info.compo
     MatProgressSpinnerModule,
     MatButtonModule,
     MatIconModule,
-    MatSnackBarModule,
     NextMatchInfoComponent,
+    PlayerCardComponent,
   ],
   templateUrl: './attendance.component.html',
   styleUrls: ['./attendance.component.scss']

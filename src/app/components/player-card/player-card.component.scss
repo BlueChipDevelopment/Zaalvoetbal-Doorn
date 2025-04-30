@@ -1,0 +1,37 @@
+.player-card-image-white {
+  background-image: url('../../../assets/images/football-shirt-white.png');
+  background-size: cover;
+  background-position: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.player-card-image-red {
+  background-image: url('../../../assets/images/football-shirt-red.png');
+  background-size: cover;
+  background-position: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.player-card {
+  min-width: 200px;
+  max-width: 300px;
+  margin: 10px auto;
+}
+
+mat-card-header {
+  align-items: center;
+}
+
+mat-card-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+mat-card-subtitle {
+  font-size: 1rem;
+  color: #666;
+}

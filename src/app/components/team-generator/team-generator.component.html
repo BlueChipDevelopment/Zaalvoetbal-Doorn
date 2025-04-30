@@ -9,18 +9,18 @@
 @if (loading$ | async) {
   <div class="loading-spinner">
     <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
+    <p>Laden van spelers en teams...</p>
   </div>
 }
 
 @if(isFirst){
-
   <app-next-match-info [nextMatchInfo]="nextMatchInfo"></app-next-match-info>
 
   <div class="pre-generate-player-forms">
     <form (submit)="createPlayerForms()"> 
       <button mat-fab extended class="futsal-doorn-btn" type="button" (click)="GetAanwezigSpelers()">
         <mat-icon>sports_soccer</mat-icon>
-        Aanwezige Spelers
+        {{ nextMatchInfo?.parsedDate | date:'EEEE d MMMM yyyy' }}
       </button>
       <button mat-fab extended class="futsal-doorn-btn" type="button" (click)="GetAlleActieveSpelers()">
         <mat-icon>sports_soccer</mat-icon>
@@ -103,21 +103,16 @@
             <h4>Total Score: {{ getTeam(teamKey).sumOfRatings.toFixed(2) }}</h4>
           </div>
           @for (player of getTeam(teamKey).squad; track player) {
-            <mat-card class="player-card">
-              <mat-card-header> 
-                <div mat-card-avatar [class]="'player-card-image-'+ (getTeam(teamKey).shirtcolor || 'default')"></div>
-                <mat-card-title>{{ player.name }}</mat-card-title>
-                <mat-card-subtitle>{{ player.position }}</mat-card-subtitle>
-                <div style="margin-left: auto;">
-                  <h2>{{ player.rating }}</h2>
-                </div>
-              </mat-card-header>
-              <mat-card-content></mat-card-content>
-              <mat-card-footer></mat-card-footer>
-            </mat-card>
+            <app-player-card [player]="player" [shirtColor]="getTeam(teamKey).shirtcolor"></app-player-card>
           }
         </div>
       }
+    </div>
+    <div class="save-teams-container">
+      <button mat-fab extended (click)="saveTeamsToSheet()" [disabled]="loading$ | async">
+        <mat-icon>save</mat-icon>
+        Teams opslaan
+      </button>
     </div>
   }
 }

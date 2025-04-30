@@ -1,0 +1,13 @@
+<mat-card class="player-card">
+  <mat-card-header>
+    <div mat-card-avatar [ngClass]="{
+      'player-card-image-white': shirtColor === 'white',
+      'player-card-image-red': shirtColor === 'red'
+    }"></div>
+    <mat-card-title>{{ player.name }}</mat-card-title>
+    <mat-card-subtitle>{{ player.position }}</mat-card-subtitle>
+    <div style="margin-left: auto;">
+      <h2>{{ player.rating }}</h2>
+    </div>
+  </mat-card-header>
+</mat-card>

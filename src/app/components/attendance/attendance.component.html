@@ -1,11 +1,8 @@
 <mat-card class="attendance-card">
-  <mat-card-header>
-    <mat-card-title>Aanwezigheid</mat-card-title>
-  </mat-card-header>
-
   <mat-card-content>
     <div *ngIf="isLoadingPlayers && !isLoadingStatus" class="loading-spinner">
       <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+      <p>Laden van aanwezigheid data...</p>
     </div>
 
 
@@ -34,9 +31,21 @@
           <mat-icon>cancel</mat-icon> Ik kan niet
         </button>
 
-        <div *ngIf="attendanceStatus && !isLoadingStatus" class="status-confirmation">
-           <span *ngIf="attendanceStatus === 'Ja'">✅ Je hebt aangegeven aanwezig te zijn.</span>
-           <span *ngIf="attendanceStatus === 'Nee'">❌ Je hebt aangegeven afwezig te zijn.</span>
+        <div class="status-confirmation" *ngIf="attendanceStatus && !isLoadingStatus">
+          <ng-container [ngSwitch]="attendanceStatus">
+            <div *ngSwitchCase="'Ja'" class="status-row status-yes">
+              <span>Je hebt aangegeven aanwezig te zijn.</span>
+              <mat-icon class="icon-green">check_circle</mat-icon>
+            </div>
+            <div *ngSwitchCase="'Nee'" class="status-row status-no">
+              <span>Je hebt aangegeven afwezig te zijn.</span>
+              <mat-icon color="warn">cancel</mat-icon>
+            </div>
+            <div *ngSwitchCase="'Misschien'" class="status-row status-maybe">
+              <span>Je hebt aangegeven misschien aanwezig te zijn.</span>
+              <mat-icon color="accent">help_outline</mat-icon>
+            </div>
+          </ng-container>
         </div>
       </div>
 

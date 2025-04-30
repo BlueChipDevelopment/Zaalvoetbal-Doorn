@@ -50,12 +50,7 @@
         <mat-card-content>
           <!-- Player Cards for Team White -->
             <div *ngFor="let player of teamWhitePlayers">
-            <mat-card class="player-card">
-              <mat-card-header>
-                <div mat-card-avatar class="player-card-image-white"></div>
-                <div mat-card-title>{{ player }}</div>
-              </mat-card-header>
-            </mat-card>
+            <app-player-card [player]="player" [shirtColor]="'white'"></app-player-card>
             </div>
         </mat-card-content>
       </mat-card>
@@ -67,12 +62,7 @@
         <mat-card-content>
           <!-- Player Cards for Team Red -->
             <div *ngFor="let player of teamRedPlayers">
-            <mat-card class="player-card">
-              <mat-card-header>
-                <div mat-card-avatar class="player-card-image-red"></div>
-                <div mat-card-title>{{ player }}</div>
-</mat-card-header>
-          </mat-card>
+            <app-player-card [player]="player" [shirtColor]="'red'"></app-player-card>
           </div>
         </mat-card-content>
       </mat-card>

@@ -1,9 +1,16 @@
-import { Positions } from '../enums/positions.enum';
-import { PlayerStats } from './IGameStats';
-
 export interface Player {
   name: string;
   position: string;
   rating: number;
-  stats?: PlayerStats;  // Optional since not all views need statistics
+  gamesPlayed: number;
+  totalPoints: number;
+  wins: number;
+  losses: number;
+  ties: number;
+  winRatio: number;
+  gameHistory: any[];
+  zlatanPoints: number;
+  ventielPoints: number;
+  actief: boolean;
 }
+

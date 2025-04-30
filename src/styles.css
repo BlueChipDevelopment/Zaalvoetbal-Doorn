@@ -135,3 +135,8 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 .tooltip-multiline {
   white-space: pre-line; /* Preserve line breaks in tooltip content */
 }
+
+.snackbar-success {
+  background: #43a047;
+  color: #fff;
+}

@@ -19,6 +19,8 @@ import { MatCardModule } from '@angular/material/card';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { PlayerCardComponent } from '../player-card/player-card.component';
 
 @Component({
   selector: 'app-team-generator',
@@ -39,6 +41,7 @@ import { MatDividerModule } from '@angular/material/divider';
     MatCardModule,
     MatButtonModule,
     MatDividerModule,
+    PlayerCardComponent,
   ],
 })
 export class TeamGeneratorComponent implements OnInit {
@@ -49,6 +52,8 @@ export class TeamGeneratorComponent implements OnInit {
   public isFirst: boolean = true;
   public isGenerated = false;
   public isGenerating = false;
+  public isTeamsSaved = false;
+
   public algorithmExplanation = '';
   
   protected positions: string[] = Object.values(Positions);
@@ -67,12 +72,15 @@ export class TeamGeneratorComponent implements OnInit {
   constructor(
     private teamGenerateService: TeamGenerateService,
     private nextMatchService: NextMatchService,
-    private googleSheetsService: GoogleSheetsService  
+    private googleSheetsService: GoogleSheetsService,
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
+    this.loadingSubject.next(true);
     this.nextMatchService.getNextMatchInfo().subscribe(info => {
       this.nextMatchInfo = info;
+      this.loadingSubject.next(false);
     });
   }
 
@@ -201,48 +209,55 @@ export class TeamGeneratorComponent implements OnInit {
   protected GetAanwezigSpelers(): void {
     this.loadingSubject.next(true);
     this.errorMessage = null;
-    this.nextMatchService.getNextMatchInfo().subscribe({
-      next: (matchInfo) => {
-        if (!matchInfo) {
-          this.errorMessage = 'Geen aankomende wedstrijd gevonden.';
-          this.loadingSubject.next(false);
-          return;
-        }
-        const dateString = matchInfo.parsedDate ? `${matchInfo.parsedDate.getFullYear()}-${(matchInfo.parsedDate.getMonth() + 1).toString().padStart(2, '0')}-${matchInfo.parsedDate.getDate().toString().padStart(2, '0')}` : matchInfo.date;
-        this.googleSheetsService.getSheetData('Aanwezigheid').pipe(
-          finalize(() => this.loadingSubject.next(false))
-        ).subscribe({
-          next: (aanwezigheidData: any[][]) => {
-            const aanwezigen = aanwezigheidData
-              .filter((row, idx) => idx > 0 && row[0] === dateString && row[2] === 'Ja')
-              .map(row => row[1]);
-            if (aanwezigen.length === 0) {
-              this.errorMessage = 'Geen aanwezige spelers gevonden voor de volgende wedstrijd.';
+    // Eerst alle ratings ophalen
+    this.teamGenerateService.getFullPlayerStats().pipe(
+      finalize(() => this.loadingSubject.next(false))
+    ).subscribe({
+      next: (playerStats: any[]) => {
+        this.nextMatchService.getNextMatchInfo().subscribe({
+          next: (matchInfo) => {
+            if (!matchInfo) {
+              this.errorMessage = 'Geen aankomende wedstrijd gevonden.';
               return;
             }
-            let formArr = new FormArray<FormGroup>([]);
-            for (let name of aanwezigen) {
-              let form = new FormGroup({
-                name: new FormControl<string | null>(name, [Validators.required]),
-                position: new FormControl<string | null>(Positions.PLAYER.toString(), [Validators.required]),
-                rating: new FormControl<number | null>(null, [Validators.required]),
-              });
-              formArr.push(form);
-            }
-            this.playerForms.controls['players'] = formArr;
-            this.numOfPlayers = aanwezigen.length;
-            this.isFirst = false;
-            this.isGenerated = false;
-            this.errorMessage = null;
+            const dateString = matchInfo.parsedDate ? `${matchInfo.parsedDate.getFullYear()}-${(matchInfo.parsedDate.getMonth() + 1).toString().padStart(2, '0')}-${matchInfo.parsedDate.getDate().toString().padStart(2, '0')}` : matchInfo.date;
+            this.googleSheetsService.getSheetData('Aanwezigheid').subscribe({
+              next: (aanwezigheidData: any[][]) => {
+                const aanwezigen = aanwezigheidData
+                  .filter((row, idx) => idx > 0 && row[0] === dateString && row[2] === 'Ja')
+                  .map(row => row[1]);
+                if (aanwezigen.length === 0) {
+                  this.errorMessage = 'Geen aanwezige spelers gevonden voor de volgende wedstrijd.';
+                  return;
+                }
+                let formArr = new FormArray<FormGroup>([]);
+                for (let name of aanwezigen) {
+                  const playerStat = playerStats.find((p: any) => p.name === name);
+                  let form = new FormGroup({
+                    name: new FormControl<string | null>(name, [Validators.required]),
+                    position: new FormControl<string | null>(playerStat ? playerStat.position : Positions.PLAYER.toString(), [Validators.required]),
+                    rating: new FormControl<number | null>(playerStat ? playerStat.rating : null, [Validators.required]),
+                  });
+                  formArr.push(form);
+                }
+                this.playerForms.controls['players'] = formArr;
+                this.numOfPlayers = aanwezigen.length;
+                this.isFirst = false;
+                this.isGenerated = false;
+                this.errorMessage = null;
+              },
+              error: (err) => {
+                this.errorMessage = 'Fout bij ophalen aanwezigheid: ' + (err.message || err);
+              }
+            });
           },
           error: (err) => {
-            this.errorMessage = 'Fout bij ophalen aanwezigheid: ' + (err.message || err);
+            this.errorMessage = 'Fout bij ophalen wedstrijden: ' + (err.message || err);
           }
         });
       },
       error: (err) => {
-        this.errorMessage = 'Fout bij ophalen wedstrijden: ' + (err.message || err);
-        this.loadingSubject.next(false);
+        this.errorMessage = 'Fout bij ophalen spelersstatistieken: ' + (err.message || err);
       }
     });
   }
@@ -289,5 +304,39 @@ export class TeamGeneratorComponent implements OnInit {
     }
     this.playerForms.controls['players'] = formArr;
     this.isFirst = false;
+  }
+
+  saveTeamsToSheet(): void {
+    if (!this.nextMatchInfo || !this.teams.teamWhite || !this.teams.teamRed) {
+      this.errorMessage = 'Kan teams niet opslaan: ontbrekende gegevens.';
+      return;
+    }
+    this.loadingSubject.next(true);
+    this.errorMessage = null;
+    const teamWhiteNames = this.teams.teamWhite.squad.map(p => p.name).join(', ');
+    const teamRedNames = this.teams.teamRed.squad.map(p => p.name).join(', ');
+    let sheetRowIndex = this.nextMatchInfo.matchNumber ? Number(this.nextMatchInfo.matchNumber) + 1 : null;
+    if (!sheetRowIndex) {
+      this.errorMessage = 'Kan rijnummer van de wedstrijd niet bepalen.';
+      this.loadingSubject.next(false);
+      return;
+    }
+    const updateData = [
+      {
+        range: `Wedstrijden!C${sheetRowIndex}:D${sheetRowIndex}`,
+        values: [[teamWhiteNames, teamRedNames]]
+      }
+    ];
+    this.googleSheetsService.batchUpdateSheet(updateData).pipe(
+      finalize(() => this.loadingSubject.next(false))
+    ).subscribe({
+      next: () => {
+        this.isTeamsSaved = true;
+        this.snackBar.open('Teams opgeslagen!', 'Sluiten', { duration: 3000, panelClass: ['snackbar-success'] });
+      },
+      error: (err) => {
+        this.errorMessage = 'Fout bij opslaan teams: ' + (err.message || err);
+      }
+    });
   }
 }
