@@ -13,6 +13,8 @@ import { finalize, Observable } from 'rxjs';
 import { NextMatchService, NextMatchInfo } from '../../services/next-match.service';
 import { NextMatchInfoComponent } from '../next-match-info/next-match-info.component';
 import { PlayerCardComponent } from '../player-card/player-card.component';
+import { GameStatisticsService } from '../../services/game.statistics.service';
+import { Player } from '../../interfaces/IPlayer';
 
 @Component({
   selector: 'app-attendance',
@@ -41,7 +43,7 @@ export class AttendanceComponent implements OnInit {
   isLoadingPlayers: boolean = false;
   isLoadingStatus: boolean = false;
   attendanceStatus: 'Ja' | 'Nee' | 'Misschien' | null = null;
-  attendanceList: { speler: string, status: 'Ja' | 'Nee' | 'Misschien' }[] = [];
+  attendanceList: { speler: string, status: 'Ja' | 'Nee' | 'Misschien', playerObj?: Player }[] = [];
   readonly LAST_PLAYER_KEY = 'lastSelectedPlayer';
   readonly SHEET_NAME = 'Aanwezigheid';
   readonly PLAYER_SHEET_NAME = 'Spelers';
@@ -49,7 +51,8 @@ export class AttendanceComponent implements OnInit {
   constructor(
     private googleSheetsService: GoogleSheetsService,
     private snackBar: MatSnackBar,
-    private nextMatchService: NextMatchService
+    private nextMatchService: NextMatchService,
+    private gameStatisticsService: GameStatisticsService
   ) {}
 
   ngOnInit(): void {
@@ -80,10 +83,17 @@ export class AttendanceComponent implements OnInit {
     const formattedDate = this.formatDate(this.nextGameDate);
     this.googleSheetsService.getSheetData(this.SHEET_NAME).subscribe({
       next: (data) => {
-        // Filter op records voor deze datum
-        this.attendanceList = data
-          .filter((row, idx) => idx > 0 && row[0] === formattedDate)
-          .map(row => ({ speler: row[1], status: row[2] as 'Ja' | 'Nee' | 'Misschien' }));
+        // Eerst alle player stats ophalen
+        this.gameStatisticsService.getFullPlayerStats().subscribe((players: Player[]) => {
+          // Filter op records voor deze datum
+          this.attendanceList = data
+            .filter((row, idx) => idx > 0 && row[0] === formattedDate)
+            .map(row => {
+              const spelerNaam = row[1];
+              const playerObj = players.find(p => p.name === spelerNaam);
+              return { speler: spelerNaam, status: row[2] as 'Ja' | 'Nee' | 'Misschien', playerObj };
+            });
+        });
       },
       error: () => {
         this.attendanceList = [];

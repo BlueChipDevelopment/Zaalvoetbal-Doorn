@@ -9,6 +9,7 @@ export interface NextMatchInfo {
   location: string;
   time: string;
   matchNumber: string | number | null;
+  rowNumber?: number; // Toegevoegd
 }
 
 @Injectable({ providedIn: 'root' })
@@ -24,17 +25,40 @@ export class NextMatchService {
         const nextMatchRow = data.find((row, index) => index > 0 && !row[WHITE_GOALS_COL] && !row[RED_GOALS_COL]);
         if (!nextMatchRow) return null;
         const dateString = nextMatchRow[DATE_COL];
-        const parsedDate = new Date(dateString);
-        if (!isNaN(parsedDate.getTime())) {
-          parsedDate.setHours(20, 30, 0, 0); // vaste tijd 20:30
+
+        // Parse dateString as DD-MM-YYYY or YYYY-MM-DD
+        let parsedDate: Date | null = null;
+        if (typeof dateString === 'string') {
+          const parts = dateString.split('-');
+          if (parts.length === 3) {
+            if (parts[0].length === 4) {
+              // YYYY-MM-DD
+              parsedDate = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+            } else {
+              // DD-MM-YYYY
+              parsedDate = new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
+            }
+          } else {
+            parsedDate = new Date(dateString);
+          }
         }
+        if (parsedDate && !isNaN(parsedDate.getTime())) {
+          parsedDate.setHours(20, 30, 0, 0); // vaste tijd 20:30
+        } else {
+          parsedDate = null;
+        }
+
+        // Zoek de rij-index op (1-based)
+        const rowNumber = data.findIndex(row => row === nextMatchRow);
+
         return {
           date: dateString,
-          parsedDate: !isNaN(parsedDate.getTime()) ? parsedDate : null,
+          parsedDate: parsedDate,
           row: nextMatchRow,
           location: 'Sporthal Steinheim',
           time: '20:30',
           matchNumber: nextMatchRow[0] ?? null,
+          rowNumber: rowNumber > -1 ? rowNumber + 1 : undefined,
         };
       })
     );

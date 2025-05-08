@@ -4,12 +4,12 @@
     <span class="next-match-title">Wedstrijd #{{ nextMatchInfo.matchNumber }}</span>
   </div>
   <div class="next-match-details">
-    <div class="next-match-date">{{ nextMatchInfo?.parsedDate | date:'EEEE d MMMM yyyy' }} <b>om {{ nextMatchInfo?.time }}</b></div>
+    <div class="next-match-date">{{ nextMatchInfo.parsedDate | date:'EEEE d MMMM yyyy' }} <b>om {{ nextMatchInfo.time }}</b></div>
     <div class="next-match-location">
       <span class="next-match-location-icon">
         <mat-icon fontIcon="location_on"></mat-icon>
       </span>
-      <span>{{ nextMatchInfo?.location }}</span>
+      <span>{{ nextMatchInfo.location }}</span>
     </div>
   </div>
 </div>

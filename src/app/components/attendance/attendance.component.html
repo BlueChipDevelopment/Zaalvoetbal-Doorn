@@ -61,15 +61,21 @@
     <div class="attendance-overview" *ngIf="attendanceList.length > 0">
       <div class="attendance-col">
         <h3>Aanwezig</h3>
-        <ul>
-          <li *ngFor="let item of attendanceList" [hidden]="item.status !== 'Ja'">{{ item.speler }}</li>
-        </ul>
+        <ng-container *ngFor="let item of attendanceList" >
+          <ng-container *ngIf="item.status === 'Ja'">
+            <app-player-card *ngIf="item.playerObj" [player]="item.playerObj"></app-player-card>
+            <span *ngIf="!item.playerObj">{{ item.speler }}</span>
+          </ng-container>
+        </ng-container>
       </div>
       <div class="attendance-col">
         <h3>Afwezig</h3>
-        <ul>
-          <li *ngFor="let item of attendanceList" [hidden]="item.status !== 'Nee'">{{ item.speler }}</li>
-        </ul>
+        <ng-container *ngFor="let item of attendanceList">
+          <ng-container *ngIf="item.status === 'Nee'">
+            <app-player-card *ngIf="item.playerObj" [player]="item.playerObj"></app-player-card>
+            <span *ngIf="!item.playerObj">{{ item.speler }}</span>
+          </ng-container>
+        </ng-container>
       </div>
     </div>
   </mat-card-content>

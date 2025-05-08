@@ -133,7 +133,7 @@
             <span class="mobile-header">Name</span>
           </mat-header-cell>
           <mat-cell *matCellDef="let player; let i = index" class="name-cell name-data-cell clickable-name" (click)="openChemistryModal(player)">
-            {{player.player}}
+            {{player.name}}
             <ng-container *ngIf="i === 0">
               <mat-icon class="trophy-gold">emoji_events</mat-icon>
             </ng-container>

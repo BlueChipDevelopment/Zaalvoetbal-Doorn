@@ -11,7 +11,7 @@
 
   <div *ngIf="!isLoading && !errorMessage && nextMatch">
 
-    <app-next-match-info [nextMatchInfo]="nextMatchInfo" [matchNumber]="nextMatch?.matchNumber ?? null"></app-next-match-info>
+    <app-next-match-info [nextMatchInfo]="nextMatchInfo" [matchNumber]="nextMatch.matchNumber"></app-next-match-info>
 
       <!-- Score Inputs and Button -->
     <div class="score-inputs">

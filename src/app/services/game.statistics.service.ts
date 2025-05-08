@@ -55,10 +55,10 @@ export class GameStatisticsService {
             if (parts.length === 3) {
               if (parts[0].length === 4) {
                 // YYYY-MM-DD
-                return new Date(d);
+                return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
               } else {
                 // DD-MM-YYYY
-                return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+                return new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
               }
             }
             return new Date(d);

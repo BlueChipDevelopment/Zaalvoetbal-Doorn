@@ -66,12 +66,7 @@ import { ScoreComponent } from './components/score/score.component';
     MatSnackBarModule, 
     MatToolbarModule, 
     MatSidenavModule, 
-    AppRoutingModule, 
-    RouterModule.forRoot([
-      { path: '', component: TeamGeneratorComponent },
-      { path: 'leaderboard', component: LeaderboardComponent },
-      { path: 'score', component: ScoreComponent }
-    ])
+    AppRoutingModule
   ],
   providers: [provideHttpClient(withInterceptorsFromDi()), TitleCasePipe, { provide: LOCALE_ID, useValue: 'nl' }]
 })

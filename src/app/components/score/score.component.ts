@@ -83,7 +83,6 @@ export class ScoreComponent implements OnInit {
     // Haal eerst alle spelersstats op via gameStatisticsService
     this.gameStatisticsService.getFullPlayerStats().subscribe({
       next: (playerStats: Player[]) => {
-        console.log('playerStats:', playerStats);
         this.nextMatchService.getNextMatchInfo().subscribe({
           next: (info) => {
             this.nextMatchInfo = info;
@@ -96,26 +95,22 @@ export class ScoreComponent implements OnInit {
                 teamRedPlayers: matchRow[3] ?? '',
                 teamWhiteGoals: matchRow[4],
                 teamRedGoals: matchRow[5],
-                zlatan: matchRow[6]
+                zlatan: matchRow[6],
+                rowNumber: info.rowNumber // direct uit NextMatchInfo
               };
               // Bouw de player objecten voor de cards
               this.teamWhitePlayers = this.parsePlayers(this.nextMatch.teamWhitePlayers, playerStats);
               this.teamRedPlayers = this.parsePlayers(this.nextMatch.teamRedPlayers, playerStats);
-              console.log('teamWhitePlayers:', this.teamWhitePlayers);
-              console.log('teamRedPlayers:', this.teamRedPlayers);
-              console.log('teamWhitePlayers string:', this.nextMatch.teamWhitePlayers);
-              console.log('teamWhitePlayers split:', (this.nextMatch.teamWhitePlayers ?? '').split(',').map((p: string) => p.trim()));
-              console.log('teamRedPlayers string:', this.nextMatch.teamRedPlayers);
-              console.log('teamRedPlayers split:', (this.nextMatch.teamRedPlayers ?? '').split(',').map((p: string) => p.trim()));
               const combinedPlayers = [...new Set([
                 ...this.teamWhitePlayers.map(p => p.name),
                 ...this.teamRedPlayers.map(p => p.name)
               ])];
               this.participatingPlayers = combinedPlayers.filter(player => !!player);
+              this.isLoading = false;
             } else {
               this.errorMessage = 'Geen aankomende wedstrijd gevonden.';
+              this.isLoading = false;
             }
-            this.isLoading = false;
           },
           error: error => {
             this.errorMessage = 'Fout bij het laden van wedstrijden.';
@@ -169,7 +164,7 @@ export class ScoreComponent implements OnInit {
           this._snackBar.open('Scores en Zlatan succesvol opgeslagen!', 'OK', {
             duration: 3000
           }).afterDismissed().subscribe(() => {
-            this.router.navigate(['/leaderboard']);
+            this.router.navigate(['/klassement']);
           });
         },
         error: error => {
