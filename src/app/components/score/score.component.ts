@@ -106,7 +106,6 @@ export class ScoreComponent implements OnInit {
                 ...this.teamRedPlayers.map(p => p.name)
               ])];
               this.participatingPlayers = combinedPlayers.filter(player => !!player);
-              console.log('participatingPlayers:', this.participatingPlayers);
               this.isLoading = false;
             } else {
               this.errorMessage = 'Geen aankomende wedstrijd gevonden.';
@@ -133,6 +132,7 @@ export class ScoreComponent implements OnInit {
     return (playerString ?? '')
       .split(',')
       .map((player: string) => player.trim())
+      .filter((trimmed: string) => !!trimmed) // Lege namen negeren
       .map((trimmed: string) => {
         const match = playerStats.find(p =>
           (p.name && p.name.trim().toLowerCase() === trimmed.toLowerCase()) ||
