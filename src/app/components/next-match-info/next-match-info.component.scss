@@ -1,3 +1,5 @@
+@import '../../../styles_variables';
+
 .next-match-box {
   background: #e3f2fd;
   border-radius: 12px;
@@ -19,7 +21,7 @@
 }
 
 .next-match-icon {
-  color: #1976d2;
+  color: $primary-color;
 }
 
 .next-match-title {
@@ -39,7 +41,7 @@
 }
 
 .next-match-location {
-  color: #1976d2;
+  color: $primary-color;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -49,7 +51,7 @@
 }
 
 .next-match-number {
-  color: #888;
+  color: $secondary-color;
   font-size: 0.95rem;
   margin-top: 2px;
 }

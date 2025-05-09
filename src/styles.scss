@@ -1,8 +1,4 @@
-$primary-color: #1976d2;
-$secondary-color: #616161;
-$success-color: #43a047;
-$error-color: #f44336;
-$font-main: 'Roboto', Arial, sans-serif;
+@import './styles_variables';
 
 html, body {
   height: 100%;
@@ -59,7 +55,7 @@ label {
   font-size: 14px;
   cursor: pointer;
   background-color: $primary-color;
-  color: white;
+  color: $light-bg;
   border: none;
   &:hover {
     opacity: 0.8;
@@ -72,7 +68,7 @@ label {
 }
 
 .fancy-button {
-  background-color: white;
+  background-color: $light-bg;
   color: $primary-color;
   i.material-icons {
     color: $primary-color;
@@ -90,7 +86,7 @@ app-top-bar {
   justify-content: space-between;
   align-items: center;
   h1 {
-    color: white;
+    color: $light-bg;
     margin: 0;
   }
 }
@@ -101,10 +97,10 @@ app-top-bar {
 
 .snackbar-success {
   background: $success-color;
-  color: #fff;
+  color: $light-bg;
 }
 
 .mat-snack-bar-container {
-  color: #fff !important;
+  color: $light-bg !important;
   font-family: $font-main;
 }

@@ -13,109 +13,111 @@
   </div>
 }
 
-@if(isFirst){
-  <app-next-match-info [nextMatchInfo]="nextMatchInfo"></app-next-match-info>
+@if (!(loading$ | async)) {
+  @if(isFirst){
+    <app-next-match-info [nextMatchInfo]="nextMatchInfo"></app-next-match-info>
 
-  <div class="pre-generate-player-forms">
-    <form (submit)="createPlayerForms()">
-      <i>Maak teams voor wedstrijd # {{ nextMatchInfo?.matchNumber }} op {{ nextMatchInfo?.parsedDate | date:'EEEE d MMMM yyyy' }} op basis van geregistreerde aanwezigheid</i> 
-      <button mat-fab extended class="futsal-doorn-btn" type="button" (click)="GetAanwezigSpelers()">
-        <mat-icon>sports_soccer</mat-icon>
-        {{ nextMatchInfo?.parsedDate | date:'EEEE d MMMM yyyy' }}
+    <div class="pre-generate-player-forms">
+      <form (submit)="createPlayerForms()">
+        <i>Maak teams voor wedstrijd # {{ nextMatchInfo?.matchNumber }} op {{ nextMatchInfo?.parsedDate | date:'EEEE d MMMM yyyy' }} op basis van geregistreerde aanwezigheid</i> 
+        <button mat-fab extended class="futsal-doorn-btn" type="button" (click)="GetAanwezigSpelers()">
+          <mat-icon>sports_soccer</mat-icon>
+          {{ nextMatchInfo?.parsedDate | date:'EEEE d MMMM yyyy' }}
+        </button>
+        <i>Maak teams op basis van alle actieve spelers van Zaalvoetbal Doorn</i>
+        <button mat-fab extended class="futsal-doorn-btn" type="button" (click)="GetAlleActieveSpelers()">
+          <mat-icon>sports_soccer</mat-icon>
+          Actieve Spelers
+        </button>
+        <i>Maak teams op basis van nieuw in te voeren spelers</i>
+        <mat-form-field subscriptSizing="dynamic" appearance="outline">
+          <mat-label>Aantal spelers</mat-label>
+          <input matInput type="number" [(ngModel)]="numOfPlayers" name="something" />
+        </mat-form-field>
+        <button mat-fab extended color="accent" type="submit" [disabled]="numOfPlayers < 1">
+          <mat-icon>sports_soccer</mat-icon>
+          Nieuw
+        </button>
+      </form>
+    </div>
+  } @else {
+    <div class="add-new-form-container">
+      <span>{{ numOfPlayers }} Players</span>
+      <button mat-mini-fab color="accent" (click)="addNewPlayer()">
+        <mat-icon>add</mat-icon>
       </button>
-      <i>Maak teams op basis van alle actieve spelers van Zaalvoetbal Doorn</i>
-      <button mat-fab extended class="futsal-doorn-btn" type="button" (click)="GetAlleActieveSpelers()">
-        <mat-icon>sports_soccer</mat-icon>
-        Actieve Spelers
-      </button>
-      <i>Maak teams op basis van nieuw in te voeren spelers</i>
-      <mat-form-field subscriptSizing="dynamic" appearance="outline">
-        <mat-label>Aantal spelers</mat-label>
-        <input matInput type="number" [(ngModel)]="numOfPlayers" name="something" />
-      </mat-form-field>
-      <button mat-fab extended color="accent" type="submit" [disabled]="numOfPlayers < 1">
-        <mat-icon>sports_soccer</mat-icon>
-        Nieuw
-      </button>
-    </form>
-  </div>
-} @else {
-  <div class="add-new-form-container">
-    <span>{{ numOfPlayers }} Players</span>
-    <button mat-mini-fab color="accent" (click)="addNewPlayer()">
-      <mat-icon>add</mat-icon>
-    </button>
-  </div>
-  <ng-container [formGroup]="playerForms">
-    <ng-container formArrayName="players">
-      @for (form of getAsFormArray(playerForms.controls['players']).controls; track form) {
-        <form [formGroup]="getAsFormGroup(form)">
-          <mat-form-field subscriptSizing="dynamic">
-            <mat-label>Player Name {{ $index + 1 }}</mat-label>
-            <input formControlName="name" matInput type="text" />
-          </mat-form-field>
-          <mat-form-field subscriptSizing="dynamic">
-            <mat-label>Position</mat-label>
-            <mat-select formControlName="position">
-              @for (position of positions; track $index) {
-              <mat-option [value]="position">{{ position }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-          <mat-form-field subscriptSizing="dynamic">
-            <mat-label>Rating</mat-label>
-            <mat-select formControlName="rating">
-              @for (rating of ratings; track rating) {
-              <mat-option [value]="rating">{{ rating }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-          <button mat-mini-fab color="accent" (click)="deletePlayer($index)">
-            <mat-icon>close</mat-icon>
-          </button>
-        </form>
-        <mat-divider class="dividers"></mat-divider>
-      }
+    </div>
+    <ng-container [formGroup]="playerForms">
+      <ng-container formArrayName="players">
+        @for (form of getAsFormArray(playerForms.controls['players']).controls; track form) {
+          <form [formGroup]="getAsFormGroup(form)">
+            <mat-form-field subscriptSizing="dynamic">
+              <mat-label>Player Name {{ $index + 1 }}</mat-label>
+              <input formControlName="name" matInput type="text" />
+            </mat-form-field>
+            <mat-form-field subscriptSizing="dynamic">
+              <mat-label>Position</mat-label>
+              <mat-select formControlName="position">
+                @for (position of positions; track $index) {
+                <mat-option [value]="position">{{ position }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field subscriptSizing="dynamic">
+              <mat-label>Rating</mat-label>
+              <mat-select formControlName="rating">
+                @for (rating of ratings; track rating) {
+                <mat-option [value]="rating">{{ rating }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <button mat-mini-fab color="accent" (click)="deletePlayer($index)">
+              <mat-icon>close</mat-icon>
+            </button>
+          </form>
+          <mat-divider class="dividers"></mat-divider>
+        }
+      </ng-container>
+      <div class="button-container">
+        <button mat-raised-button color="accent" (click)="generateTeams()" [disabled]="numOfPlayers < 1 || isGenerating" id="generate">
+          Generate
+        </button>
+        <button mat-raised-button (click)="clean()" [disabled]="numOfPlayers < 1 || isGenerating">
+          Clean
+        </button>
+      </div>
     </ng-container>
-    <div class="button-container">
-      <button mat-raised-button color="accent" (click)="generateTeams()" [disabled]="numOfPlayers < 1 || isGenerating" id="generate">
-        Generate
-      </button>
-      <button mat-raised-button (click)="clean()" [disabled]="numOfPlayers < 1 || isGenerating">
-        Clean
-      </button>
-    </div>
-  </ng-container>
-  
-  <!-- Show spinner during generation -->
-  @if(isGenerating) {
-    <div class="generation-spinner-container">
-      <mat-spinner diameter="40"></mat-spinner>
-      <p>Generating balanced teams...</p>
-    </div>
-  }
-  
-  @if(isGenerated){
-    <hr class="solid" />
-    <!-- Team results -->
-    <div class="results">
-      @for (teamKey of getTeams(); track teamKey) {
-        <div class="each-result">
-          <h2>{{ getTeam(teamKey).name }}</h2>
-          <div class="results-details">
-            <h4>Total Score: {{ getTeam(teamKey).sumOfRatings.toFixed(2) }}</h4>
+    
+    <!-- Show spinner during generation -->
+    @if(isGenerating) {
+      <div class="generation-spinner-container">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Generating balanced teams...</p>
+      </div>
+    }
+    
+    @if(isGenerated){
+      <hr class="solid" />
+      <!-- Team results -->
+      <div class="results">
+        @for (teamKey of getTeams(); track teamKey) {
+          <div class="each-result">
+            <h2>{{ getTeam(teamKey).name }}</h2>
+            <div class="results-details">
+              <h4>Total Score: {{ getTeam(teamKey).sumOfRatings.toFixed(2) }}</h4>
+            </div>
+            @for (player of getTeam(teamKey).squad; track player) {
+              <app-player-card [player]="player" [shirtColor]="getTeam(teamKey).shirtcolor"></app-player-card>
+            }
           </div>
-          @for (player of getTeam(teamKey).squad; track player) {
-            <app-player-card [player]="player" [shirtColor]="getTeam(teamKey).shirtcolor"></app-player-card>
-          }
-        </div>
-      }
-    </div>
-    <div class="save-teams-container">
-      <button mat-fab extended (click)="saveTeamsToSheet()" [disabled]="loading$ | async">
-        <mat-icon>save</mat-icon>
-        Teams opslaan
-      </button>
-    </div>
+        }
+      </div>
+      <div class="save-teams-container">
+        <button mat-fab extended (click)="saveTeamsToSheet()" [disabled]="loading$ | async">
+          <mat-icon>save</mat-icon>
+          Teams opslaan
+        </button>
+      </div>
+    }
   }
 }

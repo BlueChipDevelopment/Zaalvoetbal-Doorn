@@ -106,6 +106,7 @@ export class ScoreComponent implements OnInit {
                 ...this.teamRedPlayers.map(p => p.name)
               ])];
               this.participatingPlayers = combinedPlayers.filter(player => !!player);
+              console.log('participatingPlayers:', this.participatingPlayers);
               this.isLoading = false;
             } else {
               this.errorMessage = 'Geen aankomende wedstrijd gevonden.';

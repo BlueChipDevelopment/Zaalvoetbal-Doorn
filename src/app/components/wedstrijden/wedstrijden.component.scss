@@ -1,0 +1,111 @@
+@import '../../../styles_variables';
+
+// Kleuren en schaduw variabelen
+$card-shadow: 0 2px 8px rgba(0,0,0,0.08);
+$score: #333;
+
+.loading-spinner {
+    display: flex;
+    flex-direction: column; // Stack spinner and text vertically
+    justify-content: center;
+    align-items: center;
+    position: absolute; // Position relative to the container
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); // Center precisely
+    z-index: 1000; // Ensure it's on top
+  
+    p {
+      margin-top: 1rem; // Add space between spinner and text
+    }
+}
+
+.wedstrijden-container {
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 1rem;
+}
+
+.wedstrijd-card {
+  background: $light-bg;
+  border-radius: 12px;
+  box-shadow: $card-shadow;
+  margin-bottom: 2rem;
+  padding: 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.wedstrijd-header {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: $primary-color;
+}
+
+.wedstrijd-teams {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 1.2rem;
+}
+
+.team {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 200px;
+  min-width: 120px;
+  max-width: 200px;
+}
+
+.team-rood, .team-wit {
+  text-align: center;
+  justify-content: center;
+}
+
+.team-rood img, .team-wit img {
+  width: 28px;
+  height: 28px;
+}
+
+.wedstrijd-score {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: $score;
+  white-space: nowrap;
+  width: 60px;
+  min-width: 60px;
+  max-width: 60px;
+  text-align: center;
+}
+
+.wedstrijd-locatie {
+  font-size: 0.95rem;
+  color: $secondary-color;
+}
+
+// Responsive verbeteringen
+@media (max-width: 500px) {
+  .wedstrijden-container {
+    padding: 0.5rem;
+  }
+  .wedstrijd-card {
+    padding: 1rem 0.5rem;
+  }
+  .wedstrijd-teams {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .team {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    justify-content: center;
+  }
+  .wedstrijd-score {
+    width: auto;
+    min-width: 0;
+    max-width: 100%;
+  }
+}

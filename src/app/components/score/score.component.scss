@@ -1,3 +1,5 @@
+@import '../../../styles_variables';
+
 .score-container {
   display: flex;
   flex-direction: column;
@@ -40,8 +42,7 @@
   margin-bottom: 10px;
   margin-left: auto; // Center the card within its container if needed
   margin-right: auto;
-  background-color: white; // Ensure white background
-  // Player cards will retain their default mat-card box-shadow
+  background-color: $light-bg; 
 }
 
 .player-card-image-white {

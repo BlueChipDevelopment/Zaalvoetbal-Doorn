@@ -1,3 +1,5 @@
+@import '../../../styles_variables';
+
 :host {
   display: flex;
   flex-direction: column;
@@ -112,7 +114,7 @@ form {
   min-width: 300px;
   margin-bottom: 10px;
   padding: 10px;
-  background-color: white;
+  background-color: $light-bg;
 }
 
 .player-card-image-white {
@@ -127,20 +129,22 @@ form {
 
 .loading-spinner {
   display: flex;
+  flex-direction: column; // Stack spinner and text vertically
   justify-content: center;
   align-items: center;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 1000;
-  background-color: rgba(255, 255, 255, 0.8);
-  min-height: 200px;
+  position: absolute; // Position relative to the container
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); // Center precisely
+  z-index: 1000; // Ensure it's on top
+
+  p {
+    margin-top: 1rem; // Add space between spinner and text
+  }
 }
 
 .error-message {
-  background-color: #ffebee;
+  background-color: $light-bg;
   padding: 16px;
   border-radius: 4px;
   margin-bottom: 16px;
@@ -178,7 +182,7 @@ h1 {
   
   p {
     margin-top: 1rem;
-    color: #3f51b5;
+    color: $primary-color;
     font-weight: 500;
   }
 }
@@ -187,14 +191,14 @@ h1 {
   max-width: 800px;
   margin: 0 auto 2rem;
   padding: 1rem;
-  background-color: #f5f5f5;
+  background-color: $light-bg;
   border-radius: 4px;
   text-align: center;
 }
 
 .score-explanation {
   font-size: 0.9rem;
-  color: #666;
+  color: $secondary-color;
   margin: 0.5rem 0;
 }
 

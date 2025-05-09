@@ -1,3 +1,9 @@
+@import '../../../styles_variables';
+
+$trophy-gold: gold;
+$trophy-silver: silver;
+$trophy-bronze: #CE8946;
+
 $mobile-breakpoint: 767px;
 
 table {
@@ -49,19 +55,19 @@ th, td {
 
 .trophy-gold {
   font-size: 30px !important;
-  color: gold !important;
+  color: $trophy-gold !important;
   margin-left: 5px !important;
   vertical-align: middle !important;
 }
 .trophy-silver {
   font-size: 30px !important;
-  color: silver !important;
+  color: $trophy-silver !important;
   margin-left: 5px !important;
   vertical-align: middle !important;
 }
 .trophy-bronze {
   font-size: 30px !important;
-  color: #CE8946 !important;
+  color: $trophy-bronze !important;
   margin-left: 5px !important;
   vertical-align: middle !important;
 }
