@@ -44,6 +44,8 @@ export class AttendanceComponent implements OnInit {
   isLoadingStatus: boolean = false;
   attendanceStatus: 'Ja' | 'Nee' | 'Misschien' | null = null;
   attendanceList: { speler: string, status: 'Ja' | 'Nee' | 'Misschien', playerObj?: Player }[] = [];
+  presentCount = 0;
+  absentCount = 0;
   readonly LAST_PLAYER_KEY = 'lastSelectedPlayer';
   readonly SHEET_NAME = 'Aanwezigheid';
   readonly PLAYER_SHEET_NAME = 'Spelers';
@@ -78,14 +80,14 @@ export class AttendanceComponent implements OnInit {
   loadAttendanceList(): void {
     if (!this.nextGameDate) {
       this.attendanceList = [];
+      this.presentCount = 0;
+      this.absentCount = 0;
       return;
     }
     const formattedDate = this.formatDate(this.nextGameDate);
     this.googleSheetsService.getSheetData(this.SHEET_NAME).subscribe({
       next: (data) => {
-        // Eerst alle player stats ophalen
         this.gameStatisticsService.getFullPlayerStats().subscribe((players: Player[]) => {
-          // Filter op records voor deze datum
           this.attendanceList = data
             .filter((row, idx) => idx > 0 && row[0] === formattedDate)
             .map(row => {
@@ -93,10 +95,14 @@ export class AttendanceComponent implements OnInit {
               const playerObj = players.find(p => p.name === spelerNaam);
               return { speler: spelerNaam, status: row[2] as 'Ja' | 'Nee' | 'Misschien', playerObj };
             });
+          this.presentCount = this.attendanceList.filter(item => item.status === 'Ja').length;
+          this.absentCount = this.attendanceList.filter(item => item.status === 'Nee').length;
         });
       },
       error: () => {
         this.attendanceList = [];
+        this.presentCount = 0;
+        this.absentCount = 0;
       }
     });
   }

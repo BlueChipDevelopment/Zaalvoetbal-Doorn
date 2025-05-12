@@ -60,7 +60,7 @@
 
     <div class="attendance-overview" *ngIf="attendanceList.length > 0">
       <div class="attendance-col">
-        <h3>Aanwezig</h3>
+        <h3>Aanwezig ({{ presentCount }})</h3>
         <ng-container *ngFor="let item of attendanceList" >
           <ng-container *ngIf="item.status === 'Ja'">
             <app-player-card *ngIf="item.playerObj" [player]="item.playerObj"></app-player-card>
@@ -69,7 +69,7 @@
         </ng-container>
       </div>
       <div class="attendance-col">
-        <h3>Afwezig</h3>
+        <h3>Afwezig ({{ absentCount }})</h3>
         <ng-container *ngFor="let item of attendanceList">
           <ng-container *ngIf="item.status === 'Nee'">
             <app-player-card *ngIf="item.playerObj" [player]="item.playerObj"></app-player-card>
