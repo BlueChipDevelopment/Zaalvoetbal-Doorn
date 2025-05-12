@@ -1,21 +1,21 @@
-<h2 mat-dialog-title>Chemistry Information</h2>
+<h2 mat-dialog-title>Chemistry informatie</h2>
 <mat-dialog-content>
-  <p>Player: <strong>{{ data.player.name }}</strong></p>
-  <p>Best Chemistry:</p>
+  <p>Speler: <strong>{{ data.player.name }}</strong></p>
+  <p>Beste chemie:</p>
   <ul>
-    <li>Player: <strong>{{ data.bestTeammates.best.name }}</strong></li>
-    <li>Games Played: <strong>{{ data.bestTeammates.best.gamesPlayed }}</strong></li>
-    <li>Games Won: <strong>{{ data.bestTeammates.best.gamesWon }}</strong></li>
-    <li>Games Lost: <strong>{{ data.bestTeammates.best.gamesPlayed - data.bestTeammates.best.gamesWon - data.bestTeammates.best.gamesTied }}</strong></li>
-    <li>Games Tied: <strong>{{ data.bestTeammates.best.gamesTied }}</strong></li>
+    <li>Speler: <strong>{{ data.bestTeammates.best.name }}</strong></li>
+    <li>Wedstrijden: <strong>{{ data.bestTeammates.best.gamesPlayed }}</strong></li>
+    <li>Gewonnen: <strong>{{ data.bestTeammates.best.gamesWon }}</strong></li>
+    <li>Verloren: <strong>{{ data.bestTeammates.best.gamesPlayed - data.bestTeammates.best.gamesWon - data.bestTeammates.best.gamesTied }}</strong></li>
+    <li>Gelijk: <strong>{{ data.bestTeammates.best.gamesTied }}</strong></li>
   </ul>
-  <p>Worst Chemistry:</p>
+  <p>Slechtste chemie:</p>
   <ul>
-    <li>Player: <strong>{{ data.bestTeammates.worst.name }}</strong></li>
-    <li>Games Played: <strong>{{ data.bestTeammates.worst.gamesPlayed }}</strong></li>
-    <li>Games Won: <strong>{{ data.bestTeammates.worst.gamesWon }}</strong></li>
-    <li>Games Lost: <strong>{{ data.bestTeammates.worst.gamesPlayed - data.bestTeammates.worst.gamesWon - data.bestTeammates.worst.gamesTied }}</strong></li>
-    <li>Games Tied: <strong>{{ data.bestTeammates.worst.gamesTied }}</strong></li>
+    <li>Speler: <strong>{{ data.bestTeammates.worst.name }}</strong></li>
+    <li>Wedstrijden: <strong>{{ data.bestTeammates.worst.gamesPlayed }}</strong></li>
+    <li>Gewonnen: <strong>{{ data.bestTeammates.worst.gamesWon }}</strong></li>
+    <li>Verloren: <strong>{{ data.bestTeammates.worst.gamesPlayed - data.bestTeammates.worst.gamesWon - data.bestTeammates.worst.gamesTied }}</strong></li>
+    <li>Gelijk: <strong>{{ data.bestTeammates.worst.gamesTied }}</strong></li>
   </ul>
 </mat-dialog-content>
 <mat-dialog-actions>

@@ -6,3 +6,8 @@
   display: flex;
   justify-content: flex-end;
 }
+
+.chemistry-modal-panel .mat-dialog-container {
+  width: 400px;
+  max-width: 90vw;
+}

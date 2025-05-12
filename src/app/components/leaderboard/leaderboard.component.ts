@@ -84,9 +84,9 @@ export class LeaderboardComponent implements OnInit {
 
   protected openChemistryModal(player: any): void {
     this.dialog.open(ChemistryModalComponent, {
-      width: '400px',
+      panelClass: 'chemistry-modal-panel',
       data: {
-        player: { ...player, name: player.player }, // voeg name toe
+        player: { ...player, name: player.name },
         bestTeammates: this.getBestAndWorstTeammates(player)
       }
     });
