@@ -79,11 +79,11 @@
         }
       </ng-container>
       <div class="button-container">
-        <button mat-raised-button color="accent" (click)="generateTeams()" [disabled]="numOfPlayers < 1 || isGenerating" id="generate">
-          Generate
+        <button mat-fab extended (click)="generateTeams()" [disabled]="numOfPlayers < 1 || isGenerating" id="generate">
+          Genereer Teams
         </button>
-        <button mat-raised-button (click)="clean()" [disabled]="numOfPlayers < 1 || isGenerating">
-          Clean
+        <button mat-fab extended (click)="clean()" [disabled]="numOfPlayers < 1 || isGenerating">
+          Verwijder Spelers
         </button>
       </div>
     </ng-container>

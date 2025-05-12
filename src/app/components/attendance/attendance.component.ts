@@ -98,7 +98,7 @@ export class AttendanceComponent implements OnInit {
               const playerObj = foundPlayer || {
                 name: spelerNaam,
                 position: playerMeta ? playerMeta.position : '',
-                rating: 0,
+                rating: 1,
                 gamesPlayed: 0,
                 totalPoints: 0,
                 wins: 0,
