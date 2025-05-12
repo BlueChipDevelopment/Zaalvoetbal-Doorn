@@ -12,8 +12,8 @@
       <mat-form-field appearance="fill" class="player-select">
         <mat-label>Selecteer Speler</mat-label>
         <mat-select [(ngModel)]="selectedPlayer" (selectionChange)="onPlayerSelectionChange()" name="player" [disabled]="isLoadingStatus">
-          <mat-option *ngFor="let player of players" [value]="player">
-            {{ player }}
+          <mat-option *ngFor="let player of players" [value]="player.name">
+            {{ player.name }}
           </mat-option>
         </mat-select>
       </mat-form-field>
