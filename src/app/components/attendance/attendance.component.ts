@@ -35,7 +35,7 @@ import { Player } from '../../interfaces/IPlayer';
   styleUrls: ['./attendance.component.scss']
 })
 export class AttendanceComponent implements OnInit {
-  players: string[] = [];
+  players: { name: string, position: string }[] = [];
   selectedPlayer: string | null = null;
   nextGameDate: Date | null = null;
   nextGameDateRaw: string | null = null;
@@ -87,12 +87,29 @@ export class AttendanceComponent implements OnInit {
     const formattedDate = this.formatDate(this.nextGameDate);
     this.googleSheetsService.getSheetData(this.SHEET_NAME).subscribe({
       next: (data) => {
-        this.gameStatisticsService.getFullPlayerStats().subscribe((players: Player[]) => {
+        this.gameStatisticsService.getFullPlayerStats().subscribe((playerStats: Player[]) => {
           this.attendanceList = data
             .filter((row, idx) => idx > 0 && row[0] === formattedDate)
             .map(row => {
               const spelerNaam = row[1];
-              const playerObj = players.find(p => p.name === spelerNaam);
+              // Zoek speler in playerStats (voor statistieken) en in this.players (voor positie)
+              const foundPlayer = playerStats.find((p: Player) => p.name === spelerNaam);
+              const playerMeta = this.players.find(p => p.name === spelerNaam);
+              const playerObj = foundPlayer || {
+                name: spelerNaam,
+                position: playerMeta ? playerMeta.position : '',
+                rating: 0,
+                gamesPlayed: 0,
+                totalPoints: 0,
+                wins: 0,
+                losses: 0,
+                ties: 0,
+                winRatio: 0,
+                gameHistory: [],
+                zlatanPoints: 0,
+                ventielPoints: 0,
+                actief: true
+              };
               return { speler: spelerNaam, status: row[2] as 'Ja' | 'Nee' | 'Misschien', playerObj };
             });
           this.presentCount = this.attendanceList.filter(item => item.status === 'Ja').length;
@@ -114,9 +131,9 @@ export class AttendanceComponent implements OnInit {
       .subscribe({
         next: (data) => {
           this.players = data.slice(1)
-                             .map(row => row[0])
-                             .filter(name => name)
-                             .sort();
+                             .map(row => ({ name: row[0], position: row[1] || '' }))
+                             .filter(player => player.name)
+                             .sort((a, b) => a.name.localeCompare(b.name));
           this.loadLastSelectedPlayer();
         },
         error: (err) => {
@@ -128,7 +145,7 @@ export class AttendanceComponent implements OnInit {
 
   loadLastSelectedPlayer(): void {
     const lastPlayer = localStorage.getItem(this.LAST_PLAYER_KEY);
-    if (lastPlayer && this.players.includes(lastPlayer)) {
+    if (lastPlayer && this.players.some(player => player.name === lastPlayer)) {
       this.selectedPlayer = lastPlayer;
       this.fetchCurrentAttendanceStatus();
     } else {
