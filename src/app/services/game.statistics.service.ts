@@ -112,6 +112,22 @@ export class GameStatisticsService {
             }
           });
         });
+        // Voeg spelers toe die in de Spelers-lijst staan maar nog geen wedstrijden hebben gespeeld
+        (spelers || []).forEach((row: any) => {
+          const naam = row[0]?.trim().toLowerCase();
+          if (naam && !playerStats[naam]) {
+            playerStats[naam] = {
+              gamesPlayed: 0,
+              totalPoints: 0,
+              wins: 0,
+              losses: 0,
+              ties: 0,
+              gameHistory: [],
+              zlatanPoints: 0,
+              ventielPoints: 0
+            };
+          }
+        });
         // Total points en max
         Object.values(playerStats).forEach((stats: any) => {
           stats.totalPoints = (stats.wins * 3) + (stats.ties * 2) + (stats.losses * 1) + (stats.zlatanPoints || 0);
