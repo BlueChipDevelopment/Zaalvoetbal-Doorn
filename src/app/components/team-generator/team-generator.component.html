@@ -1,7 +1,11 @@
 <!-- Error message display -->
 @if (errorMessage) {
-  <div class="error-message">
-    <mat-error>{{ errorMessage }}</mat-error>
+  <div class="error-banner mat-elevation-z2">
+    <mat-icon>error</mat-icon>
+    <span>{{ errorMessage }}</span>
+    <button mat-icon-button (click)="errorMessage = null">
+      <mat-icon>close</mat-icon>
+    </button>
   </div>
 }
 

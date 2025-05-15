@@ -220,7 +220,7 @@ export class TeamGeneratorComponent implements OnInit {
         this.nextMatchService.getNextMatchInfo().subscribe({
           next: (matchInfo) => {
             if (!matchInfo) {
-              this.errorMessage = 'Geen aankomende wedstrijd gevonden.';
+              this.snackBar.open('Geen aankomende wedstrijd gevonden.', 'Sluiten', { duration: 5000, panelClass: ['snackbar-error'] });
               return;
             }
             const dateString = matchInfo.parsedDate ? `${matchInfo.parsedDate.getFullYear()}-${(matchInfo.parsedDate.getMonth() + 1).toString().padStart(2, '0')}-${matchInfo.parsedDate.getDate().toString().padStart(2, '0')}` : matchInfo.date;
@@ -230,7 +230,7 @@ export class TeamGeneratorComponent implements OnInit {
                   .filter((row, idx) => idx > 0 && row[0] === dateString && row[2] === 'Ja')
                   .map(row => row[1]);
                 if (aanwezigen.length === 0) {
-                  this.errorMessage = 'Geen aanwezige spelers gevonden voor de volgende wedstrijd.';
+                  this.snackBar.open('Geen aanwezige spelers gevonden voor de volgende wedstrijd.', 'Sluiten', { duration: 5000, panelClass: ['snackbar-error'] });
                   return;
                 }
                 let formArr = new FormArray<FormGroup>([]);
@@ -250,17 +250,17 @@ export class TeamGeneratorComponent implements OnInit {
                 this.errorMessage = null;
               },
               error: (err) => {
-                this.errorMessage = 'Fout bij ophalen aanwezigheid: ' + (err.message || err);
+                this.snackBar.open('Fout bij ophalen aanwezigheid: ' + (err.message || err), 'Sluiten', { duration: 5000, panelClass: ['snackbar-error'] });
               }
             });
           },
           error: (err) => {
-            this.errorMessage = 'Fout bij ophalen wedstrijden: ' + (err.message || err);
+            this.snackBar.open('Fout bij ophalen wedstrijden: ' + (err.message || err), 'Sluiten', { duration: 5000, panelClass: ['snackbar-error'] });
           }
         });
       },
       error: (err) => {
-        this.errorMessage = 'Fout bij ophalen spelersstatistieken: ' + (err.message || err);
+        this.snackBar.open('Fout bij ophalen spelersstatistieken: ' + (err.message || err), 'Sluiten', { duration: 5000, panelClass: ['snackbar-error'] });
       }
     });
   }
@@ -280,7 +280,7 @@ export class TeamGeneratorComponent implements OnInit {
           this.GenerateFormFields();
         }
       }, error => {
-        this.errorMessage = error.message || 'Fout bij ophalen spelers.';
+        this.snackBar.open(error.message || 'Fout bij ophalen spelers.', 'Sluiten', { duration: 5000, panelClass: ['snackbar-error'] });
       });
   }
 
@@ -311,7 +311,7 @@ export class TeamGeneratorComponent implements OnInit {
 
   saveTeamsToSheet(): void {
     if (!this.nextMatchInfo || !this.teams.teamWhite || !this.teams.teamRed) {
-      this.errorMessage = 'Kan teams niet opslaan: ontbrekende gegevens.';
+      this.snackBar.open('Kan teams niet opslaan: ontbrekende gegevens.', 'Sluiten', { duration: 5000, panelClass: ['snackbar-error'] });
       return;
     }
     this.loadingSubject.next(true);
@@ -320,7 +320,7 @@ export class TeamGeneratorComponent implements OnInit {
     const teamRedNames = this.teams.teamRed.squad.map(p => p.name).join(', ');
     let sheetRowIndex = this.nextMatchInfo.matchNumber ? Number(this.nextMatchInfo.matchNumber) + 1 : null;
     if (!sheetRowIndex) {
-      this.errorMessage = 'Kan rijnummer van de wedstrijd niet bepalen.';
+      this.snackBar.open('Kan rijnummer van de wedstrijd niet bepalen.', 'Sluiten', { duration: 5000, panelClass: ['snackbar-error'] });
       this.loadingSubject.next(false);
       return;
     }
@@ -338,7 +338,7 @@ export class TeamGeneratorComponent implements OnInit {
         this.snackBar.open('Teams opgeslagen!', 'Sluiten', { duration: 3000, panelClass: ['snackbar-success'] });
       },
       error: (err) => {
-        this.errorMessage = 'Fout bij opslaan teams: ' + (err.message || err);
+        this.snackBar.open('Fout bij opslaan teams: ' + (err.message || err), 'Sluiten', { duration: 5000, panelClass: ['snackbar-error'] });
       }
     });
   }

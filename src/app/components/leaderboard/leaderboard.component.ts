@@ -3,9 +3,28 @@ import { GameStatisticsService } from '../../services/game.statistics.service';
 import { TitleCasePipe } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import { ChemistryModalComponent } from './chemistry-modal.component';
+import { MatError } from '@angular/material/form-field';
+import { MatTableModule } from '@angular/material/table';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { CommonModule } from '@angular/common';
+import { MatCardModule } from '@angular/material/card';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-leaderboard',
+  standalone: true,
+  imports: [
+    TitleCasePipe,
+    ChemistryModalComponent,
+    MatError,
+    MatTableModule,
+    MatIconModule,
+    MatTooltipModule,
+    CommonModule, // <-- Needed for *ngIf, *ngFor, [ngClass], etc.
+    MatCardModule,
+    MatProgressSpinnerModule
+  ],
   templateUrl: './leaderboard.component.html',
   styleUrls: ['./leaderboard.component.scss']
 })
@@ -13,6 +32,7 @@ export class LeaderboardComponent implements OnInit {
   leaderboard: any[] = [];
   isMobile = false;
   isLoading = true; 
+  public errorMessage: string | null = null;
 
   constructor(
     private titleCasePipe: TitleCasePipe,

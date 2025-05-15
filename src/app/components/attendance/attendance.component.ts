@@ -49,6 +49,8 @@ export class AttendanceComponent implements OnInit {
   readonly LAST_PLAYER_KEY = 'lastSelectedPlayer';
   readonly SHEET_NAME = 'Aanwezigheid';
   readonly PLAYER_SHEET_NAME = 'Spelers';
+  public errorMessage: string | null = null; // Algemene foutmeldingen (API, etc)
+  public playerSelectError: string | null = null; // Alleen voor veldvalidatie spelerselectie
 
   constructor(
     private googleSheetsService: GoogleSheetsService,
@@ -64,6 +66,7 @@ export class AttendanceComponent implements OnInit {
         this.nextMatchInfo = info;
         this.nextGameDate = info?.parsedDate || null;
         this.nextGameDateRaw = info?.date || null;
+        this.errorMessage = null;
         this.loadPlayers();
         this.loadAttendanceList();
       },
@@ -72,7 +75,7 @@ export class AttendanceComponent implements OnInit {
         this.nextGameDate = null;
         this.nextGameDateRaw = null;
         this.isLoadingPlayers = false;
-        this.snackBar.open('Fout bij het laden van wedstrijden.', 'Sluiten', { duration: 3000 });
+        this.errorMessage = 'Fout bij het laden van wedstrijden.';
       }
     });
   }
@@ -92,7 +95,6 @@ export class AttendanceComponent implements OnInit {
             .filter((row, idx) => idx > 0 && row[0] === formattedDate)
             .map(row => {
               const spelerNaam = row[1];
-              // Zoek speler in playerStats (voor statistieken) en in this.players (voor positie)
               const foundPlayer = playerStats.find((p: Player) => p.name === spelerNaam);
               const playerMeta = this.players.find(p => p.name === spelerNaam);
               const playerObj = foundPlayer || {
@@ -114,12 +116,14 @@ export class AttendanceComponent implements OnInit {
             });
           this.presentCount = this.attendanceList.filter(item => item.status === 'Ja').length;
           this.absentCount = this.attendanceList.filter(item => item.status === 'Nee').length;
+          this.errorMessage = null;
         });
       },
-      error: () => {
+      error: (err) => {
         this.attendanceList = [];
         this.presentCount = 0;
         this.absentCount = 0;
+        this.errorMessage = 'Fout bij het laden van aanwezigheid.';
       }
     });
   }
@@ -134,11 +138,12 @@ export class AttendanceComponent implements OnInit {
                              .map(row => ({ name: row[0], position: row[1] || '' }))
                              .filter(player => player.name)
                              .sort((a, b) => a.name.localeCompare(b.name));
+          this.errorMessage = null;
           this.loadLastSelectedPlayer();
         },
         error: (err) => {
           console.error('Error loading players:', err);
-          this.snackBar.open('Fout bij het laden van spelers.', 'Sluiten', { duration: 3000 });
+          this.errorMessage = 'Fout bij het laden van spelers.';
         }
       });
   }
@@ -157,11 +162,13 @@ export class AttendanceComponent implements OnInit {
 
   onPlayerSelectionChange(): void {
     this.attendanceStatus = null;
+    this.playerSelectError = null;
     if (this.selectedPlayer) {
       localStorage.setItem(this.LAST_PLAYER_KEY, this.selectedPlayer);
       this.fetchCurrentAttendanceStatus();
     } else {
       localStorage.removeItem(this.LAST_PLAYER_KEY);
+      this.playerSelectError = 'Selecteer eerst een speler.';
     }
   }
 
@@ -190,21 +197,24 @@ export class AttendanceComponent implements OnInit {
             } else {
               this.attendanceStatus = null;
             }
+            this.errorMessage = null;
           }
         },
         error: (err) => {
           console.error(`Error fetching attendance status for ${currentPlayer}:`, err);
           if (this.selectedPlayer === currentPlayer) {
             this.attendanceStatus = null;
+            this.snackBar.open('Fout bij ophalen aanwezigheid status.', 'Sluiten', { duration: 5000, panelClass: ['snackbar-error'] });
           }
         }
       });
   }
 
   setAttendance(status: 'Ja' | 'Nee' | 'Misschien'): void {
+    this.playerSelectError = null;
     if (!this.selectedPlayer || !this.nextGameDate || this.isLoadingStatus) {
       if (!this.selectedPlayer || !this.nextGameDate) {
-        this.snackBar.open('Selecteer eerst een speler.', 'Sluiten', { duration: 3000 });
+        this.playerSelectError = 'Selecteer eerst een speler.';
       }
       return;
     }
@@ -250,14 +260,14 @@ export class AttendanceComponent implements OnInit {
             error: (err) => {
               console.error('Error saving attendance:', err);
               const message = (err instanceof Error) ? err.message : 'Fout bij opslaan aanwezigheid.';
-              this.snackBar.open(message, 'Sluiten', { duration: 5000 });
+              this.snackBar.open(message, 'Sluiten', { duration: 5000, panelClass: ['snackbar-error'] });
             }
           });
         },
         error: (err) => {
           console.error('Error fetching sheet data before saving:', err);
           const message = (err instanceof Error) ? err.message : 'Kon bestaande data niet controleren, opslaan mislukt.';
-          this.snackBar.open(message, 'Sluiten', { duration: 5000 });
+          this.snackBar.open(message, 'Sluiten', { duration: 5000, panelClass: ['snackbar-error'] });
           this.isLoadingStatus = false;
         }
       });

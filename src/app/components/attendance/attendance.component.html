@@ -5,9 +5,18 @@
       <p>Laden van aanwezigheid data...</p>
     </div>
 
-
     <div *ngIf="!isLoadingPlayers">
       <app-next-match-info [nextMatchInfo]="nextMatchInfo"></app-next-match-info>
+
+      <ng-container *ngIf="errorMessage">
+        <div class="error-banner mat-elevation-z2">
+          <mat-icon>error</mat-icon>
+          <span>{{ errorMessage }}</span>
+          <button mat-icon-button (click)="errorMessage = null">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      </ng-container>
 
       <mat-form-field appearance="fill" class="player-select">
         <mat-label>Selecteer Speler</mat-label>
@@ -16,6 +25,7 @@
             {{ player.name }}
           </mat-option>
         </mat-select>
+        <mat-error *ngIf="playerSelectError">{{ playerSelectError }}</mat-error>
       </mat-form-field>
 
       <div *ngIf="selectedPlayer" class="attendance-buttons">

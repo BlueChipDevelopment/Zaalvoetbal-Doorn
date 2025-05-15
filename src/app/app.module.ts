@@ -32,16 +32,10 @@ registerLocaleData(localeNl);
 import { AppRoutingModule } from './app-routing.module';
 
 import { AppComponent } from './app.component';
-import { TeamGeneratorComponent } from './components/team-generator/team-generator.component';
-import { ChemistryModalComponent } from './components/leaderboard/chemistry-modal.component';
-import { LeaderboardComponent } from './components/leaderboard/leaderboard.component';
-import { ScoreComponent } from './components/score/score.component';
 
 @NgModule({
   declarations: [
-    AppComponent,
-    ChemistryModalComponent,
-    LeaderboardComponent,
+    AppComponent
   ],
   bootstrap: [AppComponent],
   imports: [

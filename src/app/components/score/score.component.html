@@ -5,8 +5,12 @@
     <p>Laden van volgende wedstrijd...</p>
   </div>
 
-  <div *ngIf="errorMessage" class="error-message">
-    <p>{{ errorMessage }}</p>
+  <div *ngIf="errorMessage" class="error-banner mat-elevation-z2">
+    <mat-icon>error</mat-icon>
+    <span>{{ errorMessage }}</span>
+    <button mat-icon-button (click)="errorMessage = null">
+      <mat-icon>close</mat-icon>
+    </button>
   </div>
 
   <div *ngIf="!isLoading && !errorMessage && nextMatch">

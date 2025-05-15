@@ -2,18 +2,20 @@ import { Component, OnInit } from '@angular/core';
 import { GoogleSheetsService } from '../../services/google-sheets-service';
 import { CommonModule } from '@angular/common';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatError } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-wedstrijden',
   standalone: true,
-  imports: [MatProgressSpinnerModule, CommonModule],
+  imports: [MatProgressSpinnerModule, CommonModule, MatError, MatIconModule],
   templateUrl: './wedstrijden.component.html',
   styleUrl: './wedstrijden.component.scss'
 })
 export class WedstrijdenComponent implements OnInit {
   wedstrijden: any[] = [];
   isLoading = true;
-  errorMessage = '';
+  errorMessage: string | null = null;
 
   constructor(private googleSheetsService: GoogleSheetsService) {}
 
