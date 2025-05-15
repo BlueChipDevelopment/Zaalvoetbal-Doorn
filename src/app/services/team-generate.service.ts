@@ -29,7 +29,7 @@ export class TeamGenerateService {
     const fieldPlayers = players.filter(player => player.position !== Positions.GOAL_KEEPER);
 
     // Create teams with optimized distribution
-    const [teamWhite, teamRed] = this.createTeamsV2(
+    const [teamWhite, teamRed] = this.createTeams(
       goalKeepers,
       fieldPlayers,
     );
@@ -65,12 +65,12 @@ export class TeamGenerateService {
   }
 
   // Optimized team creation algorithm with better performance
-  private createTeamsV2(
+  private createTeams(
     goalKeepers: Player[],
     players: Player[],
   ): [Team, Team] {
     const teamWhite: Team = {
-      name: 'Team White',
+      name: 'Team Wit',
       squad: [],
       totalScore: 0,
       shirtcolor: 'white',
@@ -82,7 +82,7 @@ export class TeamGenerateService {
     };
 
     const teamRed: Team = {
-      name: 'Team Red',
+      name: 'Team Rood',
       squad: [],
       totalScore: 0,
       shirtcolor: 'red',

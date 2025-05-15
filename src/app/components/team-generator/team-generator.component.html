@@ -8,7 +8,7 @@
 <!-- Loading spinner -->
 @if (loading$ | async) {
   <div class="loading-spinner">
-    <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
+    <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
     <p>Laden van spelers en teams...</p>
   </div>
 }
@@ -91,7 +91,7 @@
     <!-- Show spinner during generation -->
     @if(isGenerating) {
       <div class="generation-spinner-container">
-        <mat-spinner diameter="40"></mat-spinner>
+        <mat-spinner diameter="50"></mat-spinner>
         <p>Generating balanced teams...</p>
       </div>
     }
@@ -100,17 +100,31 @@
       <hr class="solid" />
       <!-- Team results -->
       <div class="results">
-        @for (teamKey of getTeams(); track teamKey) {
-          <div class="each-result">
-            <h2>{{ getTeam(teamKey).name }}</h2>
-            <div class="results-details">
-              <h4>Total Score: {{ getTeam(teamKey).sumOfRatings.toFixed(2) }}</h4>
-            </div>
-            @for (player of getTeam(teamKey).squad; track player) {
-              <app-player-card [player]="player" [shirtColor]="getTeam(teamKey).shirtcolor"></app-player-card>
-            }
+        <div
+          class="each-result"
+          *ngFor="let teamKey of getTeams(); track teamKey"
+        >
+          <h2>{{ getTeam(teamKey).name }}</h2>
+          <div class="results-details">
+            <h4>Team Rating: {{ getTeam(teamKey).sumOfRatings.toFixed(2) }}</h4>
           </div>
-        }
+          <div
+            cdkDropList
+            [cdkDropListData]="getTeam(teamKey).squad"
+            [cdkDropListConnectedTo]="connectedDropLists"
+            (cdkDropListDropped)="onPlayerDrop($event, teamKey)"
+            [id]="teamKey + '-drop'"
+            class="team-drop-list"
+          >
+            <div
+              *ngFor="let player of getTeam(teamKey).squad; track player"
+              cdkDrag
+              class="player-drag-item"
+            >
+              <app-player-card [player]="player" [shirtColor]="getTeam(teamKey).shirtcolor"></app-player-card>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="save-teams-container">
         <button mat-fab extended (click)="saveTeamsToSheet()" [disabled]="loading$ | async">

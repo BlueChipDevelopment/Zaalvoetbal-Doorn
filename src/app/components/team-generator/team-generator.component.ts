@@ -21,6 +21,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { PlayerCardComponent } from '../player-card/player-card.component';
+import { DragDropModule } from '@angular/cdk/drag-drop';
+import { CdkDragDrop, transferArrayItem } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-team-generator',
@@ -42,6 +44,7 @@ import { PlayerCardComponent } from '../player-card/player-card.component';
     MatButtonModule,
     MatDividerModule,
     PlayerCardComponent,
+    DragDropModule,
   ],
 })
 export class TeamGeneratorComponent implements OnInit {
@@ -338,5 +341,33 @@ export class TeamGeneratorComponent implements OnInit {
         this.errorMessage = 'Fout bij opslaan teams: ' + (err.message || err);
       }
     });
+  }
+
+  onPlayerDrop(event: CdkDragDrop<any[]>, targetTeamKey: string) {
+    const sourceTeamKey = this.getTeams().find(teamKey => this.getTeam(teamKey).squad === event.previousContainer.data);
+    const targetTeam = this.getTeam(targetTeamKey);
+    const sourceTeam = this.getTeam(sourceTeamKey!);
+    if (event.previousContainer === event.container) {
+      // Zelfde team, sorteren
+      const moved = targetTeam.squad.splice(event.previousIndex, 1)[0];
+      targetTeam.squad.splice(event.currentIndex, 0, moved);
+    } else {
+      // Tussen teams verplaatsen
+      transferArrayItem(
+        event.previousContainer.data,
+        event.container.data,
+        event.previousIndex,
+        event.currentIndex
+      );
+    }
+    // Optioneel: herbereken scores
+    targetTeam.sumOfRatings = targetTeam.squad.reduce((sum, p) => sum + (p.rating || 0), 0);
+    if (sourceTeamKey && sourceTeamKey !== targetTeamKey) {
+      sourceTeam.sumOfRatings = sourceTeam.squad.reduce((sum, p) => sum + (p.rating || 0), 0);
+    }
+  }
+
+  get connectedDropLists(): string[] {
+    return this.getTeams().map(t => t + '-drop');
   }
 }
