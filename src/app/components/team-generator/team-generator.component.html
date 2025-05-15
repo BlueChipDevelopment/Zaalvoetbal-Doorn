@@ -96,7 +96,7 @@
     @if(isGenerating) {
       <div class="generation-spinner-container">
         <mat-spinner diameter="50"></mat-spinner>
-        <p>Generating balanced teams...</p>
+        <p>Teams genereren...</p>
       </div>
     }
     
@@ -104,36 +104,43 @@
       <hr class="solid" />
       <!-- Team results -->
       <div class="results">
-        <div
-          class="each-result"
-          *ngFor="let teamKey of getTeams(); track teamKey"
-        >
-          <h2>{{ getTeam(teamKey).name }}</h2>
-          <div class="results-details">
-            <h4>Team Rating: {{ getTeam(teamKey).sumOfRatings.toFixed(2) }}</h4>
-          </div>
-          <div
-            cdkDropList
-            [cdkDropListData]="getTeam(teamKey).squad"
-            [cdkDropListConnectedTo]="connectedDropLists"
-            (cdkDropListDropped)="onPlayerDrop($event, teamKey)"
-            [id]="teamKey + '-drop'"
-            class="team-drop-list"
-          >
+        @for (teamKey of getTeams(); track teamKey) {
+          <div class="each-result">
+            <div class="team-header">
+              <h4>{{ getTeam(teamKey).name }}</h4>
+              <span class="team-rating">Team Rating: {{ getTeam(teamKey).sumOfRatings.toFixed(2) }}</span>
+            </div>
+            <div class="results-details">
+              <!-- eventueel extra teamdetails -->
+            </div>
             <div
-              *ngFor="let player of getTeam(teamKey).squad; track player"
-              cdkDrag
-              class="player-drag-item"
+              cdkDropList
+              [cdkDropListData]="getTeam(teamKey).squad"
+              [cdkDropListConnectedTo]="connectedDropLists"
+              (cdkDropListDropped)="onPlayerDrop($event, teamKey)"
+              [id]="teamKey + '-drop'"
+              class="team-drop-list"
             >
-              <app-player-card [player]="player" [shirtColor]="getTeam(teamKey).shirtcolor"></app-player-card>
+              <div
+                *ngFor="let player of getTeam(teamKey).squad; track player"
+                cdkDrag
+                class="player-drag-item"
+              >
+                <app-player-card [player]="player" [shirtColor]="getTeam(teamKey).shirtcolor"></app-player-card>
+              </div>
             </div>
           </div>
-        </div>
+        }
       </div>
       <div class="save-teams-container">
-        <button mat-fab extended (click)="saveTeamsToSheet()" [disabled]="loading$ | async">
+        <button mat-fab (click)="saveTeamsToSheet()" title="Teams opslaan" [disabled]="loading$ | async">
           <mat-icon>save</mat-icon>
-          Teams opslaan
+        </button>
+        <button mat-fab (click)="shareAllTeamsOnWhatsApp()" title="Deel teams via Whatsapp" style="margin-left: 16px;">
+          <mat-icon svgIcon="whatsapp"></mat-icon>
+        </button>
+        <button mat-fab (click)="downloadTeamsScreenshot()" title="Download teams als afbeelding" style="margin-left: 16px;">
+          <mat-icon>photo_camera</mat-icon>
         </button>
       </div>
     }

@@ -76,10 +76,23 @@ form {
 .results {
   width: 90%;
   display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  flex-wrap: wrap;
+  flex-direction: row;
+}
+
+.team-header {
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 50px;
-  margin-bottom: 50px;
+  margin-bottom: 12px;
+}
+
+.team-header h4,
+.team-header .team-rating {
+  text-align: center;
 }
 
 .each-result {
@@ -181,7 +194,6 @@ h1 {
   
   p {
     margin-top: 1rem;
-    color: $primary-color;
     font-weight: 500;
   }
 }
