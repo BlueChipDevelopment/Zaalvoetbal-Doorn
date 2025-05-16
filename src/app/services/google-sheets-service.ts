@@ -68,6 +68,47 @@ export class GoogleSheetsService {
     );
   }
 
+  /**
+   * Get the latest teams from a dedicated sheet or range
+   */
+  getLatestTeams(): Observable<any> {
+    // Adjust the sheet/range as needed for your setup
+    const url = `${this.firebaseBaseUrl}/getSheetData?spreadsheetId=${this.firebaseSpreadsheetId}&sheetName=LaatsteTeams`;
+    return this.http.get<any[][]>(url).pipe(
+      map((data: any[][]) => {
+        // Transform the sheet data into Teams structure
+        // Example assumes: [ [teamName, player1, player2, ...], ... ]
+        if (!data || data.length < 2) return null;
+        const [whiteRow, redRow] = data;
+        return {
+          teamWhite: {
+            name: whiteRow[0],
+            squad: whiteRow.slice(1).map((name: string) => ({ name, rating: 0 })),
+            sumOfRatings: 0,
+            totalScore: 0,
+            shirtcolor: 'white',
+            attack: 0,
+            defense: 0,
+            condition: 0,
+            chemistryScore: 0
+          },
+          teamRed: {
+            name: redRow[0],
+            squad: redRow.slice(1).map((name: string) => ({ name, rating: 0 })),
+            sumOfRatings: 0,
+            totalScore: 0,
+            shirtcolor: 'red',
+            attack: 0,
+            defense: 0,
+            condition: 0,
+            chemistryScore: 0
+          }
+        };
+      }),
+      catchError(this.handleError)
+    );
+  }
+
   private handleError(error: HttpErrorResponse) {
     let errorMessage = 'An error occurred while fetching data from Firebase Functions';
     if (error.error instanceof ErrorEvent) {

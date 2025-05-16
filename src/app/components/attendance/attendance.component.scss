@@ -36,22 +36,6 @@ mat-card-header {
   margin-bottom: 24px;
 }
 
-.loading-spinner {
-  display: flex;
-  flex-direction: column; // Stack spinner and text vertically
-  justify-content: center;
-  align-items: center;
-  position: absolute; // Position relative to the container
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%); // Center precisely
-  z-index: 1000; // Ensure it's on top
-
-  p {
-    margin-top: 1rem; // Add space between spinner and text
-  }
-}
-
 .player-select {
   width: 100%;
   margin-bottom: 20px;

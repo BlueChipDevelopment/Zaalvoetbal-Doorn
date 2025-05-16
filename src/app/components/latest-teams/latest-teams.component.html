@@ -1,0 +1,46 @@
+<div *ngIf="loading" class="loading-spinner">
+  <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+  <p>Opstelling laden...</p>
+</div>
+<div *ngIf="error" class="error-banner">
+  <mat-icon>error</mat-icon>
+  <span>{{ error }}</span>
+</div>
+<div *ngIf="teams && !loading">
+  <div class="results">
+    <div class="each-result" *ngFor="let team of orderedTeams">
+      <div class="team-header">
+        <h4>{{ team.key === 'teamWhite' ? 'Team Wit' : 'Team Rood' }}</h4>
+        <div class="team-rating" *ngIf="team.value && team.value.length > 0">
+          Rating: <strong>{{ getTeamRating(team.value) | number:'1.0-0' }}</strong>
+        </div>
+      </div>
+      <div class="results-details">
+        <ng-container *ngIf="team.value.length > 0; else geenOpstelling">
+          <app-player-card *ngFor="let player of team.value" [player]="player" [shirtColor]="team.key === 'teamWhite' ? 'white' : 'red'"></app-player-card>
+        </ng-container>
+        <ng-template #geenOpstelling>
+          <span>Geen spelers in deze opstelling.</span>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+  <div class="share-link-container">
+    <button mat-fab (click)="copyLatestTeamsLink()" title="Kopieer link naar laatste teams">
+      <mat-icon>link</mat-icon>
+    </button>    
+  </div>
+</div>
+<div *ngIf="!loading && !teams && countdown">
+  <div class="countdown-container">
+    <mat-icon>hourglass_empty</mat-icon>
+    <div class="countdown-timer">
+      {{ countdown }}
+    </div>
+    <div class="countdown-date">
+      De opstelling wordt automatisch getoond op
+      <strong>{{ revealTime | date:'EEEE d MMMM yyyy HH:mm' }}</strong>
+    </div>
+    <div class="countdown-note">Refresh deze pagina na het verstrijken van de tijd.</div>
+  </div>
+</div>

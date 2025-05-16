@@ -75,6 +75,8 @@ export class TeamGeneratorComponent implements OnInit {
 
   nextMatchInfo: NextMatchInfo | null = null;
 
+  latestTeamsUrl = window.location.origin + '/teams/latest';
+
   constructor(
     private teamGenerateService: TeamGenerateService,
     private nextMatchService: NextMatchService,
@@ -325,14 +327,15 @@ export class TeamGeneratorComponent implements OnInit {
       this.snackBar.open('Kan teams niet opslaan: ontbrekende gegevens.', 'Sluiten', { duration: 5000, panelClass: ['snackbar-error'] });
       return;
     }
-    this.loadingSubject.next(true);
+    // Spinner niet tonen bij opslaan
     this.errorMessage = null;
+
+    // Save to Wedstrijden sheet as before
     const teamWhiteNames = this.teams.teamWhite.squad.map(p => p.name).join(', ');
     const teamRedNames = this.teams.teamRed.squad.map(p => p.name).join(', ');
     let sheetRowIndex = this.nextMatchInfo.matchNumber ? Number(this.nextMatchInfo.matchNumber) + 1 : null;
     if (!sheetRowIndex) {
       this.snackBar.open('Kan rijnummer van de wedstrijd niet bepalen.', 'Sluiten', { duration: 5000, panelClass: ['snackbar-error'] });
-      this.loadingSubject.next(false);
       return;
     }
     const updateData = [
@@ -341,17 +344,17 @@ export class TeamGeneratorComponent implements OnInit {
         values: [[teamWhiteNames, teamRedNames]]
       }
     ];
-    this.googleSheetsService.batchUpdateSheet(updateData).pipe(
-      finalize(() => this.loadingSubject.next(false))
-    ).subscribe({
-      next: () => {
-        this.isTeamsSaved = true;
-        this.snackBar.open('Teams opgeslagen!', 'Sluiten', { duration: 3000, panelClass: ['snackbar-success'] });
-      },
-      error: (err) => {
-        this.snackBar.open('Fout bij opslaan teams: ' + (err.message || err), 'Sluiten', { duration: 5000, panelClass: ['snackbar-error'] });
-      }
-    });
+
+    this.googleSheetsService.batchUpdateSheet(updateData)
+      .subscribe({
+        next: () => {
+          this.isTeamsSaved = true;
+          this.snackBar.open('Teams opgeslagen!', 'Sluiten', { duration: 3000, panelClass: ['snackbar-success'] });
+        },
+        error: (err) => {
+          this.snackBar.open('Fout bij opslaan teams: ' + (err.message || err), 'Sluiten', { duration: 5000, panelClass: ['snackbar-error'] });
+        }
+      });
   }
 
   onPlayerDrop(event: CdkDragDrop<any[]>, targetTeamKey: string) {
@@ -421,5 +424,14 @@ export class TeamGeneratorComponent implements OnInit {
       link.href = canvas.toDataURL('image/png');
       link.click();
     });
+  }
+
+  copyLatestTeamsLink() {
+    navigator.clipboard.writeText(this.latestTeamsUrl);
+    this.snackBar.open('Link naar de laatste teams gekopieerd!', 'Sluiten', { duration: 2500, panelClass: ['snackbar-success'] });
+  }
+
+  trackByTeamKey(index: number, key: string): string {
+    return key;
   }
 }

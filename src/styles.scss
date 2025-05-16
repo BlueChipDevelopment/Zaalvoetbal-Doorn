@@ -104,3 +104,32 @@ app-top-bar {
   color: $light-bg !important;
   font-family: $font-main;
 }
+
+.error-banner {
+  background: #ffebee;
+  color: #b71c1c;
+  padding: 12px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.loading-spinner {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+
+  p {
+    margin-top: 1rem;
+    font-weight: 500;
+    text-align: center;
+  }
+}
