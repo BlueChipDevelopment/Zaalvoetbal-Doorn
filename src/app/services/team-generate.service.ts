@@ -4,8 +4,7 @@ import { Positions } from '../enums/positions.enum';
 import { Team } from '../interfaces/ITeam';
 import { GoogleSheetsService } from './google-sheets-service';
 import { GameStatisticsService } from './game.statistics.service';
-import { Observable, forkJoin } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'

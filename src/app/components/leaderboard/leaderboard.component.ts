@@ -21,7 +21,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     MatTableModule,
     MatIconModule,
     MatTooltipModule,
-    CommonModule, // <-- Needed for *ngIf, *ngFor, [ngClass], etc.
+    CommonModule, 
     MatCardModule,
     MatProgressSpinnerModule
   ],

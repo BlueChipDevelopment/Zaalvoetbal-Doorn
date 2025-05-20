@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { Player } from '../interfaces/IPlayer';
-import { PlayerStats } from '../interfaces/IGameStats';
 import { Observable, forkJoin } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { GoogleSheetsService } from './google-sheets-service';
