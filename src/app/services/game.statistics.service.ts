@@ -36,7 +36,9 @@ export class GameStatisticsService {
       wedstrijden: this.googleSheetsService.getSheetData('Wedstrijden')
     }).pipe(
       map(({ spelers, wedstrijden }) => {
-        const actieveSpelers = (spelers || []).filter(row => row[0] && row[2]?.toLowerCase() === 'ja');
+        // Sla de header over (eerste rij) in spelers
+        const spelersData = (spelers || []).slice(1);
+        const actieveSpelers = spelersData.filter(row => row[0] && row[2]?.toLowerCase() === 'ja');
         const actieveSpelersMap: { [naam: string]: any } = {};
         actieveSpelers.forEach((row: any) => {
           actieveSpelersMap[row[0].trim().toLowerCase()] = row;
@@ -112,7 +114,7 @@ export class GameStatisticsService {
           });
         });
         // Voeg spelers toe die in de Spelers-lijst staan maar nog geen wedstrijden hebben gespeeld
-        (spelers || []).forEach((row: any) => {
+        spelersData.forEach((row: any) => {
           const naam = row[0]?.trim().toLowerCase();
           if (naam && !playerStats[naam]) {
             playerStats[naam] = {
@@ -134,10 +136,10 @@ export class GameStatisticsService {
         const maxTotalPoints = Math.max(...Object.values(playerStats).map((stats: any) => stats.totalPoints || 0), 1);
         // Maak array met alle info
         return Object.entries(playerStats).map(([player, stats]) => {
+          // Zoek altijd de spelerRow op in de originele spelerslijst (zonder header)
+          const spelerRow = spelersData.find((row: any) => row[0] && row[0].trim().toLowerCase() === player);
           let rating = Math.round((stats.totalPoints / (maxTotalPoints / 10)));
           rating = Math.max(1, Math.min(10, rating));
-          // Zoek altijd de spelerRow op in de originele spelerslijst
-          const spelerRow = (spelers || []).find((row: any) => row[0] && row[0].trim().toLowerCase() === player);
           return {
             name: spelerRow ? spelerRow[0] : player,
             position: spelerRow ? spelerRow[1] : null, // 2e kolom is positie
