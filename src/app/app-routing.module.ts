@@ -6,6 +6,7 @@ import { TeamGeneratorComponent } from './components/team-generator/team-generat
 import { AttendanceComponent } from './components/attendance/attendance.component';
 import { WedstrijdenComponent } from './components/wedstrijden/wedstrijden.component';
 import { LatestTeamsComponent } from './components/latest-teams/latest-teams.component';
+import { AboutComponent } from './components/about/about.component';
 
 const routes: Routes = [
   { path: 'klassement', component: LeaderboardComponent },
@@ -14,6 +15,7 @@ const routes: Routes = [
   { path: 'aanwezigheid', component: AttendanceComponent },
   { path: 'wedstrijden', component: WedstrijdenComponent },
   { path: 'opstelling', component: LatestTeamsComponent },
+  { path: 'about', component: AboutComponent },
   { path: '', redirectTo: '/klassement', pathMatch: 'full' },
   { path: '**', redirectTo: '/klassement' }
 ];

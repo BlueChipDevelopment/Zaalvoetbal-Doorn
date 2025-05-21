@@ -31,6 +31,7 @@ registerLocaleData(localeNl);
 import { AppRoutingModule } from './app-routing.module';
 
 import { AppComponent } from './app.component';
+import { AboutComponent } from './components/about/about.component';
 
 @NgModule({
   declarations: [
@@ -59,7 +60,8 @@ import { AppComponent } from './app.component';
     MatSnackBarModule, 
     MatToolbarModule, 
     MatSidenavModule, 
-    AppRoutingModule
+    AppRoutingModule,
+    AboutComponent
   ],
   providers: [provideHttpClient(withInterceptorsFromDi()), TitleCasePipe, { provide: LOCALE_ID, useValue: 'nl' }]
 })
