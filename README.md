@@ -1,5 +1,48 @@
 # Zaalvoetbal Doorn - Team Generator
 
+## Getting Started
+
+### Installatie
+
+1. Clone deze repository:
+   ```sh
+   git clone https://github.com/bluechipdevelopment/zaalvoetbal-doorn.git
+   cd zaalvoetbal-doorn
+   ```
+2. Installeer de dependencies:
+   ```sh
+   npm install
+   ```
+
+### Lokaal draaien
+
+Start de ontwikkelserver:
+```sh
+npm start
+```
+Of:
+```sh
+ng serve
+```
+De app is nu bereikbaar op http://localhost:4200
+
+### Deployment (GitHub Pages)
+
+1. Build de productieversie:
+   ```sh
+   ng build --configuration production
+   ```
+2. Deploy naar GitHub Pages:
+   ```sh
+   ng deploy
+   ```
+
+Voor een custom domein: zorg dat het CNAME-bestand in de build zit en de DNS correct is ingesteld.
+
+## Over Zaalvoetbal Doorn
+
+Zaalvoetbal Doorn is een zaalvoetbalcompetitie voor iedereen die van voetballen houdt en in de regio Doorn woont of werkt. Onze competitie staat bekend om zijn gezelligheid, sportiviteit en spannende wedstrijden. Of je nu een fanatieke voetballer bent of af en toe een balletje wilt trappen, bij Zaalvoetbal Doorn ben je aan het juiste adres!
+
 ## Functionele features
 
 - Automatisch gebalanceerde zaalvoetbalteams genereren op basis van spelersnamen, posities en ratings
