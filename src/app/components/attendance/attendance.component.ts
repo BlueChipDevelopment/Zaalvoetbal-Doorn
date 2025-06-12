@@ -15,6 +15,7 @@ import { NextMatchInfoComponent } from '../next-match-info/next-match-info.compo
 import { PlayerCardComponent } from '../player-card/player-card.component';
 import { GameStatisticsService } from '../../services/game.statistics.service';
 import { Player } from '../../interfaces/IPlayer';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-attendance',
@@ -51,6 +52,10 @@ export class AttendanceComponent implements OnInit {
   readonly PLAYER_SHEET_NAME = 'Spelers';
   public errorMessage: string | null = null; // Algemene foutmeldingen (API, etc)
   public playerSelectError: string | null = null; // Alleen voor veldvalidatie spelerselectie
+
+  pushPermissionGranted = false;
+  pushPermissionLoading = false;
+  pushPermissionError: string | null = null;
 
   constructor(
     private googleSheetsService: GoogleSheetsService,
@@ -271,6 +276,115 @@ export class AttendanceComponent implements OnInit {
           this.isLoadingStatus = false;
         }
       });
+  }
+
+  requestPushPermission() {
+    this.pushPermissionError = null;
+    this.pushPermissionLoading = true;
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+      this.showPushError('Push-notificaties worden niet ondersteund in deze browser.');
+      this.pushPermissionLoading = false;
+      return;
+    }
+    navigator.serviceWorker.ready.then(registration => {
+      // Voeg een timeout toe voor het geval de gebruiker niet reageert
+      let permissionHandled = false;
+      const timeout = setTimeout(() => {
+        if (!permissionHandled) {
+          this.pushPermissionLoading = false;
+          this.showPushError('Geen reactie op push-melding. Probeer het opnieuw.');
+        }
+      }, 15000); // 15 seconden
+      Promise.resolve(Notification.requestPermission())
+        .then(permission => {
+          permissionHandled = true;
+          clearTimeout(timeout);
+          if (permission !== 'granted') {
+            this.showPushError('Toestemming geweigerd.');
+            this.pushPermissionLoading = false;
+            return;
+          }
+          // Haal VAPID public key uit environment
+          const vapidPublicKey = environment.vapidPublicKey;
+          if (!vapidPublicKey) {
+            this.showPushError('VAPID public key ontbreekt in de environment.');
+            this.pushPermissionLoading = false;
+            return;
+          }
+          const convertedVapidKey = this.urlBase64ToUint8Array(vapidPublicKey);
+          registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: convertedVapidKey
+          }).then(subscription => {
+            // Subscription opslaan in Google Sheets
+            this.savePushSubscription(subscription);
+          }).catch(err => {
+            this.showPushError('Kon geen push subscription aanmaken: ' + err);
+            this.pushPermissionLoading = false;
+          });
+        })
+        .catch(err => {
+          permissionHandled = true;
+          clearTimeout(timeout);
+          this.pushPermissionLoading = false;
+          this.showPushError('Fout bij aanvragen push-permissie: ' + err);
+        });
+    }).catch(err => {
+      this.pushPermissionLoading = false;
+      this.showPushError('Service worker niet gereed: ' + err);
+    });
+  }
+
+  private savePushSubscription(subscription: PushSubscription) {
+    // Zoek de speler in de sheet (op naam)
+    this.googleSheetsService.getSheetData(this.PLAYER_SHEET_NAME).subscribe({
+      next: (rows) => {
+        const playerRowIdx = rows.findIndex((row, idx) => idx > 0 && row[0] === this.selectedPlayer);
+        if (playerRowIdx === -1) {
+          this.showPushError('Speler niet gevonden in sheet.');
+          this.pushPermissionLoading = false;
+          return;
+        }
+        this.googleSheetsService.updatePlayerPushSubscription(
+          playerRowIdx - 1, // -1 want rows bevat header
+          JSON.stringify(subscription),
+          true
+        ).subscribe({
+          next: () => {
+            this.pushPermissionGranted = true;
+            this.pushPermissionLoading = false;
+          },
+          error: (err) => {
+            this.showPushError('Fout bij opslaan subscription: ' + err);
+            this.pushPermissionLoading = false;
+          }
+        });
+      },
+      error: (err) => {
+        this.showPushError('Fout bij ophalen spelers: ' + err);
+        this.pushPermissionLoading = false;
+      }
+    });
+  }
+
+  private showPushError(message: string) {
+    this.pushPermissionError = message;
+    this.snackBar.open(message, 'Sluiten', { duration: 5000, panelClass: ['snackbar-error'] });
+    // Optioneel: direct resetten zodat de error niet in de UI blijft hangen
+    setTimeout(() => { this.pushPermissionError = null; }, 0);
+  }
+
+  private urlBase64ToUint8Array(base64String: string): Uint8Array {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding)
+      .replace(/-/g, '+')
+      .replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
   }
 
   private formatDate(date: Date): string {

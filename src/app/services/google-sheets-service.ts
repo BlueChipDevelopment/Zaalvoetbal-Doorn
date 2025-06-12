@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -106,6 +106,27 @@ export class GoogleSheetsService {
         };
       }),
       catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Update push subscription and notification permission for a player (by row index) on the Spelers sheet
+   * @param rowIndex 0-based index (excluding header)
+   * @param pushSubscription JSON-stringified push subscription
+   * @param pushPermission true/false
+   */
+  updatePlayerPushSubscription(rowIndex: number, pushSubscription: string, pushPermission: boolean): Observable<any> {
+    // Kolom D = 3 (NotificatieToestemming), Kolom E = 4 (PushSubscription)
+    const sheetName = 'Spelers';
+    return this.getSheetData(sheetName).pipe(
+      map(rows => {
+        const row = rows[rowIndex + 1]; // +1 vanwege header op rij 0
+        if (!row) throw new Error('Player row not found');
+        row[3] = pushPermission ? 'TRUE' : 'FALSE'; // Kolom D
+        row[4] = pushSubscription; // Kolom E
+        return row;
+      }),
+      switchMap(row => this.updateSheetRow(sheetName, rowIndex + 2, row)) // +2: 1-based + header
     );
   }
 

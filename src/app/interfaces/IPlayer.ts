@@ -12,5 +12,7 @@ export interface Player {
   zlatanPoints: number;
   ventielPoints: number;
   actief: boolean;
+  pushSubscription?: string; // JSON-stringified push subscription
+  pushPermission?: boolean; // true if user gave permission
 }
 

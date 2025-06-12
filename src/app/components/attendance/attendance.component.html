@@ -88,5 +88,14 @@
         </ng-container>
       </div>
     </div>
+
+    <div *ngIf="selectedPlayer" class="push-permission-block">
+      <button mat-stroked-button color="accent" (click)="requestPushPermission()" [disabled]="pushPermissionLoading || pushPermissionGranted">
+        <mat-icon>notifications_active</mat-icon>
+        <span *ngIf="!pushPermissionGranted">Push-notificaties inschakelen</span>
+        <span *ngIf="pushPermissionGranted">Push-notificaties ingeschakeld</span>
+      </button>
+      <mat-progress-spinner *ngIf="pushPermissionLoading" diameter="24" mode="indeterminate"></mat-progress-spinner>
+    </div>
   </mat-card-content>
 </mat-card>

@@ -21,7 +21,9 @@
               "src/assets",
               "src/robots.txt",
               "src/404.html",
-              "src/CNAME"
+              "src/CNAME",
+              "src/manifest.webmanifest",
+              "src/firebase-messaging-sw.js"
             ],
             "styles": [
               "@angular/material/prebuilt-themes/deeppurple-amber.css",
@@ -48,7 +50,8 @@
                   "maximumError": "20kb"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "serviceWorker": "ngsw-config.json"
             },
             "development": {
               "optimization": false,

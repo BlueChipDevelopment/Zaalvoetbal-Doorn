@@ -75,8 +75,6 @@ export class TeamGeneratorComponent implements OnInit {
 
   nextMatchInfo: NextMatchInfo | null = null;
 
-  latestTeamsUrl = window.location.origin + '/teams/latest';
-
   constructor(
     private teamGenerateService: TeamGenerateService,
     private nextMatchService: NextMatchService,
@@ -350,6 +348,12 @@ export class TeamGeneratorComponent implements OnInit {
         next: () => {
           this.isTeamsSaved = true;
           this.snackBar.open('Teams opgeslagen!', 'Sluiten', { duration: 3000, panelClass: ['snackbar-success'] });
+          // Push notificatie sturen naar alle spelers met toestemming
+          this.sendPushNotificationToAll(
+            'De opstelling is bekend!',
+            'Bekijk de teams voor de volgende wedstrijd.',
+            window.location.origin + '/opstelling'
+          );
         },
         error: (err) => {
           this.snackBar.open('Fout bij opslaan teams: ' + (err.message || err), 'Sluiten', { duration: 5000, panelClass: ['snackbar-error'] });
@@ -426,9 +430,22 @@ export class TeamGeneratorComponent implements OnInit {
     });
   }
 
-  copyLatestTeamsLink() {
-    navigator.clipboard.writeText(this.latestTeamsUrl);
-    this.snackBar.open('Link naar de laatste teams gekopieerd!', 'Sluiten', { duration: 2500, panelClass: ['snackbar-success'] });
+  /**
+   * Stuur een push notificatie naar alle spelers met toestemming (via backend)
+   */
+  sendPushNotificationToAll(title: string, body: string, url: string) {
+    fetch('https://europe-west1-zaalvoetbal-doorn-74a8c.cloudfunctions.net/sendPushToAll', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, body, url })
+    })
+      .then(async res => {
+        if (!res.ok) throw new Error(await res.text());
+        this.snackBar.open('Push notificatie verstuurd!', 'Sluiten', { duration: 3000, panelClass: ['snackbar-success'] });
+      })
+      .catch(err => {
+        this.snackBar.open('Fout bij versturen push notificatie: ' + err, 'Sluiten', { duration: 5000, panelClass: ['snackbar-error'] });
+      });
   }
 
   trackByTeamKey(index: number, key: string): string {

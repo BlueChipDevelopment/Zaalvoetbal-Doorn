@@ -1,0 +1,362 @@
+[debug] [2025-06-04T09:54:02.783Z] ----------------------------------------------------------------------
+[debug] [2025-06-04T09:54:02.786Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\chris.kok\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy --only functions:scheduledAttendanceReminders
+[debug] [2025-06-04T09:54:02.786Z] CLI Version:   14.5.1
+[debug] [2025-06-04T09:54:02.786Z] Platform:      win32
+[debug] [2025-06-04T09:54:02.786Z] Node Version:  v22.16.0
+[debug] [2025-06-04T09:54:02.786Z] Time:          Wed Jun 04 2025 11:54:02 GMT+0200 (Central European Summer Time)
+[debug] [2025-06-04T09:54:02.787Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-06-04T09:54:02.943Z] Object "" in "firebase.json" has unknown property: {"additionalProperty":"serviceAccount"}
+[debug] [2025-06-04T09:54:02.946Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-06-04T09:54:02.946Z] > authorizing via signed-in user (cs.de.kok@gmail.com)
+[debug] [2025-06-04T09:54:02.946Z] [iam] checking project zaalvoetbal-doorn-74a8c for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]
+[debug] [2025-06-04T09:54:02.947Z] Checked if tokens are valid: false, expires at: 1749031676241
+[debug] [2025-06-04T09:54:02.947Z] Checked if tokens are valid: false, expires at: 1749031676241
+[debug] [2025-06-04T09:54:02.947Z] > refreshing access token with scopes: []
+[debug] [2025-06-04T09:54:02.948Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-06-04T09:54:02.949Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-06-04T09:54:03.054Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2025-06-04T09:54:03.055Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-06-04T09:54:03.061Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c:testIamPermissions [none]
+[debug] [2025-06-04T09:54:03.061Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c:testIamPermissions x-goog-quota-user=projects/zaalvoetbal-doorn-74a8c
+[debug] [2025-06-04T09:54:03.061Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2025-06-04T09:54:03.736Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c:testIamPermissions 200
+[debug] [2025-06-04T09:54:03.736Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2025-06-04T09:54:03.737Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:03.737Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:03.737Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/serviceAccounts/zaalvoetbal-doorn-74a8c@appspot.gserviceaccount.com:testIamPermissions [none]
+[debug] [2025-06-04T09:54:03.737Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/serviceAccounts/zaalvoetbal-doorn-74a8c@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2025-06-04T09:54:04.395Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/serviceAccounts/zaalvoetbal-doorn-74a8c@appspot.gserviceaccount.com:testIamPermissions 200
+[debug] [2025-06-04T09:54:04.395Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/serviceAccounts/zaalvoetbal-doorn-74a8c@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[info] 
+[info] === Deploying to 'zaalvoetbal-doorn-74a8c'...
+[info] 
+[info] i  deploying functions 
+[info] Running command: npm --prefix "$RESOURCE_DIR" run build
+[info] +  functions: Finished running predeploy script. 
+[debug] [2025-06-04T09:54:20.533Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:20.533Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:20.533Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/services/cloudresourcemanager.googleapis.com [none]
+[debug] [2025-06-04T09:54:20.533Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/services/cloudresourcemanager.googleapis.com x-goog-quota-user=projects/zaalvoetbal-doorn-74a8c
+[debug] [2025-06-04T09:54:21.363Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/services/cloudresourcemanager.googleapis.com 200
+[debug] [2025-06-04T09:54:21.363Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/services/cloudresourcemanager.googleapis.com [omitted]
+[debug] [2025-06-04T09:54:21.363Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:21.363Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:21.363Z] >>> [apiv2][query] GET https://cloudresourcemanager.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c [none]
+[debug] [2025-06-04T09:54:22.036Z] <<< [apiv2][status] GET https://cloudresourcemanager.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c 200
+[debug] [2025-06-04T09:54:22.037Z] <<< [apiv2][body] GET https://cloudresourcemanager.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c {"projectNumber":"227969736250","projectId":"zaalvoetbal-doorn-74a8c","lifecycleState":"ACTIVE","name":"zaalvoetbal-doorn","labels":{"firebase":"enabled","firebase-core":"disabled"},"createTime":"2025-04-16T08:34:23.813313Z"}
+[info] i  functions: preparing codebase default for deployment 
+[info] i  functions: ensuring required API cloudfunctions.googleapis.com is enabled... 
+[debug] [2025-06-04T09:54:22.039Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:22.040Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:22.040Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:22.040Z] Checked if tokens are valid: true, expires at: 1749034442055
+[info] i  functions: ensuring required API cloudbuild.googleapis.com is enabled... 
+[debug] [2025-06-04T09:54:22.041Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:22.041Z] Checked if tokens are valid: true, expires at: 1749034442055
+[info] i  artifactregistry: ensuring required API artifactregistry.googleapis.com is enabled... 
+[debug] [2025-06-04T09:54:22.041Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:22.041Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:22.041Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/services/cloudfunctions.googleapis.com [none]
+[debug] [2025-06-04T09:54:22.041Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/services/cloudfunctions.googleapis.com x-goog-quota-user=projects/zaalvoetbal-doorn-74a8c
+[debug] [2025-06-04T09:54:22.042Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/services/runtimeconfig.googleapis.com [none]
+[debug] [2025-06-04T09:54:22.042Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/services/runtimeconfig.googleapis.com x-goog-quota-user=projects/zaalvoetbal-doorn-74a8c
+[debug] [2025-06-04T09:54:22.044Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/services/cloudbuild.googleapis.com [none]
+[debug] [2025-06-04T09:54:22.044Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/services/cloudbuild.googleapis.com x-goog-quota-user=projects/zaalvoetbal-doorn-74a8c
+[debug] [2025-06-04T09:54:22.045Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/services/artifactregistry.googleapis.com [none]
+[debug] [2025-06-04T09:54:22.045Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/services/artifactregistry.googleapis.com x-goog-quota-user=projects/zaalvoetbal-doorn-74a8c
+[debug] [2025-06-04T09:54:22.814Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/services/runtimeconfig.googleapis.com 200
+[debug] [2025-06-04T09:54:22.814Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/services/runtimeconfig.googleapis.com [omitted]
+[debug] [2025-06-04T09:54:22.833Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/services/artifactregistry.googleapis.com 200
+[debug] [2025-06-04T09:54:22.833Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/services/artifactregistry.googleapis.com [omitted]
+[info] +  artifactregistry: required API artifactregistry.googleapis.com is enabled 
+[debug] [2025-06-04T09:54:22.836Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/services/cloudbuild.googleapis.com 200
+[debug] [2025-06-04T09:54:22.836Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/services/cloudbuild.googleapis.com [omitted]
+[info] +  functions: required API cloudbuild.googleapis.com is enabled 
+[debug] [2025-06-04T09:54:23.180Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/services/cloudfunctions.googleapis.com 200
+[debug] [2025-06-04T09:54:23.181Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/services/cloudfunctions.googleapis.com [omitted]
+[info] +  functions: required API cloudfunctions.googleapis.com is enabled 
+[debug] [2025-06-04T09:54:23.182Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:23.182Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:23.182Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/zaalvoetbal-doorn-74a8c/adminSdkConfig [none]
+[debug] [2025-06-04T09:54:23.444Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/zaalvoetbal-doorn-74a8c/adminSdkConfig 200
+[debug] [2025-06-04T09:54:23.444Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/zaalvoetbal-doorn-74a8c/adminSdkConfig {"projectId":"zaalvoetbal-doorn-74a8c","storageBucket":"zaalvoetbal-doorn-74a8c.firebasestorage.app"}
+[debug] [2025-06-04T09:54:23.445Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:23.445Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:23.445Z] >>> [apiv2][query] GET https://runtimeconfig.googleapis.com/v1beta1/projects/zaalvoetbal-doorn-74a8c/configs [none]
+[debug] [2025-06-04T09:54:23.674Z] <<< [apiv2][status] GET https://runtimeconfig.googleapis.com/v1beta1/projects/zaalvoetbal-doorn-74a8c/configs 200
+[debug] [2025-06-04T09:54:23.674Z] <<< [apiv2][body] GET https://runtimeconfig.googleapis.com/v1beta1/projects/zaalvoetbal-doorn-74a8c/configs {}
+[debug] [2025-06-04T09:54:23.677Z] Validating nodejs source
+[debug] [2025-06-04T09:54:24.894Z] > [functions] package.json contents: {
+  "name": "functions",
+  "scripts": {
+    "lint": "eslint --ext .js,.ts .",
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "shell": "npm run build && firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "22"
+  },
+  "main": "lib/index.js",
+  "dependencies": {
+    "firebase-admin": "^12.6.0",
+    "firebase-functions": "^6.0.1",
+    "googleapis": "^133.0.0",
+    "web-push": "^3.6.7"
+  },
+  "devDependencies": {
+    "@types/node-fetch": "^2.6.12",
+    "@types/web-push": "^3.6.4",
+    "@typescript-eslint/eslint-plugin": "^5.12.0",
+    "@typescript-eslint/parser": "^5.12.0",
+    "eslint": "^8.9.0",
+    "eslint-config-google": "^0.14.0",
+    "eslint-plugin-import": "^2.25.4",
+    "firebase-functions-test": "^3.1.0",
+    "typescript": "^4.9.0"
+  },
+  "private": true
+}
+[debug] [2025-06-04T09:54:24.894Z] Building nodejs source
+[info] i  functions: Loading and analyzing source code for codebase default to determine what to deploy 
+[debug] [2025-06-04T09:54:24.895Z] Could not find functions.yaml. Must use http discovery
+[debug] [2025-06-04T09:54:24.907Z] Found firebase-functions binary at 'C:\bluechip\Futsal-Doorn\functions\node_modules\.bin\firebase-functions'
+[info] Serving at port 8793
+
+[debug] [2025-06-04T09:54:25.630Z] Got response from /__/functions.yaml {"endpoints":{"getSheetData":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["europe-west1"],"labels":{},"httpsTrigger":{},"entryPoint":"getSheetData"},"appendSheetRow":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["europe-west1"],"labels":{},"httpsTrigger":{},"entryPoint":"appendSheetRow"},"updateSheetRow":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["europe-west1"],"labels":{},"httpsTrigger":{},"entryPoint":"updateSheetRow"},"batchUpdateSheet":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["europe-west1"],"labels":{},"httpsTrigger":{},"entryPoint":"batchUpdateSheet"},"querySheetData":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["europe-west1"],"labels":{},"httpsTrigger":{},"entryPoint":"querySheetData"},"sendPushToAll":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["europe-west1"],"labels":{},"httpsTrigger":{},"entryPoint":"sendPushToAll"},"scheduledAttendanceReminders":{"platform":"gcfv1","availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"serviceAccountEmail":null,"vpc":null,"region":["europe-west1"],"scheduleTrigger":{"schedule":"every 60 minutes","retryConfig":{"retryCount":null,"maxDoublings":null,"maxRetryDuration":null,"maxBackoffDuration":null,"minBackoffDuration":null},"timeZone":null},"labels":{},"entryPoint":"scheduledAttendanceReminders"}},"specVersion":"v1alpha1","requiredAPIs":[{"api":"cloudscheduler.googleapis.com","reason":"Needed for scheduled functions."}],"extensions":{}}
+[info] i  extensions: ensuring required API firebaseextensions.googleapis.com is enabled... 
+[debug] [2025-06-04T09:54:29.675Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:29.675Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:29.675Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/services/firebaseextensions.googleapis.com [none]
+[debug] [2025-06-04T09:54:29.675Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/services/firebaseextensions.googleapis.com x-goog-quota-user=projects/zaalvoetbal-doorn-74a8c
+[debug] [2025-06-04T09:54:29.984Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/services/firebaseextensions.googleapis.com 200
+[debug] [2025-06-04T09:54:29.984Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/services/firebaseextensions.googleapis.com [omitted]
+[info] +  extensions: required API firebaseextensions.googleapis.com is enabled 
+[debug] [2025-06-04T09:54:29.984Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-06-04T09:54:29.985Z] > authorizing via signed-in user (cs.de.kok@gmail.com)
+[debug] [2025-06-04T09:54:29.985Z] [iam] checking project zaalvoetbal-doorn-74a8c for permissions ["firebase.projects.get","firebaseextensions.instances.list"]
+[debug] [2025-06-04T09:54:29.985Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:29.985Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:29.985Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c:testIamPermissions [none]
+[debug] [2025-06-04T09:54:29.985Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c:testIamPermissions x-goog-quota-user=projects/zaalvoetbal-doorn-74a8c
+[debug] [2025-06-04T09:54:29.985Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c:testIamPermissions {"permissions":["firebase.projects.get","firebaseextensions.instances.list"]}
+[debug] [2025-06-04T09:54:30.615Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c:testIamPermissions 200
+[debug] [2025-06-04T09:54:30.615Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c:testIamPermissions {"permissions":["firebase.projects.get","firebaseextensions.instances.list"]}
+[debug] [2025-06-04T09:54:30.616Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:30.616Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:30.617Z] >>> [apiv2][query] GET https://firebaseextensions.googleapis.com/v1beta/projects/zaalvoetbal-doorn-74a8c/instances pageSize=100&pageToken=
+[debug] [2025-06-04T09:54:31.334Z] <<< [apiv2][status] GET https://firebaseextensions.googleapis.com/v1beta/projects/zaalvoetbal-doorn-74a8c/instances 200
+[debug] [2025-06-04T09:54:31.334Z] <<< [apiv2][body] GET https://firebaseextensions.googleapis.com/v1beta/projects/zaalvoetbal-doorn-74a8c/instances {}
+[info] i  functions: preparing functions directory for uploading... 
+[info] i  functions: packaged C:\bluechip\Futsal-Doorn\functions (100.1 KB) for uploading 
+[info] i  functions: packaged C:\bluechip\Futsal-Doorn\functions (100.32 KB) for uploading 
+[debug] [2025-06-04T09:54:31.421Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:31.421Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:31.421Z] >>> [apiv2][query] GET https://cloudfunctions.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/locations/-/functions [none]
+[debug] [2025-06-04T09:54:31.953Z] <<< [apiv2][status] GET https://cloudfunctions.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/locations/-/functions 200
+[debug] [2025-06-04T09:54:31.953Z] <<< [apiv2][body] GET https://cloudfunctions.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/locations/-/functions {}
+[debug] [2025-06-04T09:54:31.953Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:31.953Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:31.953Z] >>> [apiv2][query] GET https://cloudfunctions.googleapis.com/v2/projects/zaalvoetbal-doorn-74a8c/locations/-/functions filter=environment%3D%22GEN_2%22
+[debug] [2025-06-04T09:54:32.948Z] <<< [apiv2][status] GET https://cloudfunctions.googleapis.com/v2/projects/zaalvoetbal-doorn-74a8c/locations/-/functions 200
+[debug] [2025-06-04T09:54:32.949Z] <<< [apiv2][body] GET https://cloudfunctions.googleapis.com/v2/projects/zaalvoetbal-doorn-74a8c/locations/-/functions {"functions":[{"name":"projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/functions/batchUpdateSheet","buildConfig":{"build":"projects/227969736250/locations/europe-west1/builds/1c1bc027-b563-4df3-ad45-ffaab2effab8","runtime":"nodejs22","entryPoint":"batchUpdateSheet","source":{"storageSource":{"bucket":"gcf-v2-sources-227969736250-europe-west1","object":"batchUpdateSheet/function-source.zip","generation":"1749029718428507"}},"environmentVariables":{"GOOGLE_NODE_RUN_SCRIPTS":""},"dockerRepository":"projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/repositories/gcf-artifacts","sourceProvenance":{"resolvedStorageSource":{"bucket":"gcf-v2-sources-227969736250-europe-west1","object":"batchUpdateSheet/function-source.zip","generation":"1749029718428507"}},"dockerRegistry":"ARTIFACT_REGISTRY","serviceAccount":"projects/zaalvoetbal-doorn-74a8c/serviceAccounts/227969736250-compute@developer.gserviceaccount.com","automaticUpdatePolicy":{}},"serviceConfig":{"service":"projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/services/batchupdatesheet","timeoutSeconds":60,"environmentVariables":{"FIREBASE_CONFIG":"{\"projectId\":\"zaalvoetbal-doorn-74a8c\",\"storageBucket\":\"zaalvoetbal-doorn-74a8c.firebasestorage.app\"}","GCLOUD_PROJECT":"zaalvoetbal-doorn-74a8c","EVENTARC_CLOUD_EVENT_SOURCE":"projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/services/batchUpdateSheet","FUNCTION_TARGET":"batchUpdateSheet","LOG_EXECUTION_ID":"true","FUNCTION_SIGNATURE_TYPE":"http"},"maxInstanceCount":40,"ingressSettings":"ALLOW_ALL","uri":"https://batchupdatesheet-kwerwths4a-ew.a.run.app","serviceAccountEmail":"227969736250-compute@developer.gserviceaccount.com","availableMemory":"256Mi","allTrafficOnLatestRevision":true,"revision":"batchupdatesheet-00007-kem","maxInstanceRequestConcurrency":80,"availableCpu":"1"},"state":"ACTIVE","updateTime":"2025-06-04T09:35:25.251298674Z","labels":{"deployment-tool":"cli-firebase","firebase-functions-hash":"ad49674e6f3f40d683eb520f2eeb86fe5f659e72"},"environment":"GEN_2","url":"https://europe-west1-zaalvoetbal-doorn-74a8c.cloudfunctions.net/batchUpdateSheet","createTime":"2025-04-16T13:21:23.819435341Z","satisfiesPzi":true},{"name":"projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/functions/getSheetData","buildConfig":{"build":"projects/227969736250/locations/europe-west1/builds/1c1bc027-b563-4df3-ad45-ffaab2effab8","runtime":"nodejs22","entryPoint":"getSheetData","source":{"storageSource":{"bucket":"gcf-v2-sources-227969736250-europe-west1","object":"getSheetData/function-source.zip","generation":"1749029660857040"}},"environmentVariables":{"GOOGLE_NODE_RUN_SCRIPTS":""},"dockerRepository":"projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/repositories/gcf-artifacts","sourceProvenance":{"resolvedStorageSource":{"bucket":"gcf-v2-sources-227969736250-europe-west1","object":"getSheetData/function-source.zip","generation":"1749029660857040"}},"dockerRegistry":"ARTIFACT_REGISTRY","serviceAccount":"projects/zaalvoetbal-doorn-74a8c/serviceAccounts/227969736250-compute@developer.gserviceaccount.com","automaticUpdatePolicy":{}},"serviceConfig":{"service":"projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/services/getsheetdata","timeoutSeconds":60,"environmentVariables":{"FIREBASE_CONFIG":"{\"projectId\":\"zaalvoetbal-doorn-74a8c\",\"storageBucket\":\"zaalvoetbal-doorn-74a8c.firebasestorage.app\"}","GCLOUD_PROJECT":"zaalvoetbal-doorn-74a8c","EVENTARC_CLOUD_EVENT_SOURCE":"projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/services/getSheetData","FUNCTION_TARGET":"getSheetData","LOG_EXECUTION_ID":"true"},"maxInstanceCount":40,"ingressSettings":"ALLOW_ALL","uri":"https://getsheetdata-kwerwths4a-ew.a.run.app","serviceAccountEmail":"227969736250-compute@developer.gserviceaccount.com","availableMemory":"256Mi","allTrafficOnLatestRevision":true,"revision":"getsheetdata-00007-yap","maxInstanceRequestConcurrency":80,"availableCpu":"1"},"state":"ACTIVE","updateTime":"2025-06-04T09:35:24.475340040Z","labels":{"deployment-tool":"cli-firebase","firebase-functions-hash":"ad49674e6f3f40d683eb520f2eeb86fe5f659e72"},"environment":"GEN_2","url":"https://europe-west1-zaalvoetbal-doorn-74a8c.cloudfunctions.net/getSheetData","createTime":"2025-04-16T13:20:06.273018683Z","satisfiesPzi":true},{"name":"projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/functions/querySheetData","buildConfig":{"build":"projects/227969736250/locations/europe-west1/builds/1c1bc027-b563-4df3-ad45-ffaab2effab8","runtime":"nodejs22","entryPoint":"querySheetData","source":{"storageSource":{"bucket":"gcf-v2-sources-227969736250-europe-west1","object":"querySheetData/function-source.zip","generation":"1749029718424080"}},"environmentVariables":{"GOOGLE_NODE_RUN_SCRIPTS":""},"dockerRepository":"projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/repositories/gcf-artifacts","sourceProvenance":{"resolvedStorageSource":{"bucket":"gcf-v2-sources-227969736250-europe-west1","object":"querySheetData/function-source.zip","generation":"1749029718424080"}},"dockerRegistry":"ARTIFACT_REGISTRY","serviceAccount":"projects/zaalvoetbal-doorn-74a8c/serviceAccounts/227969736250-compute@developer.gserviceaccount.com","automaticUpdatePolicy":{}},"serviceConfig":{"service":"projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/services/querysheetdata","timeoutSeconds":60,"environmentVariables":{"FIREBASE_CONFIG":"{\"projectId\":\"zaalvoetbal-doorn-74a8c\",\"storageBucket\":\"zaalvoetbal-doorn-74a8c.firebasestorage.app\"}","GCLOUD_PROJECT":"zaalvoetbal-doorn-74a8c","EVENTARC_CLOUD_EVENT_SOURCE":"projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/services/querySheetData","FUNCTION_TARGET":"querySheetData","LOG_EXECUTION_ID":"true","FUNCTION_SIGNATURE_TYPE":"http"},"maxInstanceCount":40,"ingressSettings":"ALLOW_ALL","uri":"https://querysheetdata-kwerwths4a-ew.a.run.app","serviceAccountEmail":"227969736250-compute@developer.gserviceaccount.com","availableMemory":"256Mi","allTrafficOnLatestRevision":true,"revision":"querysheetdata-00007-gih","maxInstanceRequestConcurrency":80,"availableCpu":"1"},"state":"ACTIVE","updateTime":"2025-06-04T09:35:27.764538570Z","labels":{"deployment-tool":"cli-firebase","firebase-functions-hash":"ad49674e6f3f40d683eb520f2eeb86fe5f659e72"},"environment":"GEN_2","url":"https://europe-west1-zaalvoetbal-doorn-74a8c.cloudfunctions.net/querySheetData","createTime":"2025-04-16T13:21:23.886734517Z","satisfiesPzi":true},{"name":"projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/functions/appendSheetRow","buildConfig":{"build":"projects/227969736250/locations/europe-west1/builds/1c1bc027-b563-4df3-ad45-ffaab2effab8","runtime":"nodejs22","entryPoint":"appendSheetRow","source":{"storageSource":{"bucket":"gcf-v2-sources-227969736250-europe-west1","object":"appendSheetRow/function-source.zip","generation":"1749029718377086"}},"environmentVariables":{"GOOGLE_NODE_RUN_SCRIPTS":""},"dockerRepository":"projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/repositories/gcf-artifacts","sourceProvenance":{"resolvedStorageSource":{"bucket":"gcf-v2-sources-227969736250-europe-west1","object":"appendSheetRow/function-source.zip","generation":"1749029718377086"}},"dockerRegistry":"ARTIFACT_REGISTRY","serviceAccount":"projects/zaalvoetbal-doorn-74a8c/serviceAccounts/227969736250-compute@developer.gserviceaccount.com","automaticUpdatePolicy":{}},"serviceConfig":{"service":"projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/services/appendsheetrow","timeoutSeconds":60,"environmentVariables":{"FIREBASE_CONFIG":"{\"projectId\":\"zaalvoetbal-doorn-74a8c\",\"storageBucket\":\"zaalvoetbal-doorn-74a8c.firebasestorage.app\"}","GCLOUD_PROJECT":"zaalvoetbal-doorn-74a8c","EVENTARC_CLOUD_EVENT_SOURCE":"projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/services/appendSheetRow","FUNCTION_TARGET":"appendSheetRow","LOG_EXECUTION_ID":"true","FUNCTION_SIGNATURE_TYPE":"http"},"maxInstanceCount":40,"ingressSettings":"ALLOW_ALL","uri":"https://appendsheetrow-kwerwths4a-ew.a.run.app","serviceAccountEmail":"227969736250-compute@developer.gserviceaccount.com","availableMemory":"256Mi","allTrafficOnLatestRevision":true,"revision":"appendsheetrow-00007-fus","maxInstanceRequestConcurrency":80,"availableCpu":"1"},"state":"ACTIVE","updateTime":"2025-06-04T09:35:26.288066147Z","labels":{"deployment-tool":"cli-firebase","firebase-functions-hash":"ad49674e6f3f40d683eb520f2eeb86fe5f659e72"},"environment":"GEN_2","url":"https://europe-west1-zaalvoetbal-doorn-74a8c.cloudfunctions.net/appendSheetRow","createTime":"2025-04-16T13:21:23.886335121Z","satisfiesPzi":true},{"name":"projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/functions/sendPushToAll","buildConfig":{"build":"projects/227969736250/locations/europe-west1/builds/1c1bc027-b563-4df3-ad45-ffaab2effab8","runtime":"nodejs22","entryPoint":"sendPushToAll","source":{"storageSource":{"bucket":"gcf-v2-sources-227969736250-europe-west1","object":"sendPushToAll/function-source.zip","generation":"1749029718475837"}},"environmentVariables":{"GOOGLE_NODE_RUN_SCRIPTS":""},"dockerRepository":"projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/repositories/gcf-artifacts","sourceProvenance":{"resolvedStorageSource":{"bucket":"gcf-v2-sources-227969736250-europe-west1","object":"sendPushToAll/function-source.zip","generation":"1749029718475837"}},"dockerRegistry":"ARTIFACT_REGISTRY","serviceAccount":"projects/zaalvoetbal-doorn-74a8c/serviceAccounts/227969736250-compute@developer.gserviceaccount.com","automaticUpdatePolicy":{}},"serviceConfig":{"service":"projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/services/sendpushtoall","timeoutSeconds":60,"environmentVariables":{"FIREBASE_CONFIG":"{\"projectId\":\"zaalvoetbal-doorn-74a8c\",\"storageBucket\":\"zaalvoetbal-doorn-74a8c.firebasestorage.app\"}","GCLOUD_PROJECT":"zaalvoetbal-doorn-74a8c","EVENTARC_CLOUD_EVENT_SOURCE":"projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/services/sendPushToAll","FUNCTION_TARGET":"sendPushToAll","LOG_EXECUTION_ID":"true","FUNCTION_SIGNATURE_TYPE":"http"},"maxInstanceCount":40,"ingressSettings":"ALLOW_ALL","uri":"https://sendpushtoall-kwerwths4a-ew.a.run.app","serviceAccountEmail":"227969736250-compute@developer.gserviceaccount.com","availableMemory":"256Mi","allTrafficOnLatestRevision":true,"revision":"sendpushtoall-00006-jov","maxInstanceRequestConcurrency":80,"availableCpu":"1"},"state":"ACTIVE","updateTime":"2025-06-04T09:35:25.718930021Z","labels":{"deployment-tool":"cli-firebase","firebase-functions-hash":"ad49674e6f3f40d683eb520f2eeb86fe5f659e72"},"environment":"GEN_2","url":"https://europe-west1-zaalvoetbal-doorn-74a8c.cloudfunctions.net/sendPushToAll","createTime":"2025-05-27T18:04:32.650718881Z","satisfiesPzi":true},{"name":"projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/functions/updateSheetRow","buildConfig":{"build":"projects/227969736250/locations/europe-west1/builds/1c1bc027-b563-4df3-ad45-ffaab2effab8","runtime":"nodejs22","entryPoint":"updateSheetRow","source":{"storageSource":{"bucket":"gcf-v2-sources-227969736250-europe-west1","object":"updateSheetRow/function-source.zip","generation":"1749029718489646"}},"environmentVariables":{"GOOGLE_NODE_RUN_SCRIPTS":""},"dockerRepository":"projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/repositories/gcf-artifacts","sourceProvenance":{"resolvedStorageSource":{"bucket":"gcf-v2-sources-227969736250-europe-west1","object":"updateSheetRow/function-source.zip","generation":"1749029718489646"}},"dockerRegistry":"ARTIFACT_REGISTRY","serviceAccount":"projects/zaalvoetbal-doorn-74a8c/serviceAccounts/227969736250-compute@developer.gserviceaccount.com","automaticUpdatePolicy":{}},"serviceConfig":{"service":"projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/services/updatesheetrow","timeoutSeconds":60,"environmentVariables":{"FIREBASE_CONFIG":"{\"projectId\":\"zaalvoetbal-doorn-74a8c\",\"storageBucket\":\"zaalvoetbal-doorn-74a8c.firebasestorage.app\"}","GCLOUD_PROJECT":"zaalvoetbal-doorn-74a8c","EVENTARC_CLOUD_EVENT_SOURCE":"projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/services/updateSheetRow","FUNCTION_TARGET":"updateSheetRow","LOG_EXECUTION_ID":"true","FUNCTION_SIGNATURE_TYPE":"http"},"maxInstanceCount":40,"ingressSettings":"ALLOW_ALL","uri":"https://updatesheetrow-kwerwths4a-ew.a.run.app","serviceAccountEmail":"227969736250-compute@developer.gserviceaccount.com","availableMemory":"256Mi","allTrafficOnLatestRevision":true,"revision":"updatesheetrow-00007-qem","maxInstanceRequestConcurrency":80,"availableCpu":"1"},"state":"ACTIVE","updateTime":"2025-06-04T09:35:25.842526884Z","labels":{"firebase-functions-hash":"ad49674e6f3f40d683eb520f2eeb86fe5f659e72","deployment-tool":"cli-firebase"},"environment":"GEN_2","url":"https://europe-west1-zaalvoetbal-doorn-74a8c.cloudfunctions.net/updateSheetRow","createTime":"2025-04-16T13:21:23.850289711Z","satisfiesPzi":true}]}
+[info] i  functions: ensuring required API cloudscheduler.googleapis.com is enabled... 
+[debug] [2025-06-04T09:54:32.951Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:32.951Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:32.951Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/227969736250/services/cloudscheduler.googleapis.com [none]
+[debug] [2025-06-04T09:54:32.951Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/227969736250/services/cloudscheduler.googleapis.com x-goog-quota-user=projects/227969736250
+[debug] [2025-06-04T09:54:33.714Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/227969736250/services/cloudscheduler.googleapis.com 200
+[debug] [2025-06-04T09:54:33.714Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/227969736250/services/cloudscheduler.googleapis.com [omitted]
+[info] +  functions: required API cloudscheduler.googleapis.com is enabled 
+[info] i  functions: ensuring required API run.googleapis.com is enabled... 
+[debug] [2025-06-04T09:54:33.716Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:33.716Z] Checked if tokens are valid: true, expires at: 1749034442055
+[info] i  functions: ensuring required API eventarc.googleapis.com is enabled... 
+[debug] [2025-06-04T09:54:33.716Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:33.717Z] Checked if tokens are valid: true, expires at: 1749034442055
+[info] i  functions: ensuring required API pubsub.googleapis.com is enabled... 
+[debug] [2025-06-04T09:54:33.717Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:33.717Z] Checked if tokens are valid: true, expires at: 1749034442055
+[info] i  functions: ensuring required API storage.googleapis.com is enabled... 
+[debug] [2025-06-04T09:54:33.718Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:33.718Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:33.718Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/227969736250/services/run.googleapis.com [none]
+[debug] [2025-06-04T09:54:33.718Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/227969736250/services/run.googleapis.com x-goog-quota-user=projects/227969736250
+[debug] [2025-06-04T09:54:33.719Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/227969736250/services/eventarc.googleapis.com [none]
+[debug] [2025-06-04T09:54:33.719Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/227969736250/services/eventarc.googleapis.com x-goog-quota-user=projects/227969736250
+[debug] [2025-06-04T09:54:33.720Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/227969736250/services/pubsub.googleapis.com [none]
+[debug] [2025-06-04T09:54:33.720Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/227969736250/services/pubsub.googleapis.com x-goog-quota-user=projects/227969736250
+[debug] [2025-06-04T09:54:33.721Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/227969736250/services/storage.googleapis.com [none]
+[debug] [2025-06-04T09:54:33.721Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/227969736250/services/storage.googleapis.com x-goog-quota-user=projects/227969736250
+[debug] [2025-06-04T09:54:34.498Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/227969736250/services/run.googleapis.com 200
+[debug] [2025-06-04T09:54:34.499Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/227969736250/services/run.googleapis.com [omitted]
+[info] +  functions: required API run.googleapis.com is enabled 
+[debug] [2025-06-04T09:54:34.502Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/227969736250/services/pubsub.googleapis.com 200
+[debug] [2025-06-04T09:54:34.502Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/227969736250/services/pubsub.googleapis.com [omitted]
+[info] +  functions: required API pubsub.googleapis.com is enabled 
+[debug] [2025-06-04T09:54:34.507Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/227969736250/services/eventarc.googleapis.com 200
+[debug] [2025-06-04T09:54:34.507Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/227969736250/services/eventarc.googleapis.com [omitted]
+[info] +  functions: required API eventarc.googleapis.com is enabled 
+[debug] [2025-06-04T09:54:34.526Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/227969736250/services/storage.googleapis.com 200
+[debug] [2025-06-04T09:54:34.526Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/227969736250/services/storage.googleapis.com [omitted]
+[info] +  functions: required API storage.googleapis.com is enabled 
+[info] i  functions: generating the service identity for pubsub.googleapis.com... 
+[debug] [2025-06-04T09:54:34.527Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:34.527Z] Checked if tokens are valid: true, expires at: 1749034442055
+[info] i  functions: generating the service identity for eventarc.googleapis.com... 
+[debug] [2025-06-04T09:54:34.528Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:34.528Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:34.528Z] >>> [apiv2][query] POST https://serviceusage.googleapis.com/v1beta1/projects/227969736250/services/pubsub.googleapis.com:generateServiceIdentity [none]
+[debug] [2025-06-04T09:54:34.528Z] >>> [apiv2][query] POST https://serviceusage.googleapis.com/v1beta1/projects/227969736250/services/eventarc.googleapis.com:generateServiceIdentity [none]
+[debug] [2025-06-04T09:54:35.315Z] <<< [apiv2][status] POST https://serviceusage.googleapis.com/v1beta1/projects/227969736250/services/pubsub.googleapis.com:generateServiceIdentity 200
+[debug] [2025-06-04T09:54:35.315Z] <<< [apiv2][body] POST https://serviceusage.googleapis.com/v1beta1/projects/227969736250/services/pubsub.googleapis.com:generateServiceIdentity {"name":"operations/finished.DONE_OPERATION","done":true,"response":{"@type":"type.googleapis.com/google.api.serviceusage.v1beta1.ServiceIdentity","email":"service-227969736250@gcp-sa-pubsub.iam.gserviceaccount.com","uniqueId":"117189157748454414443"}}
+[debug] [2025-06-04T09:54:35.357Z] <<< [apiv2][status] POST https://serviceusage.googleapis.com/v1beta1/projects/227969736250/services/eventarc.googleapis.com:generateServiceIdentity 200
+[debug] [2025-06-04T09:54:35.357Z] <<< [apiv2][body] POST https://serviceusage.googleapis.com/v1beta1/projects/227969736250/services/eventarc.googleapis.com:generateServiceIdentity {"name":"operations/finished.DONE_OPERATION","done":true,"response":{"@type":"type.googleapis.com/google.api.serviceusage.v1beta1.ServiceIdentity","email":"service-227969736250@gcp-sa-eventarc.iam.gserviceaccount.com","uniqueId":"110351979561777138958"}}
+[debug] [2025-06-04T09:54:35.359Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:35.359Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:35.360Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/services/cloudresourcemanager.googleapis.com [none]
+[debug] [2025-06-04T09:54:35.360Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/services/cloudresourcemanager.googleapis.com x-goog-quota-user=projects/zaalvoetbal-doorn-74a8c
+[debug] [2025-06-04T09:54:35.785Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/services/cloudresourcemanager.googleapis.com 200
+[debug] [2025-06-04T09:54:35.785Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/services/cloudresourcemanager.googleapis.com [omitted]
+[debug] [2025-06-04T09:54:35.785Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:35.785Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:35.785Z] >>> [apiv2][query] GET https://cloudresourcemanager.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c [none]
+[debug] [2025-06-04T09:54:35.982Z] <<< [apiv2][status] GET https://cloudresourcemanager.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c 200
+[debug] [2025-06-04T09:54:35.982Z] <<< [apiv2][body] GET https://cloudresourcemanager.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c {"projectNumber":"227969736250","projectId":"zaalvoetbal-doorn-74a8c","lifecycleState":"ACTIVE","name":"zaalvoetbal-doorn","labels":{"firebase":"enabled","firebase-core":"disabled"},"createTime":"2025-04-16T08:34:23.813313Z"}
+[debug] [2025-06-04T09:54:35.983Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:35.983Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:35.983Z] >>> [apiv2][query] GET https://cloudbilling.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/billingInfo [none]
+[debug] [2025-06-04T09:54:36.210Z] <<< [apiv2][status] GET https://cloudbilling.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/billingInfo 200
+[debug] [2025-06-04T09:54:36.211Z] <<< [apiv2][body] GET https://cloudbilling.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/billingInfo {"name":"projects/zaalvoetbal-doorn-74a8c/billingInfo","projectId":"zaalvoetbal-doorn-74a8c","billingAccountName":"billingAccounts/012AE4-2A6EC3-1B797A","billingEnabled":true}
+[debug] [2025-06-04T09:54:36.212Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:36.212Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:36.212Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:36.213Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:36.213Z] >>> [apiv2][query] POST https://cloudfunctions.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/functions:generateUploadUrl [none]
+[debug] [2025-06-04T09:54:36.213Z] >>> [apiv2][body] POST https://cloudfunctions.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/functions:generateUploadUrl {}
+[debug] [2025-06-04T09:54:36.213Z] >>> [apiv2][query] POST https://cloudfunctions.googleapis.com/v2/projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/functions:generateUploadUrl [none]
+[debug] [2025-06-04T09:54:36.397Z] <<< [apiv2][status] POST https://cloudfunctions.googleapis.com/v2/projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/functions:generateUploadUrl 200
+[debug] [2025-06-04T09:54:36.397Z] <<< [apiv2][body] POST https://cloudfunctions.googleapis.com/v2/projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/functions:generateUploadUrl {"uploadUrl":"https://storage.googleapis.com/gcf-v2-uploads-227969736250.europe-west1.cloudfunctions.appspot.com/2ddd31ab-401b-4282-9523-f91355736ef9.zip?GoogleAccessId=service-227969736250@gcf-admin-robot.iam.gserviceaccount.com&Expires=1749032676&Signature=E4ulmGSe8d3ruwpaWCQDPjvWjm95S3sWbACfwLTK2RFbQ2oIYviJ224R%2FQeLAjRGWZnDPdHd3AiF%2BfrMVOIWZNyzssq5avx2qgnnSwRnu3ssZThyABhIC5B%2FN7NSnipq4k6eTGAAKhGTvhANb1izg96hDrSBf6oI%2FFmns9iP9w0QXr2%2FudmZPQl8QAwySDQpbcWF9sIAWDMtrO7LQ85PysBDTDOs9OHyHiLaXzOjFU4ZLsNnfVhemwicqHliehDOZBYlFx7cNOK5veLPhQNRzP4cAlI6h2dayGkR0ybTcTTKZQQOyGZIIEkC9PIvTozLVc7Bcu4XDLRk5AYKwydJKA%3D%3D","storageSource":{"bucket":"gcf-v2-uploads-227969736250.europe-west1.cloudfunctions.appspot.com","object":"2ddd31ab-401b-4282-9523-f91355736ef9.zip"}}
+[debug] [2025-06-04T09:54:36.398Z] >>> [apiv2][query] PUT https://storage.googleapis.com/gcf-v2-uploads-227969736250.europe-west1.cloudfunctions.appspot.com/2ddd31ab-401b-4282-9523-f91355736ef9.zip GoogleAccessId=service-227969736250%40gcf-admin-robot.iam.gserviceaccount.com&Expires=1749032676&Signature=E4ulmGSe8d3ruwpaWCQDPjvWjm95S3sWbACfwLTK2RFbQ2oIYviJ224R%2FQeLAjRGWZnDPdHd3AiF%2BfrMVOIWZNyzssq5avx2qgnnSwRnu3ssZThyABhIC5B%2FN7NSnipq4k6eTGAAKhGTvhANb1izg96hDrSBf6oI%2FFmns9iP9w0QXr2%2FudmZPQl8QAwySDQpbcWF9sIAWDMtrO7LQ85PysBDTDOs9OHyHiLaXzOjFU4ZLsNnfVhemwicqHliehDOZBYlFx7cNOK5veLPhQNRzP4cAlI6h2dayGkR0ybTcTTKZQQOyGZIIEkC9PIvTozLVc7Bcu4XDLRk5AYKwydJKA%3D%3D
+[debug] [2025-06-04T09:54:36.398Z] >>> [apiv2][body] PUT https://storage.googleapis.com/gcf-v2-uploads-227969736250.europe-west1.cloudfunctions.appspot.com/2ddd31ab-401b-4282-9523-f91355736ef9.zip [stream]
+[debug] [2025-06-04T09:54:36.532Z] <<< [apiv2][status] PUT https://storage.googleapis.com/gcf-v2-uploads-227969736250.europe-west1.cloudfunctions.appspot.com/2ddd31ab-401b-4282-9523-f91355736ef9.zip 200
+[debug] [2025-06-04T09:54:36.532Z] <<< [apiv2][body] PUT https://storage.googleapis.com/gcf-v2-uploads-227969736250.europe-west1.cloudfunctions.appspot.com/2ddd31ab-401b-4282-9523-f91355736ef9.zip [omitted]
+[debug] [2025-06-04T09:54:36.842Z] <<< [apiv2][status] POST https://cloudfunctions.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/functions:generateUploadUrl 200
+[debug] [2025-06-04T09:54:36.842Z] <<< [apiv2][body] POST https://cloudfunctions.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/functions:generateUploadUrl {"uploadUrl":"https://storage.googleapis.com/uploads-953362734695.europe-west1.cloudfunctions.appspot.com/fced88bd-3d6c-4d76-88b4-56b6231d8a7e.zip?GoogleAccessId=service-227969736250@gcf-admin-robot.iam.gserviceaccount.com&Expires=1749032677&Signature=MTDm6NEgEdPU5nRkGXDYqbY8TM00MYOnGktqaZ%2BSksgbHnV6US9kw3t8m8pDhhcUxzfw5bQ2H%2FEk04ZaiP9oWa4DqKgvpmoJsHEiQIcYT7TGzN0GELpeKFlgToBNvh9haO0XzlA%2BcZdPnYGEJ6qaW9iyFhAdH9CwakCTcEmqFjpIuj8AP3eXOcFmqpbxRzz1%2FAG1NBGmUnDXlNagaRl8bam2qf8MkWO1FePXxKa094tOL4%2F3UkdJSL8DuL3%2Fe6Om7ZPrSfzE0hjfmTxwLvhH1aqtGBGkiyNTdFDD7bQ9ZNoSZ6NA3MKZ63bXm75CP9%2Fj%2Bc3h3tsj3BUewF6FjF7fnQ%3D%3D"}
+[debug] [2025-06-04T09:54:36.843Z] >>> [apiv2][query] PUT https://storage.googleapis.com/uploads-953362734695.europe-west1.cloudfunctions.appspot.com/fced88bd-3d6c-4d76-88b4-56b6231d8a7e.zip GoogleAccessId=service-227969736250%40gcf-admin-robot.iam.gserviceaccount.com&Expires=1749032677&Signature=MTDm6NEgEdPU5nRkGXDYqbY8TM00MYOnGktqaZ%2BSksgbHnV6US9kw3t8m8pDhhcUxzfw5bQ2H%2FEk04ZaiP9oWa4DqKgvpmoJsHEiQIcYT7TGzN0GELpeKFlgToBNvh9haO0XzlA%2BcZdPnYGEJ6qaW9iyFhAdH9CwakCTcEmqFjpIuj8AP3eXOcFmqpbxRzz1%2FAG1NBGmUnDXlNagaRl8bam2qf8MkWO1FePXxKa094tOL4%2F3UkdJSL8DuL3%2Fe6Om7ZPrSfzE0hjfmTxwLvhH1aqtGBGkiyNTdFDD7bQ9ZNoSZ6NA3MKZ63bXm75CP9%2Fj%2Bc3h3tsj3BUewF6FjF7fnQ%3D%3D
+[debug] [2025-06-04T09:54:36.843Z] >>> [apiv2][body] PUT https://storage.googleapis.com/uploads-953362734695.europe-west1.cloudfunctions.appspot.com/fced88bd-3d6c-4d76-88b4-56b6231d8a7e.zip [stream]
+[debug] [2025-06-04T09:54:36.945Z] <<< [apiv2][status] PUT https://storage.googleapis.com/uploads-953362734695.europe-west1.cloudfunctions.appspot.com/fced88bd-3d6c-4d76-88b4-56b6231d8a7e.zip 200
+[debug] [2025-06-04T09:54:36.946Z] <<< [apiv2][body] PUT https://storage.googleapis.com/uploads-953362734695.europe-west1.cloudfunctions.appspot.com/fced88bd-3d6c-4d76-88b4-56b6231d8a7e.zip [omitted]
+[info] +  functions: functions folder uploaded successfully 
+[info] i  functions: creating Node.js 22 (1st Gen) function scheduledAttendanceReminders(europe-west1)... 
+[debug] [2025-06-04T09:54:36.950Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:36.950Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:36.950Z] >>> [apiv2][query] POST https://cloudfunctions.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/functions [none]
+[debug] [2025-06-04T09:54:36.950Z] >>> [apiv2][body] POST https://cloudfunctions.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/functions {"name":"projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/functions/scheduledAttendanceReminders","sourceUploadUrl":"https://storage.googleapis.com/uploads-953362734695.europe-west1.cloudfunctions.appspot.com/fced88bd-3d6c-4d76-88b4-56b6231d8a7e.zip?GoogleAccessId=service-227969736250@gcf-admin-robot.iam.gserviceaccount.com&Expires=1749032677&Signature=MTDm6NEgEdPU5nRkGXDYqbY8TM00MYOnGktqaZ%2BSksgbHnV6US9kw3t8m8pDhhcUxzfw5bQ2H%2FEk04ZaiP9oWa4DqKgvpmoJsHEiQIcYT7TGzN0GELpeKFlgToBNvh9haO0XzlA%2BcZdPnYGEJ6qaW9iyFhAdH9CwakCTcEmqFjpIuj8AP3eXOcFmqpbxRzz1%2FAG1NBGmUnDXlNagaRl8bam2qf8MkWO1FePXxKa094tOL4%2F3UkdJSL8DuL3%2Fe6Om7ZPrSfzE0hjfmTxwLvhH1aqtGBGkiyNTdFDD7bQ9ZNoSZ6NA3MKZ63bXm75CP9%2Fj%2Bc3h3tsj3BUewF6FjF7fnQ%3D%3D","entryPoint":"scheduledAttendanceReminders","runtime":"nodejs22","dockerRegistry":"ARTIFACT_REGISTRY","labels":{"deployment-tool":"cli-firebase","deployment-scheduled":"true","firebase-functions-hash":"5ff5380f18dd3facd33b3ebe738bf28ec5449dff"},"eventTrigger":{"eventType":"google.pubsub.topic.publish","resource":"projects/zaalvoetbal-doorn-74a8c/topics/firebase-schedule-scheduledAttendanceReminders-europe-west1"},"minInstances":null,"maxInstances":null,"ingressSettings":null,"environmentVariables":{"FIREBASE_CONFIG":"{\"projectId\":\"zaalvoetbal-doorn-74a8c\",\"storageBucket\":\"zaalvoetbal-doorn-74a8c.firebasestorage.app\"}","GCLOUD_PROJECT":"zaalvoetbal-doorn-74a8c","EVENTARC_CLOUD_EVENT_SOURCE":"projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/functions/scheduledAttendanceReminders"},"serviceAccountEmail":null,"availableMemoryMb":null,"timeout":null,"vpcConnector":null,"vpcConnectorEgressSettings":null,"buildEnvironmentVariables":{"GOOGLE_NODE_RUN_SCRIPTS":""}}
+[debug] [2025-06-04T09:54:37.224Z] <<< [apiv2][status] POST https://cloudfunctions.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/functions 400
+[debug] [2025-06-04T09:54:37.225Z] <<< [apiv2][body] POST https://cloudfunctions.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/functions {"error":{"code":400,"message":"Failed to create 1st Gen function projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/functions/scheduledAttendanceReminders: runtime: Runtime validation errors: [error_code: INVALID_RUNTIME\nmessage: \"Runtime \\\"nodejs22\\\" is not supported on GCF Gen1\"\n]","status":"INVALID_ARGUMENT"}}
+[warn] !  functions: failed to create function projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/functions/scheduledAttendanceReminders 
+[error] Failed to create function projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/functions/scheduledAttendanceReminders
+[debug] [2025-06-04T09:54:37.227Z] Total Function Deployment time: 278
+[debug] [2025-06-04T09:54:37.227Z] 1 Functions Deployed
+[debug] [2025-06-04T09:54:37.227Z] 1 Functions Errored
+[debug] [2025-06-04T09:54:37.227Z] 0 Function Deployments Aborted
+[debug] [2025-06-04T09:54:37.227Z] Average Function Deployment time: 278
+[info] 
+[info] Functions deploy had errors with the following functions:
+	scheduledAttendanceReminders(europe-west1)
+[debug] [2025-06-04T09:54:37.228Z] Not printing URL for HTTPS function. Typically this means it didn't match a filter or we failed deployment
+[debug] [2025-06-04T09:54:37.228Z] Not printing URL for HTTPS function. Typically this means it didn't match a filter or we failed deployment
+[debug] [2025-06-04T09:54:37.228Z] Not printing URL for HTTPS function. Typically this means it didn't match a filter or we failed deployment
+[debug] [2025-06-04T09:54:37.228Z] Not printing URL for HTTPS function. Typically this means it didn't match a filter or we failed deployment
+[debug] [2025-06-04T09:54:37.228Z] Not printing URL for HTTPS function. Typically this means it didn't match a filter or we failed deployment
+[debug] [2025-06-04T09:54:37.228Z] Not printing URL for HTTPS function. Typically this means it didn't match a filter or we failed deployment
+[debug] [2025-06-04T09:54:37.229Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:37.229Z] Checked if tokens are valid: true, expires at: 1749034442055
+[debug] [2025-06-04T09:54:37.229Z] >>> [apiv2][query] GET https://artifactregistry.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/repositories/gcf-artifacts [none]
+[debug] [2025-06-04T09:54:37.335Z] <<< [apiv2][status] GET https://artifactregistry.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/repositories/gcf-artifacts 200
+[debug] [2025-06-04T09:54:37.335Z] <<< [apiv2][body] GET https://artifactregistry.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/repositories/gcf-artifacts {"name":"projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/repositories/gcf-artifacts","format":"DOCKER","description":"This repository is created and used by Cloud Functions for storing function docker images.","labels":{"goog-managed-by":"cloudfunctions"},"createTime":"2025-04-16T13:20:15.382835Z","updateTime":"2025-06-04T09:34:54.388256Z","mode":"STANDARD_REPOSITORY","cleanupPolicies":{"firebase-functions-cleanup":{"id":"firebase-functions-cleanup","action":"DELETE","condition":{"tagState":"ANY","olderThan":"86400s"}}},"sizeBytes":"183199858","vulnerabilityScanningConfig":{"lastEnableTime":"2025-04-16T13:20:06.474355728Z","enablementState":"SCANNING_DISABLED","enablementStateReason":"API containerscanning.googleapis.com is not enabled."},"satisfiesPzi":true,"registryUri":"europe-west1-docker.pkg.dev/zaalvoetbal-doorn-74a8c/gcf-artifacts"}
+[debug] [2025-06-04T09:54:37.335Z] Functions deploy failed.
+[debug] [2025-06-04T09:54:37.335Z] {
+  "endpoint": {
+    "id": "scheduledAttendanceReminders",
+    "project": "zaalvoetbal-doorn-74a8c",
+    "region": "europe-west1",
+    "entryPoint": "scheduledAttendanceReminders",
+    "platform": "gcfv1",
+    "runtime": "nodejs22",
+    "scheduleTrigger": {
+      "schedule": "every 60 minutes",
+      "timeZone": null,
+      "retryConfig": {
+        "maxBackoffSeconds": null,
+        "minBackoffSeconds": null,
+        "maxRetrySeconds": null,
+        "retryCount": null,
+        "maxDoublings": null
+      }
+    },
+    "labels": {
+      "deployment-tool": "cli-firebase"
+    },
+    "serviceAccount": null,
+    "ingressSettings": null,
+    "availableMemoryMb": null,
+    "timeoutSeconds": null,
+    "maxInstances": null,
+    "minInstances": null,
+    "vpc": null,
+    "environmentVariables": {
+      "FIREBASE_CONFIG": "{\"projectId\":\"zaalvoetbal-doorn-74a8c\",\"storageBucket\":\"zaalvoetbal-doorn-74a8c.firebasestorage.app\"}",
+      "GCLOUD_PROJECT": "zaalvoetbal-doorn-74a8c",
+      "EVENTARC_CLOUD_EVENT_SOURCE": "projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/functions/scheduledAttendanceReminders"
+    },
+    "codebase": "default",
+    "targetedByOnly": true,
+    "hash": "5ff5380f18dd3facd33b3ebe738bf28ec5449dff"
+  },
+  "op": "create",
+  "original": {
+    "name": "FirebaseError",
+    "children": [],
+    "context": {
+      "function": "projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/functions/scheduledAttendanceReminders"
+    },
+    "exit": 1,
+    "message": "Failed to create function projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/functions/scheduledAttendanceReminders",
+    "original": {
+      "name": "FirebaseError",
+      "children": [],
+      "context": {
+        "body": {
+          "error": {
+            "code": 400,
+            "message": "Failed to create 1st Gen function projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/functions/scheduledAttendanceReminders: runtime: Runtime validation errors: [error_code: INVALID_RUNTIME\nmessage: \"Runtime \\\"nodejs22\\\" is not supported on GCF Gen1\"\n]",
+            "status": "INVALID_ARGUMENT"
+          }
+        },
+        "response": {
+          "statusCode": 400
+        }
+      },
+      "exit": 1,
+      "message": "Request to https://cloudfunctions.googleapis.com/v1/projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/functions had HTTP Error: 400, Failed to create 1st Gen function projects/zaalvoetbal-doorn-74a8c/locations/europe-west1/functions/scheduledAttendanceReminders: runtime: Runtime validation errors: [error_code: INVALID_RUNTIME\nmessage: \"Runtime \\\"nodejs22\\\" is not supported on GCF Gen1\"\n]",
+      "status": 400
+    },
+    "status": 400,
+    "code": 400
+  }
+}
+[debug] [2025-06-04T09:54:37.337Z] Error: Failed to create function scheduledAttendanceReminders in region europe-west1
+    at C:\Users\chris.kok\AppData\Roaming\npm\node_modules\firebase-tools\lib\deploy\functions\release\fabricator.js:52:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Fabricator.createV1Function (C:\Users\chris.kok\AppData\Roaming\npm\node_modules\firebase-tools\lib\deploy\functions\release\fabricator.js:182:32)
+    at async Fabricator.createEndpoint (C:\Users\chris.kok\AppData\Roaming\npm\node_modules\firebase-tools\lib\deploy\functions\release\fabricator.js:134:13)
+    at async handle (C:\Users\chris.kok\AppData\Roaming\npm\node_modules\firebase-tools\lib\deploy\functions\release\fabricator.js:89:17)
+[error] 
+[error] Error: There was an error deploying functions
