@@ -89,7 +89,7 @@
       </div>
     </div>
 
-    <div *ngIf="selectedPlayer" class="push-permission-block">
+    <div *ngIf="false && selectedPlayer" class="push-permission-block">
       <button mat-stroked-button color="accent" (click)="requestPushPermission()" [disabled]="pushPermissionLoading || pushPermissionGranted">
         <mat-icon>notifications_active</mat-icon>
         <span *ngIf="!pushPermissionGranted">Push-notificaties inschakelen</span>
