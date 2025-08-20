@@ -1,0 +1,91 @@
+{
+  "configVersion": 1,
+  "timestamp": 1755710323416,
+  "index": "/index.html",
+  "assetGroups": [
+    {
+      "name": "app",
+      "installMode": "prefetch",
+      "updateMode": "prefetch",
+      "cacheQueryOptions": {
+        "ignoreVary": true
+      },
+      "urls": [
+        "/favicon.ico",
+        "/firebase-messaging-sw.js",
+        "/index.html",
+        "/main-LHCIQNMO.js",
+        "/manifest.webmanifest",
+        "/polyfills-FFHMD2TL.js",
+        "/styles-6S4LHXCY.css"
+      ],
+      "patterns": []
+    },
+    {
+      "name": "assets",
+      "installMode": "lazy",
+      "updateMode": "prefetch",
+      "cacheQueryOptions": {
+        "ignoreVary": true
+      },
+      "urls": [
+        "/assets/icons/icon-128x128.png",
+        "/assets/icons/icon-144x144.png",
+        "/assets/icons/icon-152x152.png",
+        "/assets/icons/icon-192x192.png",
+        "/assets/icons/icon-384x384.png",
+        "/assets/icons/icon-512x512.png",
+        "/assets/icons/icon-72x72.png",
+        "/assets/icons/icon-96x96.png",
+        "/assets/icons/whatsapp.svg",
+        "/assets/images/football-shirt-red.png",
+        "/assets/images/football-shirt-white.png",
+        "/media/football-shirt-red-F6V5GQGU.png",
+        "/media/football-shirt-white-36U2R2RQ.png"
+      ],
+      "patterns": []
+    }
+  ],
+  "dataGroups": [],
+  "hashTable": {
+    "/assets/icons/icon-128x128.png": "9229dd4ba94aada5d4f6b3c548172ea95369f499",
+    "/assets/icons/icon-144x144.png": "b825660f4844720c113f3fb2822b3fbdcdb752b5",
+    "/assets/icons/icon-152x152.png": "efb497d1eee470c7369bb073350a16b89ebe7e5c",
+    "/assets/icons/icon-192x192.png": "d975eaad867cc689e82e6cb65068fa45ee3266f4",
+    "/assets/icons/icon-384x384.png": "120251cc2b367cfd8a7e74f912b52608edd5bc21",
+    "/assets/icons/icon-512x512.png": "792133a3bee90a9b70d50a67d4ac195f7a398c69",
+    "/assets/icons/icon-72x72.png": "4f6b4920ed0d8d501b55a6e9f09221441cb6667e",
+    "/assets/icons/icon-96x96.png": "5a636881f928f1ba924fa5555d09879f08b4a1d1",
+    "/assets/icons/whatsapp.svg": "26691423e75eca4f185800b1ef533ea7b729ba73",
+    "/assets/images/football-shirt-red.png": "0df1723bfe98a67e423479be18fee4e7cde55834",
+    "/assets/images/football-shirt-white.png": "b18ac6d8f00e6f5e00cb440b80a2a72b0e1658f3",
+    "/favicon.ico": "43528d083572386b5f788141a0a2d6619d1409cd",
+    "/firebase-messaging-sw.js": "09ae43f826c182db7016a4f2096ea4c685609d71",
+    "/index.html": "cb007aac65c5ebfda49915d38f04724cc453e4b3",
+    "/main-LHCIQNMO.js": "e67ceaf7f86c4a336688e1a75922a228c1407813",
+    "/manifest.webmanifest": "f55078249defc81f0f13e2d5bb6e9e899577ec1c",
+    "/media/football-shirt-red-F6V5GQGU.png": "0df1723bfe98a67e423479be18fee4e7cde55834",
+    "/media/football-shirt-white-36U2R2RQ.png": "b18ac6d8f00e6f5e00cb440b80a2a72b0e1658f3",
+    "/polyfills-FFHMD2TL.js": "f49b49a155bc7d192db62a4c15d0a612b460a667",
+    "/styles-6S4LHXCY.css": "cfc0b8450506ff595dc8d5265e1cf7c76ff66235"
+  },
+  "navigationUrls": [
+    {
+      "positive": true,
+      "regex": "^\\/.*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*\\.[^/]*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*__[^/]*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*__[^/]*\\/.*$"
+    }
+  ],
+  "navigationRequestStrategy": "performance"
+}
