@@ -14,6 +14,24 @@
   flex: 1 1 auto; /* Zorgt dat de desktop knoppen naar rechts gaan */
 }
 
+/* Logo en titel styling */
+.logo-title-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toolbar-logo {
+  height: 32px;
+  width: 32px;
+  border-radius: 4px;
+}
+
+.toolbar-title {
+  font-size: 18px;
+  font-weight: 500;
+}
+
 .container {
   padding: 20px; /* Voeg wat padding toe aan de content area */
 }

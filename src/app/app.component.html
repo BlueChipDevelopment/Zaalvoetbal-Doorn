@@ -22,7 +22,10 @@
         class="menu-button">
         <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
       </button>
-      <span>Zaalvoetbal Doorn</span>
+      <div class="logo-title-container">
+        <img src="assets/icons/icon-72x72.png" alt="Zaalvoetbal Doorn Logo" class="toolbar-logo">
+        <span class="toolbar-title">Zaalvoetbal Doorn</span>
+      </div>
       <span class="spacer"></span>
       <div class="desktop-navigation">
         <button mat-button routerLink="/leaderboard">Klassement</button>
@@ -33,10 +36,7 @@
         <button mat-button routerLink="/opstelling">Opstelling</button>
         <button mat-button routerLink="/about">Over</button>
       </div>
-    </mat-toolbar>
-
-    
+    </mat-toolbar>    
       <router-outlet></router-outlet>
-    
   </mat-sidenav-content>
 </mat-sidenav-container>
