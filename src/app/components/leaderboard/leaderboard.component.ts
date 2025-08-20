@@ -10,6 +10,9 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-leaderboard',
@@ -23,13 +26,18 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     MatTooltipModule,
     CommonModule, 
     MatCardModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    FormsModule
   ],
   templateUrl: './leaderboard.component.html',
   styleUrls: ['./leaderboard.component.scss']
 })
 export class LeaderboardComponent implements OnInit {
   leaderboard: any[] = [];
+  availableSeasons: string[] = [];
+  selectedSeason: string | null = null;
   isMobile = false;
   isLoading = true; 
   public errorMessage: string | null = null;
@@ -47,7 +55,31 @@ export class LeaderboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.checkScreenSize();
-    this.loadLeaderboard();
+    this.loadSeasonsAndLeaderboard();
+  }
+
+  private loadSeasonsAndLeaderboard(): void {
+    this.isLoading = true;
+    
+    // Laad eerst de beschikbare seizoenen
+    this.gameStatisticsService.getAvailableSeasons().subscribe({
+      next: (seasons: string[]) => {
+        this.availableSeasons = seasons;
+        
+        // Selecteer het meest recente seizoen als default
+        if (seasons.length > 0) {
+          this.selectedSeason = seasons[0]; // Eerste seizoen is het meest recente
+        }
+        
+        // Laad het leaderboard voor het geselecteerde seizoen
+        this.loadLeaderboard();
+      },
+      error: (error: any) => {
+        console.error('Error loading seasons:', error);
+        this.errorMessage = 'Fout bij het laden van seizoenen.';
+        this.isLoading = false;
+      }
+    });
   }
 
   private checkScreenSize(): void {
@@ -56,16 +88,21 @@ export class LeaderboardComponent implements OnInit {
 
   private loadLeaderboard(): void {
     this.isLoading = true;
-    this.gameStatisticsService.getFullPlayerStats().subscribe({
+    this.gameStatisticsService.getFullPlayerStats(this.selectedSeason).subscribe({
       next: (leaderboard: any[]) => {
         this.leaderboard = leaderboard;
         this.isLoading = false;
       },
       error: (error: any) => {
         console.error('Error loading leaderboard:', error);
+        this.errorMessage = 'Fout bij het laden van het klassement.';
         this.isLoading = false;
       }
     });
+  }
+
+  public onSeasonChange(): void {
+    this.loadLeaderboard();
   }
 
   protected getLastFiveGames(player: any): { result: number; date: string; dateDisplay: string }[] {

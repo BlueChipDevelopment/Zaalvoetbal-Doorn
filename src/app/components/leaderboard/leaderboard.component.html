@@ -18,6 +18,26 @@
   <!-- Leaderboard Table (only shown when not loading) -->
   <mat-card *ngIf="!isLoading">
     <mat-card-content>
+      <!-- Season Header with integrated filter -->
+      <div class="season-header-container" *ngIf="selectedSeason">
+        <h2 class="season-title">
+          Klassement 
+          <!-- Show dropdown if multiple seasons, otherwise show season inline -->
+          <ng-container *ngIf="availableSeasons.length > 1; else singleSeason">
+            <mat-form-field subscriptSizing="dynamic" appearance="fill" class="inline-season-select">
+              <mat-select [(ngModel)]="selectedSeason" (selectionChange)="onSeasonChange()">
+                <mat-option *ngFor="let season of availableSeasons" [value]="season">
+                  {{ season }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </ng-container>
+          <ng-template #singleSeason>
+            Seizoen {{ selectedSeason }}
+          </ng-template>
+        </h2>
+      </div>
+      
       <mat-table [dataSource]="leaderboard" class="mat-elevation-z8 mobile-friendly-table leaderboard-table">
         <!-- Position Column -->
         <ng-container matColumnDef="position" class="position-column">
