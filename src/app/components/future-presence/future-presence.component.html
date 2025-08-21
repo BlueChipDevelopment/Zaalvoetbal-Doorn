@@ -1,0 +1,122 @@
+<mat-card class="future-presence-card">
+  <mat-card-content>
+    <!-- Loading spinner voor initiële data -->
+    <div *ngIf="isLoadingPlayers || isLoadingMatches" class="loading-spinner">
+      <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+      <p>Laden van wedstrijden en spelers...</p>
+    </div>
+
+    <!-- Error message -->
+    <ng-container *ngIf="errorMessage">
+      <div class="error-banner mat-elevation-z2">
+        <mat-icon>error</mat-icon>
+        <span>{{ errorMessage }}</span>
+        <button mat-icon-button (click)="errorMessage = null">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </ng-container>
+
+    <div *ngIf="!isLoadingPlayers && !isLoadingMatches">
+      <!-- Player selection -->
+      <mat-form-field appearance="fill" class="player-select" subscriptSizing="dynamic">
+        <mat-label>Selecteer Speler</mat-label>
+        <mat-select [(ngModel)]="selectedPlayer" (selectionChange)="onPlayerSelectionChange()" name="player">
+          <mat-option *ngFor="let player of players" [value]="player.name">
+            {{ player.name }}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="playerSelectError">{{ playerSelectError }}</mat-error>
+      </mat-form-field>
+
+      <!-- Prompt to select player -->
+      <div *ngIf="!selectedPlayer && players.length > 0" class="select-prompt">
+        <p>Selecteer je naam om je aanwezigheid voor toekomstige wedstrijden door te geven.</p>
+      </div>
+
+      <!-- No players found -->
+      <div *ngIf="players.length === 0">
+        <p>Geen spelers gevonden.</p>
+      </div>
+
+      <!-- No future matches -->
+      <div *ngIf="selectedPlayer && futureMatches.length === 0 && !isLoadingStatus">
+        <div class="info-message">
+          <mat-icon>info</mat-icon>
+          <p>Er zijn momenteel geen toekomstige wedstrijden gepland.</p>
+        </div>
+      </div>
+
+      <!-- Future matches list -->
+      <div *ngIf="selectedPlayer && futureMatches.length > 0" class="matches-container">
+        <div *ngIf="isLoadingStatus" class="loading-status">
+          <mat-progress-spinner mode="indeterminate" diameter="30"></mat-progress-spinner>
+          <span>Laden van aanwezigheid status...</span>
+        </div>
+
+        <div class="matches-cards" *ngIf="!isLoadingStatus">
+          <ng-container *ngFor="let match of futureMatches; let last = last">
+            <mat-card class="match-card">
+              <mat-card-content class="match-content">
+              <div class="match-info">
+                <h3 class="match-date">{{ formatDateForDisplay(match.parsedDate!) }}</h3>
+                <div class="match-details">
+                  <span class="match-time">{{ match.time }}</span>
+                  <span class="match-location">{{ match.location }}</span>
+                  <span class="match-number" *ngIf="match.matchNumber">Wedstrijd #{{ match.matchNumber }}</span>
+                </div>
+                
+                <div class="presence-counts" *ngIf="!isLoadingCounts && !isUpdatingCounts(formatDate(match.parsedDate!))">
+                  <span class="count-item present-count">
+                    <mat-icon color="primary">groups</mat-icon>
+                    <span>{{ getPresenceCounts(formatDate(match.parsedDate!)).aanwezig }} Aanwezig</span>
+                  </span>
+                  <span class="count-item absent-count">
+                    <mat-icon>person_off</mat-icon>
+                    <span>{{ getPresenceCounts(formatDate(match.parsedDate!)).afwezig }} Afwezig</span>
+                  </span>
+                </div>
+                
+                <div class="presence-counts" *ngIf="isLoadingCounts">
+                  <mat-progress-spinner mode="indeterminate" diameter="20"></mat-progress-spinner>
+                  <span class="loading-text">Laden aantallen...</span>
+                </div>
+                
+                <div class="presence-counts" *ngIf="!isLoadingCounts && isUpdatingCounts(formatDate(match.parsedDate!))">
+                  <mat-progress-spinner mode="indeterminate" diameter="20"></mat-progress-spinner>
+                  <span class="loading-text">Bijwerken...</span>
+                </div>
+              </div>                <div class="attendance-controls">
+                  <div *ngIf="isSaving(formatDate(match.parsedDate!))" class="saving-indicator">
+                    <mat-progress-spinner mode="indeterminate" diameter="24"></mat-progress-spinner>
+                    <span>Opslaan...</span>
+                  </div>
+
+                  <mat-button-toggle-group 
+                    *ngIf="!isSaving(formatDate(match.parsedDate!))"
+                    class="attendance-toggle"
+                    [value]="getAttendanceStatus(formatDate(match.parsedDate!))"
+                    (change)="setAttendance(formatDate(match.parsedDate!), $event.value)"
+                    [disabled]="isSaving(formatDate(match.parsedDate!))">
+                    
+                    <mat-button-toggle value="aanwezig" class="toggle-present">
+                      <mat-icon>check_circle</mat-icon>
+                      Aanwezig
+                    </mat-button-toggle>
+                    
+                    <mat-button-toggle value="afwezig" class="toggle-absent">
+                      <mat-icon>cancel</mat-icon>
+                      Afwezig
+                    </mat-button-toggle>
+                  </mat-button-toggle-group>
+                </div>
+              </mat-card-content>
+            </mat-card>
+            
+            <mat-divider *ngIf="!last" class="card-divider"></mat-divider>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>

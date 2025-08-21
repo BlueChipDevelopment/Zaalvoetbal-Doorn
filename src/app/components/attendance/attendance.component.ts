@@ -9,6 +9,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { finalize, Observable } from 'rxjs';
 import { NextMatchService, NextMatchInfo } from '../../services/next-match.service';
 import { NextMatchInfoComponent } from '../next-match-info/next-match-info.component';
@@ -29,6 +30,7 @@ import { environment } from '../../../environments/environment';
     MatProgressSpinnerModule,
     MatButtonModule,
     MatIconModule,
+    RouterModule,
     NextMatchInfoComponent,
     PlayerCardComponent,
   ],

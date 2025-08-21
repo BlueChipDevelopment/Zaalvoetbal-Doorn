@@ -1,0 +1,357 @@
+.future-presence-card {
+  max-width: 800px;
+  margin: 20px auto;
+  
+  h2 {
+    text-align: center;
+    margin-bottom: 24px;
+    color: #333;
+  }
+}
+
+.loading-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px;
+  
+  p {
+    margin-top: 16px;
+    color: #666;
+  }
+}
+
+.loading-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 20px;
+  color: #666;
+}
+
+.error-banner {
+  background-color: #ffebee;
+  border: 1px solid #e57373;
+  border-radius: 4px;
+  padding: 12px 16px;
+  margin: 16px 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  
+  mat-icon {
+    color: #d32f2f;
+  }
+  
+  span {
+    flex: 1;
+    color: #d32f2f;
+  }
+  
+  button {
+    color: #d32f2f;
+  }
+}
+
+.player-select {
+  width: 100%;
+}
+
+.select-prompt {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  font-style: italic;
+}
+
+.info-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px;
+  text-align: center;
+  color: #666;
+  
+  mat-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+  }
+  
+  p {
+    margin: 0;
+    font-size: 16px;
+  }
+}
+
+.matches-container {
+  margin-top: 24px;
+}
+
+.matches-cards {
+  display: flex;
+  flex-direction: column;
+}
+
+.match-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+  
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+  }
+  
+  .mat-mdc-card-content {
+    padding: 20px;
+  }
+}
+
+.card-divider {
+  margin: 8px 0;
+  opacity: 0.3;
+}
+
+.match-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 24px;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+}
+
+.match-info {
+  flex: 1;
+  
+  .match-date {
+    margin: 0 0 8px 0;
+    font-size: 18px;
+    font-weight: 500;
+    color: #333;
+    text-transform: capitalize;
+  }
+  
+  .match-details {
+    display: flex;
+    gap: 16px;
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 8px;
+    
+    @media (max-width: 768px) {
+      flex-direction: column;
+      gap: 4px;
+    }
+    
+    .match-time {
+      font-weight: 500;
+    }
+    
+    .match-location {
+      &::before {
+        content: '📍 ';
+      }
+    }
+    
+    .match-number {
+      color: #888;
+      font-style: italic;
+    }
+  }
+}
+
+.presence-counts {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 8px;
+  font-size: 0.85em;
+  color: #666;
+  
+  .count-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+    
+    &.present-count mat-icon {
+      color: #2e7d32;
+    }
+    
+    &.absent-count mat-icon {
+      color: #d32f2f;
+    }
+  }
+  
+  .loading-text {
+    margin-left: 8px;
+    font-size: 0.8em;
+    color: #999;
+  }
+}
+
+.attendance-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  
+  @media (max-width: 768px) {
+    justify-content: center;
+  }
+}
+
+.saving-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #666;
+  font-size: 14px;
+}
+
+.attendance-toggle {
+ 
+  .toggle-present {
+    &.mat-button-toggle-checked {
+      background-color: #c8e6c9 !important;
+      color: #2e7d32 !important;
+      
+      mat-icon {
+        color: #2e7d32 !important;
+      }
+    }
+    
+    mat-icon {
+      margin-right: 8px;
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+  
+  .toggle-absent {
+    &.mat-button-toggle-checked {
+      background-color: #ffcdd2 !important;
+      color: #c62828 !important;
+      
+      mat-icon {
+        color: #c62828 !important;
+      }
+    }
+    
+    mat-icon {
+      margin-right: 8px;
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+}
+
+.status-indicator {
+  .status-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+    
+    &.status-present {
+      background-color: #e8f5e8;
+      
+      mat-icon {
+        color: #2e7d32;
+      }
+    }
+    
+    &.status-absent {
+      background-color: #ffebee;
+      
+      mat-icon {
+        color: #c62828;
+      }
+    }
+    
+    &.status-unknown {
+      background-color: #f5f5f5;
+      
+      mat-icon {
+        color: #999;
+      }
+    }
+  }
+}
+
+// Mobile optimizations
+@media (max-width: 480px) {
+  .future-presence-card {
+    margin: 10px;
+    
+    h2 {
+      font-size: 20px;
+    }
+  }
+  
+  .match-content {
+    padding: 12px;
+  }
+  
+  .match-info .match-date {
+    font-size: 16px;
+  }
+  
+  .attendance-toggle {
+    .mat-button-toggle {
+      font-size: 12px;
+      
+      span {
+        display: none;
+      }
+      
+      mat-icon {
+        margin-right: 0;
+      }
+    }
+  }
+}
+
+// Dark theme support (optional)
+@media (prefers-color-scheme: dark) {
+  .future-presence-card {
+    h2 {
+      color: #e0e0e0;
+    }
+  }
+  
+  .match-info .match-date {
+    color: #e0e0e0;
+  }
+  
+  .match-details {
+    color: #b0b0b0;
+  }
+  
+  .info-message {
+    color: #b0b0b0;
+  }
+}

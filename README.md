@@ -48,6 +48,7 @@ Zaalvoetbal Doorn is een zaalvoetbalcompetitie voor iedereen die van voetballen 
 - Automatisch gebalanceerde zaalvoetbalteams genereren op basis van spelersnamen, posities en ratings
 - Handmatig of willekeurig teams samenstellen, met optimale verdeling van keepers en veldspelers
 - Bijhouden van aanwezigheid van spelers voor wedstrijden
+- **Nieuw**: Toekomstige aanwezigheid - spelers kunnen hun aan/afwezigheid doorgeven voor alle toekomstige wedstrijden in één overzicht
 - Uitgebreide statistieken per speler: aantal gespeelde wedstrijden, overwinningen, verlies, gelijke spelen, punten, zlatan- en ventielpunten, winratio, en rating
 - Ranglijst (klassement) van alle spelers op basis van prestaties en punten
 - Inzicht in teamchemie: beste en slechtste teamgenoten per speler
