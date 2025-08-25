@@ -1,23 +1,22 @@
-<mat-card class="future-presence-card">
-  <mat-card-content>
-    <!-- Loading spinner voor initiële data -->
-    <div *ngIf="isLoadingPlayers || isLoadingMatches" class="loading-spinner">
-      <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
-      <p>Laden van wedstrijden en spelers...</p>
-    </div>
+<div class="kalender-container">
+  <!-- Loading spinner voor initiële data -->
+  <div *ngIf="isLoading" class="loading-spinner">
+    <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+    <p>Laden van wedstrijden en spelers...</p>
+  </div>
 
-    <!-- Error message -->
-    <ng-container *ngIf="errorMessage">
-      <div class="error-banner mat-elevation-z2">
-        <mat-icon>error</mat-icon>
-        <span>{{ errorMessage }}</span>
-        <button mat-icon-button (click)="errorMessage = null">
-          <mat-icon>close</mat-icon>
-        </button>
-      </div>
-    </ng-container>
+  <!-- Error message -->
+  <div *ngIf="errorMessage" class="error-banner mat-elevation-z2">
+    <mat-icon>error</mat-icon>
+    <span>{{ errorMessage }}</span>
+    <button mat-icon-button (click)="errorMessage = null">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
 
-    <div *ngIf="!isLoadingPlayers && !isLoadingMatches">
+  <!-- Main content - only shown when not loading -->
+  <mat-card class="kalender-card" *ngIf="!isLoading">
+    <mat-card-content>
       <!-- Player selection -->
       <mat-form-field appearance="fill" class="player-select" subscriptSizing="dynamic">
         <mat-label>Selecteer Speler</mat-label>
@@ -117,6 +116,6 @@
           </ng-container>
         </div>
       </div>
-    </div>
-  </mat-card-content>
-</mat-card>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -25,7 +25,7 @@ interface MatchPresenceCounts {
 }
 
 @Component({
-  selector: 'app-future-presence',
+  selector: 'app-kalender',
   standalone: true,
   imports: [
     CommonModule,
@@ -38,10 +38,10 @@ interface MatchPresenceCounts {
     MatProgressSpinnerModule,
     MatIconModule
   ],
-  templateUrl: './future-presence.component.html',
-  styleUrl: './future-presence.component.scss'
+  templateUrl: './kalender.component.html',
+  styleUrl: './kalender.component.scss'
 })
-export class FuturePresenceComponent implements OnInit {
+export class KalenderComponent implements OnInit {
   players: { name: string, position: string }[] = [];
   selectedPlayer: string | null = null;
   futureMatches: FutureMatchInfo[] = [];
@@ -61,6 +61,11 @@ export class FuturePresenceComponent implements OnInit {
   readonly LAST_PLAYER_KEY = 'lastSelectedPlayer';
   readonly SHEET_NAME = 'Aanwezigheid';
   readonly PLAYER_SHEET_NAME = 'Spelers';
+
+  // Central loading state - component is ready when initial data is loaded
+  get isLoading(): boolean {
+    return this.isLoadingPlayers || this.isLoadingMatches || this.isLoadingCounts;
+  }
 
   constructor(
     private googleSheetsService: GoogleSheetsService,

@@ -4,7 +4,7 @@ import { ScoreComponent } from './components/score/score.component';
 import { LeaderboardComponent } from './components/leaderboard/leaderboard.component';
 import { TeamGeneratorComponent } from './components/team-generator/team-generator.component';
 import { AttendanceComponent } from './components/attendance/attendance.component';
-import { FuturePresenceComponent } from './components/future-presence/future-presence.component';
+import { KalenderComponent } from './components/kalender/kalender.component';
 import { WedstrijdenComponent } from './components/wedstrijden/wedstrijden.component';
 import { LatestTeamsComponent } from './components/latest-teams/latest-teams.component';
 import { AboutComponent } from './components/about/about.component';
@@ -14,7 +14,7 @@ const routes: Routes = [
   { path: 'score', component: ScoreComponent },
   { path: 'team-generator', component: TeamGeneratorComponent },
   { path: 'aanwezigheid', component: AttendanceComponent },
-  { path: 'toekomstige-aanwezigheid', component: FuturePresenceComponent },
+  { path: 'kalender', component: KalenderComponent },
   { path: 'wedstrijden', component: WedstrijdenComponent },
   { path: 'opstelling', component: LatestTeamsComponent },
   { path: 'about', component: AboutComponent },
