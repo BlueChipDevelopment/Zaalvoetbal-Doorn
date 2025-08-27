@@ -3,6 +3,7 @@ import { Player } from '../interfaces/IPlayer';
 import { Observable, forkJoin } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { GoogleSheetsService } from './google-sheets-service';
+import { PlayerService } from './player.service';
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +13,10 @@ export class GameStatisticsService {
   private cacheTimestamp: number | null = null;
   private cacheDurationMs = 5 * 60 * 1000; // 5 minuten
 
-  constructor(private googleSheetsService: GoogleSheetsService) {}
+  constructor(
+    private googleSheetsService: GoogleSheetsService,
+    private playerService: PlayerService
+  ) {}
 
   /**
    * Bepaalt het seizoen van een wedstrijd op basis van de datum.
@@ -137,16 +141,15 @@ export class GameStatisticsService {
    */
   getFullPlayerStats(season?: string | null): Observable<Player[]> {
     return forkJoin({
-      spelers: this.googleSheetsService.getSheetData('Spelers'),
+      spelers: this.playerService.getPlayers(),
       wedstrijden: this.googleSheetsService.getSheetData('Wedstrijden')
     }).pipe(
       map(({ spelers, wedstrijden }) => {
-        // Sla de header over (eerste rij) in spelers
-        const spelersData = (spelers || []).slice(1);
-        const actieveSpelers = spelersData.filter(row => row[0] && row[2]?.toLowerCase() === 'ja');
+        // spelers is already typed and processed by PlayerService
+        const actieveSpelers = spelers.filter(player => player.actief);
         const actieveSpelersMap: { [naam: string]: any } = {};
-        actieveSpelers.forEach((row: any) => {
-          actieveSpelersMap[row[0].trim().toLowerCase()] = row;
+        actieveSpelers.forEach((player) => {
+          actieveSpelersMap[player.name.trim().toLowerCase()] = player;
         });
 
         let geldigeWedstrijden = (wedstrijden || []).filter(match => {
@@ -240,8 +243,8 @@ export class GameStatisticsService {
           });
         });
         // Voeg spelers toe die in de Spelers-lijst staan maar nog geen wedstrijden hebben gespeeld
-        spelersData.forEach((row: any) => {
-          const naam = row[0]?.trim().toLowerCase();
+        spelers.forEach((player) => {
+          const naam = player.name?.trim().toLowerCase();
           if (naam && !playerStats[naam]) {
             playerStats[naam] = {
               gamesPlayed: 0,
@@ -262,13 +265,13 @@ export class GameStatisticsService {
         const maxTotalPoints = Math.max(...Object.values(playerStats).map((stats: any) => stats.totalPoints || 0), 1);
         // Maak array met alle info
         return Object.entries(playerStats).map(([player, stats]) => {
-          // Zoek altijd de spelerRow op in de originele spelerslijst (zonder header)
-          const spelerRow = spelersData.find((row: any) => row[0] && row[0].trim().toLowerCase() === player);
+          // Zoek de speler op in de PlayerService data
+          const spelerData = spelers.find((p) => p.name && p.name.trim().toLowerCase() === player);
           let rating = Math.round((stats.totalPoints / (maxTotalPoints / 10)));
           rating = Math.max(1, Math.min(10, rating));
           return {
-            name: spelerRow ? spelerRow[0] : player,
-            position: spelerRow ? spelerRow[1] : null, // 2e kolom is positie
+            name: spelerData ? spelerData.name : player,
+            position: spelerData ? spelerData.position : null,
             rating: rating,
             gamesPlayed: stats.gamesPlayed,
             totalPoints: stats.totalPoints,
@@ -279,7 +282,7 @@ export class GameStatisticsService {
             gameHistory: stats.gameHistory || [],
             zlatanPoints: stats.zlatanPoints || 0,
             ventielPoints: stats.ventielPoints || 0,
-            actief: spelerRow ? (spelerRow[2]?.toLowerCase() === 'ja') : false
+            actief: spelerData ? spelerData.actief : false
           } as Player;
         }).sort((a, b) => b.totalPoints - a.totalPoints);
       })

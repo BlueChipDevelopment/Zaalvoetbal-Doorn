@@ -16,6 +16,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDividerModule } from '@angular/material/divider';
 import { finalize, Observable } from 'rxjs';
 import { GoogleSheetsService } from '../../services/google-sheets-service';
+import { PlayerService } from '../../services/player.service';
+import { PlayerSheetData } from '../../interfaces/IPlayerSheet';
 import { NextMatchService, FutureMatchInfo } from '../../services/next-match.service';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 
@@ -81,7 +83,7 @@ interface ExtendedFutureMatchInfo extends FutureMatchInfo {
   styleUrl: './kalender.component.scss'
 })
 export class KalenderComponent implements OnInit {
-  players: { name: string, position: string, actief: boolean }[] = [];
+  players: PlayerSheetData[] = [];
   selectedPlayer: string | null = null;
   futureMatches: ExtendedFutureMatchInfo[] = [];
   playerAttendanceStatus: PlayerAttendanceStatus[] = [];
@@ -101,7 +103,6 @@ export class KalenderComponent implements OnInit {
   
   readonly LAST_PLAYER_KEY = 'lastSelectedPlayer';
   readonly SHEET_NAME = 'Aanwezigheid';
-  readonly PLAYER_SHEET_NAME = 'Spelers';
 
   // Central loading state - component is ready when initial data is loaded
   get isLoading(): boolean {
@@ -110,6 +111,7 @@ export class KalenderComponent implements OnInit {
 
   constructor(
     private googleSheetsService: GoogleSheetsService,
+    private playerService: PlayerService,
     private nextMatchService: NextMatchService,
     private snackBar: MatSnackBar
   ) {}
@@ -121,19 +123,11 @@ export class KalenderComponent implements OnInit {
 
   loadPlayers(): void {
     this.isLoadingPlayers = true;
-    this.googleSheetsService.getSheetData(this.PLAYER_SHEET_NAME)
+    this.playerService.getPlayers()
       .pipe(finalize(() => this.isLoadingPlayers = false))
       .subscribe({
-        next: (data) => {
-          this.players = data.slice(1)
-                             .map(row => ({ 
-                               name: row[0], 
-                               position: row[1] || '', 
-                               actief: row[2] === 'Ja' || row[2] === true || row[2] === 'TRUE' || row[2] === 1 || row[2] === '1'
-                             }))
-                             .filter(player => player.name)
-                             .sort((a, b) => a.name.localeCompare(b.name));
-          
+        next: (players) => {
+          this.players = players;
           this.errorMessage = null;
           this.loadLastSelectedPlayer();
         },

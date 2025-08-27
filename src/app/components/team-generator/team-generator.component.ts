@@ -5,6 +5,8 @@ import { Positions } from '../../enums/positions.enum';
 import { Team, Teams } from '../../interfaces/ITeam';
 import { TeamGenerateService } from '../../services/team-generate.service';
 import { GoogleSheetsService } from '../../services/google-sheets-service';
+import { PlayerService } from '../../services/player.service';
+import { PlayerSheetData } from '../../interfaces/IPlayerSheet';
 import { finalize } from 'rxjs/operators';
 import { ReplaySubject } from 'rxjs';
 import { NextMatchService, NextMatchInfo } from '../../services/next-match.service';
@@ -79,6 +81,7 @@ export class TeamGeneratorComponent implements OnInit {
     private teamGenerateService: TeamGenerateService,
     private nextMatchService: NextMatchService,
     private googleSheetsService: GoogleSheetsService,
+    private playerService: PlayerService,
     private snackBar: MatSnackBar,
     private iconRegistry: MatIconRegistry,
     private sanitizer: DomSanitizer
@@ -280,18 +283,26 @@ export class TeamGeneratorComponent implements OnInit {
   protected GetAlleActieveSpelers(): void {
     this.loadingSubject.next(true);
     this.errorMessage = null;
+    
+    // Get statistics data to merge with player data
     this.teamGenerateService.getFullPlayerStats()
       .pipe(
         finalize(() => this.loadingSubject.next(false))
       )
-      .subscribe((players: any[]) => {
-        // Filter alleen actieve spelers
-        this.activePlayersList = players.filter(p => p.actief);
-        if (this.activePlayersList.length > 0) {
-          this.GenerateFormFields();
+      .subscribe({
+        next: (players: any[]) => {
+          // Filter alleen actieve spelers (statistics already include actief status from PlayerService)
+          this.activePlayersList = players.filter(p => p.actief);
+          if (this.activePlayersList.length > 0) {
+            this.GenerateFormFields();
+          }
+        },
+        error: (error) => {
+          this.snackBar.open(error.message || 'Fout bij ophalen spelers.', 'Sluiten', { 
+            duration: 5000, 
+            panelClass: ['snackbar-error'] 
+          });
         }
-      }, error => {
-        this.snackBar.open(error.message || 'Fout bij ophalen spelers.', 'Sluiten', { duration: 5000, panelClass: ['snackbar-error'] });
       });
   }
 

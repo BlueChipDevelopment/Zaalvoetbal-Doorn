@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { GoogleSheetsService } from '../../services/google-sheets-service';
+import { PlayerService } from '../../services/player.service';
+import { PlayerSheetData } from '../../interfaces/IPlayerSheet';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -38,7 +40,7 @@ import { environment } from '../../../environments/environment';
   styleUrls: ['./attendance.component.scss']
 })
 export class AttendanceComponent implements OnInit {
-  players: { name: string, position: string }[] = [];
+  players: PlayerSheetData[] = [];
   selectedPlayer: string | null = null;
   nextGameDate: Date | null = null;
   nextGameDateRaw: string | null = null;
@@ -51,7 +53,6 @@ export class AttendanceComponent implements OnInit {
   absentCount = 0;
   readonly LAST_PLAYER_KEY = 'lastSelectedPlayer';
   readonly SHEET_NAME = 'Aanwezigheid';
-  readonly PLAYER_SHEET_NAME = 'Spelers';
   public errorMessage: string | null = null; // Algemene foutmeldingen (API, etc)
   public playerSelectError: string | null = null; // Alleen voor veldvalidatie spelerselectie
 
@@ -61,6 +62,7 @@ export class AttendanceComponent implements OnInit {
 
   constructor(
     private googleSheetsService: GoogleSheetsService,
+    private playerService: PlayerService,
     private snackBar: MatSnackBar,
     private nextMatchService: NextMatchService,
     private gameStatisticsService: GameStatisticsService
@@ -137,14 +139,11 @@ export class AttendanceComponent implements OnInit {
 
   loadPlayers(): void {
     this.isLoadingPlayers = true;
-    this.googleSheetsService.getSheetData(this.PLAYER_SHEET_NAME)
+    this.playerService.getPlayers()
       .pipe(finalize(() => this.isLoadingPlayers = false))
       .subscribe({
-        next: (data) => {
-          this.players = data.slice(1)
-                             .map(row => ({ name: row[0], position: row[1] || '' }))
-                             .filter(player => player.name)
-                             .sort((a, b) => a.name.localeCompare(b.name));
+        next: (players) => {
+          this.players = players;
           this.errorMessage = null;
           this.loadLastSelectedPlayer();
         },
@@ -338,32 +337,23 @@ export class AttendanceComponent implements OnInit {
   }
 
   private savePushSubscription(subscription: PushSubscription) {
-    // Zoek de speler in de sheet (op naam)
-    this.googleSheetsService.getSheetData(this.PLAYER_SHEET_NAME).subscribe({
-      next: (rows) => {
-        const playerRowIdx = rows.findIndex((row, idx) => idx > 0 && row[0] === this.selectedPlayer);
-        if (playerRowIdx === -1) {
-          this.showPushError('Speler niet gevonden in sheet.');
-          this.pushPermissionLoading = false;
-          return;
-        }
-        this.googleSheetsService.updatePlayerPushSubscription(
-          playerRowIdx - 1, // -1 want rows bevat header
-          JSON.stringify(subscription),
-          true
-        ).subscribe({
-          next: () => {
-            this.pushPermissionGranted = true;
-            this.pushPermissionLoading = false;
-          },
-          error: (err) => {
-            this.showPushError('Fout bij opslaan subscription: ' + err);
-            this.pushPermissionLoading = false;
-          }
-        });
+    if (!this.selectedPlayer) {
+      this.showPushError('Geen speler geselecteerd.');
+      this.pushPermissionLoading = false;
+      return;
+    }
+
+    this.playerService.updatePlayerPushSubscription(
+      this.selectedPlayer,
+      JSON.stringify(subscription),
+      true
+    ).subscribe({
+      next: () => {
+        this.pushPermissionGranted = true;
+        this.pushPermissionLoading = false;
       },
       error: (err) => {
-        this.showPushError('Fout bij ophalen spelers: ' + err);
+        this.showPushError('Fout bij opslaan subscription: ' + err);
         this.pushPermissionLoading = false;
       }
     });
