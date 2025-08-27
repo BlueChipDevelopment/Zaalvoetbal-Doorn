@@ -54,7 +54,7 @@
         </div>
 
         <div class="matches-cards" *ngIf="!isLoadingStatus">
-          <ng-container *ngFor="let match of futureMatches; let last = last">
+          <ng-container *ngFor="let match of futureMatches; let last = last; trackBy: trackByMatchDate">
             <mat-card class="match-card" *ngIf="match.parsedDate">
               <mat-card-content class="match-content">
               <div class="match-info">
@@ -65,30 +65,30 @@
                   <span class="match-number" *ngIf="match.matchNumber">Wedstrijd #{{ match.matchNumber }}</span>
                 </div>
                 
-                <div class="presence-counts" *ngIf="!isLoadingCounts && !isUpdatingCounts(formatDate(match.parsedDate))">
+                <div class="presence-counts" *ngIf="!isLoadingCounts && !isUpdatingCounts(match.formattedDate)">
                   <button 
                     mat-stroked-button 
                     class="count-button present-count"
-                    (click)="toggleMatchExpansion(formatDate(match.parsedDate))"
+                    (click)="toggleMatchExpansion(match.formattedDate)"
                     matTooltip="Klik om spelers te bekijken">
                     <mat-icon>groups</mat-icon>
-                    <span>{{ getPresenceCounts(formatDate(match.parsedDate)).aanwezig }}</span>
+                    <span>{{ getPresenceCounts(match.formattedDate).aanwezig }}</span>
                   </button>
                   <button 
                     mat-stroked-button 
                     class="count-button absent-count"
-                    (click)="toggleMatchExpansion(formatDate(match.parsedDate))"
+                    (click)="toggleMatchExpansion(match.formattedDate)"
                     matTooltip="Klik om spelers te bekijken">
                     <mat-icon>person_off</mat-icon>
-                    <span>{{ getPresenceCounts(formatDate(match.parsedDate)).afwezig }}</span>
+                    <span>{{ getPresenceCounts(match.formattedDate).afwezig }}</span>
                   </button>
                   <button 
                     mat-stroked-button 
                     class="count-button no-response-count"
-                    (click)="toggleMatchExpansion(formatDate(match.parsedDate))"
+                    (click)="toggleMatchExpansion(match.formattedDate)"
                     matTooltip="Klik om spelers te bekijken">
                     <mat-icon>help_outline</mat-icon>
-                    <span>{{ getAttendanceDetails(formatDate(match.parsedDate))?.geenReactie?.length || 0 }}</span>
+                    <span>{{ getAttendanceDetails(match.formattedDate)?.geenReactie?.length || 0 }}</span>
                   </button>
                 </div>
                 
@@ -97,22 +97,22 @@
                   <span class="loading-text">Laden aantallen...</span>
                 </div>
                 
-                <div class="presence-counts" *ngIf="!isLoadingCounts && isUpdatingCounts(formatDate(match.parsedDate))">
+                <div class="presence-counts" *ngIf="!isLoadingCounts && isUpdatingCounts(match.formattedDate)">
                   <mat-progress-spinner mode="indeterminate" diameter="20"></mat-progress-spinner>
                   <span class="loading-text">Bijwerken...</span>
                 </div>
               </div>                <div class="attendance-controls">
-                  <div *ngIf="isSaving(formatDate(match.parsedDate))" class="saving-indicator">
+                  <div *ngIf="isSaving(match.formattedDate)" class="saving-indicator">
                     <mat-progress-spinner mode="indeterminate" diameter="24"></mat-progress-spinner>
                     <span>Opslaan...</span>
                   </div>
 
                   <mat-button-toggle-group 
-                    *ngIf="!isSaving(formatDate(match.parsedDate))"
+                    *ngIf="!isSaving(match.formattedDate)"
                     class="attendance-toggle"
-                    [value]="getAttendanceStatus(formatDate(match.parsedDate))"
-                    (change)="setAttendance(formatDate(match.parsedDate), $event.value)"
-                    [disabled]="isSaving(formatDate(match.parsedDate))">
+                    [value]="getAttendanceStatus(match.formattedDate)"
+                    (change)="setAttendance(match.formattedDate, $event.value)"
+                    [disabled]="isSaving(match.formattedDate)">
                     
                     <mat-button-toggle value="aanwezig" class="toggle-present">
                       <mat-icon>check_circle</mat-icon>
@@ -129,9 +129,9 @@
 
               <!-- Expandable player details -->
               <div class="player-details" 
-                   *ngIf="isMatchExpanded(formatDate(match.parsedDate))"
+                   *ngIf="isMatchExpanded(match.formattedDate)"
                    [@slideInOut]>
-                <ng-container *ngIf="getAttendanceDetails(formatDate(match.parsedDate)) as details">
+                <ng-container *ngIf="getAttendanceDetails(match.formattedDate) as details">
                   <div class="attendance-section">
                     <!-- Present players -->
                     <mat-list *ngIf="details.aanwezig.length > 0" class="player-list present-list">

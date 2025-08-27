@@ -43,6 +43,10 @@ interface MatchAttendanceDetails {
   geenReactie: { name: string; position?: string; actief: boolean; }[];
 }
 
+interface ExtendedFutureMatchInfo extends FutureMatchInfo {
+  formattedDate: string;
+}
+
 @Component({
   selector: 'app-kalender',
   standalone: true,
@@ -79,7 +83,7 @@ interface MatchAttendanceDetails {
 export class KalenderComponent implements OnInit {
   players: { name: string, position: string, actief: boolean }[] = [];
   selectedPlayer: string | null = null;
-  futureMatches: FutureMatchInfo[] = [];
+  futureMatches: ExtendedFutureMatchInfo[] = [];
   playerAttendanceStatus: PlayerAttendanceStatus[] = [];
   matchPresenceCounts: MatchPresenceCounts[] = [];
   matchAttendanceDetails: MatchAttendanceDetails[] = [];
@@ -146,7 +150,10 @@ export class KalenderComponent implements OnInit {
       .pipe(finalize(() => this.isLoadingMatches = false))
       .subscribe({
         next: (matches) => {
-          this.futureMatches = matches;
+          this.futureMatches = matches.map(match => ({
+            ...match,
+            formattedDate: match.parsedDate ? this.formatDate(match.parsedDate) : ''
+          }));
           this.errorMessage = null;
           // Load presence counts and details for all matches
           this.loadMatchPresenceCounts();
@@ -574,5 +581,9 @@ export class KalenderComponent implements OnInit {
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const day = date.getDate().toString().padStart(2, '0');
     return `${year}-${month}-${day}`;
+  }
+
+  trackByMatchDate(index: number, match: ExtendedFutureMatchInfo): string {
+    return match.formattedDate || match.date;
   }
 }
