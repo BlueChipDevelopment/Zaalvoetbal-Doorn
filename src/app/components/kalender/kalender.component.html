@@ -55,25 +55,41 @@
 
         <div class="matches-cards" *ngIf="!isLoadingStatus">
           <ng-container *ngFor="let match of futureMatches; let last = last">
-            <mat-card class="match-card">
+            <mat-card class="match-card" *ngIf="match.parsedDate">
               <mat-card-content class="match-content">
               <div class="match-info">
-                <h3 class="match-date">{{ formatDateForDisplay(match.parsedDate!) }}</h3>
+                <h3 class="match-date">{{ formatDateForDisplay(match.parsedDate) }}</h3>
                 <div class="match-details">
                   <span class="match-time">{{ match.time }}</span>
                   <span class="match-location">{{ match.location }}</span>
                   <span class="match-number" *ngIf="match.matchNumber">Wedstrijd #{{ match.matchNumber }}</span>
                 </div>
                 
-                <div class="presence-counts" *ngIf="!isLoadingCounts && !isUpdatingCounts(formatDate(match.parsedDate!))">
-                  <span class="count-item present-count">
-                    <mat-icon color="primary">groups</mat-icon>
-                    <span>{{ getPresenceCounts(formatDate(match.parsedDate!)).aanwezig }} Aanwezig</span>
-                  </span>
-                  <span class="count-item absent-count">
+                <div class="presence-counts" *ngIf="!isLoadingCounts && !isUpdatingCounts(formatDate(match.parsedDate))">
+                  <button 
+                    mat-stroked-button 
+                    class="count-button present-count"
+                    (click)="toggleMatchExpansion(formatDate(match.parsedDate))"
+                    matTooltip="Klik om spelers te bekijken">
+                    <mat-icon>groups</mat-icon>
+                    <span>{{ getPresenceCounts(formatDate(match.parsedDate)).aanwezig }}</span>
+                  </button>
+                  <button 
+                    mat-stroked-button 
+                    class="count-button absent-count"
+                    (click)="toggleMatchExpansion(formatDate(match.parsedDate))"
+                    matTooltip="Klik om spelers te bekijken">
                     <mat-icon>person_off</mat-icon>
-                    <span>{{ getPresenceCounts(formatDate(match.parsedDate!)).afwezig }} Afwezig</span>
-                  </span>
+                    <span>{{ getPresenceCounts(formatDate(match.parsedDate)).afwezig }}</span>
+                  </button>
+                  <button 
+                    mat-stroked-button 
+                    class="count-button no-response-count"
+                    (click)="toggleMatchExpansion(formatDate(match.parsedDate))"
+                    matTooltip="Klik om spelers te bekijken">
+                    <mat-icon>help_outline</mat-icon>
+                    <span>{{ getAttendanceDetails(formatDate(match.parsedDate))?.geenReactie?.length || 0 }}</span>
+                  </button>
                 </div>
                 
                 <div class="presence-counts" *ngIf="isLoadingCounts">
@@ -81,22 +97,22 @@
                   <span class="loading-text">Laden aantallen...</span>
                 </div>
                 
-                <div class="presence-counts" *ngIf="!isLoadingCounts && isUpdatingCounts(formatDate(match.parsedDate!))">
+                <div class="presence-counts" *ngIf="!isLoadingCounts && isUpdatingCounts(formatDate(match.parsedDate))">
                   <mat-progress-spinner mode="indeterminate" diameter="20"></mat-progress-spinner>
                   <span class="loading-text">Bijwerken...</span>
                 </div>
               </div>                <div class="attendance-controls">
-                  <div *ngIf="isSaving(formatDate(match.parsedDate!))" class="saving-indicator">
+                  <div *ngIf="isSaving(formatDate(match.parsedDate))" class="saving-indicator">
                     <mat-progress-spinner mode="indeterminate" diameter="24"></mat-progress-spinner>
                     <span>Opslaan...</span>
                   </div>
 
                   <mat-button-toggle-group 
-                    *ngIf="!isSaving(formatDate(match.parsedDate!))"
+                    *ngIf="!isSaving(formatDate(match.parsedDate))"
                     class="attendance-toggle"
-                    [value]="getAttendanceStatus(formatDate(match.parsedDate!))"
-                    (change)="setAttendance(formatDate(match.parsedDate!), $event.value)"
-                    [disabled]="isSaving(formatDate(match.parsedDate!))">
+                    [value]="getAttendanceStatus(formatDate(match.parsedDate))"
+                    (change)="setAttendance(formatDate(match.parsedDate), $event.value)"
+                    [disabled]="isSaving(formatDate(match.parsedDate))">
                     
                     <mat-button-toggle value="aanwezig" class="toggle-present">
                       <mat-icon>check_circle</mat-icon>
@@ -110,6 +126,82 @@
                   </mat-button-toggle-group>
                 </div>
               </mat-card-content>
+
+              <!-- Expandable player details -->
+              <div class="player-details" 
+                   *ngIf="isMatchExpanded(formatDate(match.parsedDate))"
+                   [@slideInOut]>
+                <ng-container *ngIf="getAttendanceDetails(formatDate(match.parsedDate)) as details">
+                  <div class="attendance-section">
+                    <!-- Present players -->
+                    <mat-list *ngIf="details.aanwezig.length > 0" class="player-list present-list">
+                      <div matSubheader class="present-subheader">
+                        <mat-icon>check_circle</mat-icon>
+                        Aanwezig ({{ details.aanwezig.length }})
+                      </div>
+                      <div class="player-chips">
+                        <mat-chip-set>
+                          <mat-chip *ngFor="let player of details.aanwezig" class="player-chip present-chip">
+                            <div class="chip-content">
+                              <span class="player-avatar">{{ getPlayerInitials(player.name) }}</span>
+                              <div class="player-info">
+                                <span class="player-name">{{ player.name }}</span>
+                                <span class="player-position" *ngIf="player.position">{{ player.position }}</span>
+                              </div>
+                            </div>
+                          </mat-chip>
+                        </mat-chip-set>
+                      </div>
+                    </mat-list>
+
+                    <mat-divider *ngIf="details.aanwezig.length > 0 && (details.afwezig.length > 0 || details.geenReactie.length > 0)"></mat-divider>
+
+                    <!-- Absent players -->
+                    <mat-list *ngIf="details.afwezig.length > 0" class="player-list absent-list">
+                      <div matSubheader class="absent-subheader">
+                        <mat-icon color="warn">cancel</mat-icon>
+                        Afwezig ({{ details.afwezig.length }})
+                      </div>
+                      <div class="player-chips">
+                        <mat-chip-set>
+                          <mat-chip *ngFor="let player of details.afwezig" class="player-chip absent-chip">
+                            <div class="chip-content">
+                              <span class="player-avatar">{{ getPlayerInitials(player.name) }}</span>
+                              <div class="player-info">
+                                <span class="player-name">{{ player.name }}</span>
+                                <span class="player-position" *ngIf="player.position">{{ player.position }}</span>
+                              </div>
+                            </div>
+                          </mat-chip>
+                        </mat-chip-set>
+                      </div>
+                    </mat-list>
+
+                    <mat-divider *ngIf="details.afwezig.length > 0 && details.geenReactie.length > 0"></mat-divider>
+
+                    <!-- No response players -->
+                    <mat-list *ngIf="details.geenReactie.length > 0" class="player-list no-response-list">
+                      <div matSubheader class="no-response-subheader">
+                        <mat-icon>help</mat-icon>
+                        Geen reactie ({{ details.geenReactie.length }})
+                      </div>
+                      <div class="player-chips">
+                        <mat-chip-set>
+                          <mat-chip *ngFor="let player of details.geenReactie" class="player-chip no-response-chip">
+                            <div class="chip-content">
+                              <span class="player-avatar">{{ getPlayerInitials(player.name) }}</span>
+                              <div class="player-info">
+                                <span class="player-name">{{ player.name }}</span>
+                                <span class="player-position" *ngIf="player.position">{{ player.position }}</span>
+                              </div>
+                            </div>
+                          </mat-chip>
+                        </mat-chip-set>
+                      </div>
+                    </mat-list>
+                  </div>
+                </ng-container>
+              </div>
             </mat-card>
             
             <mat-divider *ngIf="!last" class="card-divider"></mat-divider>

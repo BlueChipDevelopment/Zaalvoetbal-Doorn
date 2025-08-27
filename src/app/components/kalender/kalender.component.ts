@@ -4,14 +4,20 @@ import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatListModule } from '@angular/material/list';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDividerModule } from '@angular/material/divider';
 import { finalize, Observable } from 'rxjs';
 import { GoogleSheetsService } from '../../services/google-sheets-service';
 import { NextMatchService, FutureMatchInfo } from '../../services/next-match.service';
+import { trigger, state, style, transition, animate } from '@angular/animations';
 
 interface PlayerAttendanceStatus {
   date: string;
@@ -24,29 +30,60 @@ interface MatchPresenceCounts {
   afwezig: number;
 }
 
+interface PlayerAttendance {
+  name: string;
+  status: 'Ja' | 'Nee';
+  position?: string;
+}
+
+interface MatchAttendanceDetails {
+  date: string;
+  aanwezig: PlayerAttendance[];
+  afwezig: PlayerAttendance[];
+  geenReactie: { name: string; position?: string; actief: boolean; }[];
+}
+
 @Component({
   selector: 'app-kalender',
   standalone: true,
+  animations: [
+    trigger('slideInOut', [
+      transition(':enter', [
+        style({ height: '0', opacity: 0, overflow: 'hidden' }),
+        animate('300ms ease-in-out', style({ height: '*', opacity: 1 }))
+      ]),
+      transition(':leave', [
+        animate('300ms ease-in-out', style({ height: '0', opacity: 0 }))
+      ])
+    ])
+  ],
   imports: [
     CommonModule,
     FormsModule,
     MatCardModule,
     MatListModule,
     MatButtonToggleModule,
+    MatButtonModule,
     MatFormFieldModule,
     MatSelectModule,
     MatProgressSpinnerModule,
-    MatIconModule
+    MatIconModule,
+    MatChipsModule,
+    MatExpansionModule,
+    MatTooltipModule,
+    MatDividerModule
   ],
   templateUrl: './kalender.component.html',
   styleUrl: './kalender.component.scss'
 })
 export class KalenderComponent implements OnInit {
-  players: { name: string, position: string }[] = [];
+  players: { name: string, position: string, actief: boolean }[] = [];
   selectedPlayer: string | null = null;
   futureMatches: FutureMatchInfo[] = [];
   playerAttendanceStatus: PlayerAttendanceStatus[] = [];
   matchPresenceCounts: MatchPresenceCounts[] = [];
+  matchAttendanceDetails: MatchAttendanceDetails[] = [];
+  expandedMatches: { [date: string]: boolean } = {};
   
   isLoadingPlayers = false;
   isLoadingMatches = false;
@@ -85,9 +122,14 @@ export class KalenderComponent implements OnInit {
       .subscribe({
         next: (data) => {
           this.players = data.slice(1)
-                             .map(row => ({ name: row[0], position: row[1] || '' }))
+                             .map(row => ({ 
+                               name: row[0], 
+                               position: row[1] || '', 
+                               actief: row[2] === 'Ja' || row[2] === true || row[2] === 'TRUE' || row[2] === 1 || row[2] === '1'
+                             }))
                              .filter(player => player.name)
                              .sort((a, b) => a.name.localeCompare(b.name));
+          
           this.errorMessage = null;
           this.loadLastSelectedPlayer();
         },
@@ -106,8 +148,9 @@ export class KalenderComponent implements OnInit {
         next: (matches) => {
           this.futureMatches = matches;
           this.errorMessage = null;
-          // Load presence counts for all matches
+          // Load presence counts and details for all matches
           this.loadMatchPresenceCounts();
+          this.loadMatchAttendanceDetails();
           if (this.selectedPlayer) {
             this.loadPlayerAttendanceStatus();
           }
@@ -236,6 +279,63 @@ export class KalenderComponent implements OnInit {
       });
   }
 
+  loadMatchAttendanceDetails(): void {
+    if (this.futureMatches.length === 0) {
+      this.matchAttendanceDetails = [];
+      return;
+    }
+
+    this.googleSheetsService.getSheetData(this.SHEET_NAME)
+      .subscribe({
+        next: (data) => {
+          this.matchAttendanceDetails = this.futureMatches.map(match => {
+            const formattedDate = this.formatDate(match.parsedDate!);
+            
+            // Get all players with their positions
+            const playerMap = new Map();
+            this.players.forEach(player => {
+              playerMap.set(player.name, player.position);
+            });
+
+            // Collect attendance for this match date
+            const aanwezig: PlayerAttendance[] = [];
+            const afwezig: PlayerAttendance[] = [];
+
+            data.forEach((row, index) => {
+              if (index > 0 && row[0] === formattedDate) { // Skip header row
+                const playerName = row[1];
+                const status = row[2] as 'Ja' | 'Nee';
+                const position = playerMap.get(playerName) || '';
+
+                if (status === 'Ja') {
+                  aanwezig.push({ name: playerName, status, position });
+                } else if (status === 'Nee') {
+                  afwezig.push({ name: playerName, status, position });
+                }
+              }
+            });
+
+            // Find players who haven't responded (only active players)
+            const respondedPlayers = new Set([...aanwezig.map(p => p.name), ...afwezig.map(p => p.name)]);
+            const geenReactie = this.players
+              .filter(player => !respondedPlayers.has(player.name) && player.actief)
+              .map(player => ({ name: player.name, position: player.position, actief: player.actief }));
+
+            return {
+              date: formattedDate,
+              aanwezig: aanwezig.sort((a, b) => a.name.localeCompare(b.name)),
+              afwezig: afwezig.sort((a, b) => a.name.localeCompare(b.name)),
+              geenReactie: geenReactie.sort((a, b) => a.name.localeCompare(b.name))
+            };
+          });
+        },
+        error: (err) => {
+          console.error('Error loading attendance details:', err);
+          this.matchAttendanceDetails = [];
+        }
+      });
+  }
+
   updateMatchPresenceCount(matchDate: string): void {
     this.updatingCounts[matchDate] = true;
     
@@ -280,6 +380,65 @@ export class KalenderComponent implements OnInit {
       });
   }
 
+  updateMatchAttendanceDetails(matchDate: string): void {
+    this.googleSheetsService.getSheetData(this.SHEET_NAME)
+      .subscribe({
+        next: (data) => {
+          // Get all players with their positions
+          const playerMap = new Map();
+          this.players.forEach(player => {
+            playerMap.set(player.name, player.position);
+          });
+
+          // Collect attendance for this specific match date
+          const aanwezig: PlayerAttendance[] = [];
+          const afwezig: PlayerAttendance[] = [];
+
+          data.forEach((row, index) => {
+            if (index > 0 && row[0] === matchDate) { // Skip header row
+              const playerName = row[1];
+              const status = row[2] as 'Ja' | 'Nee';
+              const position = playerMap.get(playerName) || '';
+
+              if (status === 'Ja') {
+                aanwezig.push({ name: playerName, status, position });
+              } else if (status === 'Nee') {
+                afwezig.push({ name: playerName, status, position });
+              }
+            }
+          });
+
+          // Find players who haven't responded (only active players)
+          const respondedPlayers = new Set([...aanwezig.map(p => p.name), ...afwezig.map(p => p.name)]);
+          const geenReactie = this.players
+            .filter(player => !respondedPlayers.has(player.name) && player.actief)
+            .map(player => ({ name: player.name, position: player.position, actief: player.actief }));
+
+          // Update only the specific match in the array
+          const matchIndex = this.matchAttendanceDetails.findIndex(m => m.date === matchDate);
+          if (matchIndex >= 0) {
+            this.matchAttendanceDetails[matchIndex] = {
+              date: matchDate,
+              aanwezig: aanwezig.sort((a, b) => a.name.localeCompare(b.name)),
+              afwezig: afwezig.sort((a, b) => a.name.localeCompare(b.name)),
+              geenReactie: geenReactie.sort((a, b) => a.name.localeCompare(b.name))
+            };
+          } else {
+            // Add new entry if it doesn't exist
+            this.matchAttendanceDetails.push({
+              date: matchDate,
+              aanwezig: aanwezig.sort((a, b) => a.name.localeCompare(b.name)),
+              afwezig: afwezig.sort((a, b) => a.name.localeCompare(b.name)),
+              geenReactie: geenReactie.sort((a, b) => a.name.localeCompare(b.name))
+            });
+          }
+        },
+        error: (err) => {
+          console.error('Error updating attendance details for match:', matchDate, err);
+        }
+      });
+  }
+
   setAttendance(matchDate: string, uiStatus: 'aanwezig' | 'afwezig'): void {
     if (!this.selectedPlayer || this.savingStates[matchDate]) {
       return;
@@ -309,16 +468,13 @@ export class KalenderComponent implements OnInit {
           let operation: Observable<any>;
           if (rowIndex > 0) {
             const sheetRowIndex = rowIndex + 1;
-            console.log(`Updating row ${sheetRowIndex} for ${currentPlayer} on ${matchDate}`);
             operation = this.googleSheetsService.updateSheetRow(this.SHEET_NAME, sheetRowIndex, rowData);
           } else {
-            console.log(`Appending row for ${currentPlayer} on ${matchDate}`);
             operation = this.googleSheetsService.appendSheetRow(this.SHEET_NAME, rowData);
           }
 
           operation.pipe(finalize(() => this.savingStates[matchDate] = false)).subscribe({
             next: (response) => {
-              console.log('Attendance saved:', response);
               if (this.selectedPlayer === currentPlayer) {
                 // Update local status
                 const statusIndex = this.playerAttendanceStatus.findIndex(s => s.date === matchDate);
@@ -330,6 +486,7 @@ export class KalenderComponent implements OnInit {
 
                 // Refresh presence counts only for this specific match
                 this.updateMatchPresenceCount(matchDate);
+                this.updateMatchAttendanceDetails(matchDate);
 
                 this.snackBar.open(
                   `Aanwezigheid (${dbStatus === 'Ja' ? 'Aanwezig' : 'Afwezig'}) voor ${currentPlayer} opgeslagen!`, 
@@ -368,9 +525,31 @@ export class KalenderComponent implements OnInit {
     return status.status === 'Ja' ? 'aanwezig' : 'afwezig';
   }
 
-  getPresenceCounts(matchDate: string): { aanwezig: number; afwezig: number } {
+  getPresenceCounts(matchDate: string): { aanwezig: number; afwezig: number; geenReactie: number } {
     const counts = this.matchPresenceCounts.find(c => c.date === matchDate);
-    return counts ? { aanwezig: counts.aanwezig, afwezig: counts.afwezig } : { aanwezig: 0, afwezig: 0 };
+    const details = this.getAttendanceDetails(matchDate);
+    
+    const aanwezig = counts ? counts.aanwezig : 0;
+    const afwezig = counts ? counts.afwezig : 0;
+    const geenReactie = details ? details.geenReactie.length : 0;
+    
+    return { aanwezig, afwezig, geenReactie };
+  }
+
+  getAttendanceDetails(matchDate: string): MatchAttendanceDetails | null {
+    return this.matchAttendanceDetails.find(details => details.date === matchDate) || null;
+  }
+
+  toggleMatchExpansion(matchDate: string): void {
+    this.expandedMatches[matchDate] = !this.expandedMatches[matchDate];
+  }
+
+  isMatchExpanded(matchDate: string): boolean {
+    return this.expandedMatches[matchDate] || false;
+  }
+
+  getPlayerInitials(name: string): string {
+    return name.split(' ').map(n => n.charAt(0).toUpperCase()).join('').substring(0, 2);
   }
 
   isUpdatingCounts(matchDate: string): boolean {
