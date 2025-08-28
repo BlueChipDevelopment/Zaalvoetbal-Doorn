@@ -14,8 +14,9 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDividerModule } from '@angular/material/divider';
-import { finalize, Observable } from 'rxjs';
+import { finalize, Observable, forkJoin } from 'rxjs';
 import { GoogleSheetsService } from '../../services/google-sheets-service';
+import { AttendanceService } from '../../services/attendance.service';
 import { PlayerService } from '../../services/player.service';
 import { PlayerSheetData } from '../../interfaces/IPlayerSheet';
 import { NextMatchService, FutureMatchInfo } from '../../services/next-match.service';
@@ -91,6 +92,9 @@ export class KalenderComponent implements OnInit {
   matchAttendanceDetails: MatchAttendanceDetails[] = [];
   expandedMatches: { [date: string]: boolean } = {};
   
+  // Store all attendance records for reuse
+  private allAttendanceRecords: any[] = [];
+  
   isLoadingPlayers = false;
   isLoadingMatches = false;
   isLoadingStatus = false;
@@ -102,7 +106,6 @@ export class KalenderComponent implements OnInit {
   playerSelectError: string | null = null;
   
   readonly LAST_PLAYER_KEY = 'lastSelectedPlayer';
-  readonly SHEET_NAME = 'Aanwezigheid';
 
   // Central loading state - component is ready when initial data is loaded
   get isLoading(): boolean {
@@ -111,6 +114,7 @@ export class KalenderComponent implements OnInit {
 
   constructor(
     private googleSheetsService: GoogleSheetsService,
+    private attendanceService: AttendanceService,
     private playerService: PlayerService,
     private nextMatchService: NextMatchService,
     private snackBar: MatSnackBar
@@ -149,12 +153,8 @@ export class KalenderComponent implements OnInit {
             formattedDate: match.parsedDate ? this.formatDate(match.parsedDate) : ''
           }));
           this.errorMessage = null;
-          // Load presence counts and details for all matches
-          this.loadMatchPresenceCounts();
-          this.loadMatchAttendanceDetails();
-          if (this.selectedPlayer) {
-            this.loadPlayerAttendanceStatus();
-          }
+          // Load all attendance data using the attendance service (single cached call)
+          this.loadAllAttendanceData();
         },
         error: (err) => {
           console.error('Error loading future matches:', err);
@@ -167,9 +167,7 @@ export class KalenderComponent implements OnInit {
     const lastPlayer = localStorage.getItem(this.LAST_PLAYER_KEY);
     if (lastPlayer && this.players.some(player => player.name === lastPlayer)) {
       this.selectedPlayer = lastPlayer;
-      if (this.futureMatches.length > 0) {
-        this.loadPlayerAttendanceStatus();
-      }
+      // Player attendance status will be loaded by loadAllAttendanceData() when matches are loaded
     } else {
       this.selectedPlayer = null;
       localStorage.removeItem(this.LAST_PLAYER_KEY);
@@ -183,12 +181,123 @@ export class KalenderComponent implements OnInit {
     if (this.selectedPlayer) {
       localStorage.setItem(this.LAST_PLAYER_KEY, this.selectedPlayer);
       if (this.futureMatches.length > 0) {
-        this.loadPlayerAttendanceStatus();
+        this.loadPlayerAttendanceStatusFromStoredData();
       }
     } else {
       localStorage.removeItem(this.LAST_PLAYER_KEY);
       this.playerSelectError = 'Selecteer eerst een speler.';
     }
+  }
+
+  loadAllAttendanceData(): void {
+    if (this.futureMatches.length === 0) {
+      this.matchPresenceCounts = [];
+      this.matchAttendanceDetails = [];
+      return;
+    }
+
+    this.isLoadingCounts = true;
+
+    // Get all attendance records once and store them for reuse
+    this.attendanceService.getAttendanceRecords({ futureOnly: false })
+      .pipe(finalize(() => this.isLoadingCounts = false))
+      .subscribe({
+        next: (allRecords) => {
+          // Store for reuse
+          this.allAttendanceRecords = allRecords;
+          
+          // Process match presence counts
+          this.processMatchPresenceCounts();
+          
+          // Load detailed attendance for all matches
+          this.loadMatchAttendanceDetailsFromService();
+          
+          // Load player attendance status if a player is selected
+          if (this.selectedPlayer) {
+            this.loadPlayerAttendanceStatusFromStoredData();
+          }
+        },
+        error: (err) => {
+          console.error('Error loading attendance data:', err);
+          this.matchPresenceCounts = [];
+          this.snackBar.open('Fout bij ophalen aanwezigheid aantallen.', 'Sluiten', { 
+            duration: 5000, 
+            panelClass: ['snackbar-error'] 
+          });
+        }
+      });
+  }
+
+  private processMatchPresenceCounts(): void {
+    const futureDates = this.futureMatches.map(match => this.formatDate(match.parsedDate!));
+    
+    this.matchPresenceCounts = futureDates.map(date => {
+      const dateRecords = this.allAttendanceRecords.filter(record => record.date === date);
+      return {
+        date,
+        aanwezig: dateRecords.filter(r => r.status === 'Ja').length,
+        afwezig: dateRecords.filter(r => r.status === 'Nee').length
+      };
+    });
+  }
+
+  loadPlayerAttendanceStatusFromStoredData(): void {
+    if (!this.selectedPlayer || this.futureMatches.length === 0) {
+      this.playerAttendanceStatus = [];
+      return;
+    }
+
+    const currentPlayer = this.selectedPlayer;
+    const playerRecords = this.allAttendanceRecords.filter(record => 
+      record.playerName === currentPlayer
+    );
+
+    this.playerAttendanceStatus = this.futureMatches.map(match => {
+      const formattedDate = this.formatDate(match.parsedDate!);
+      const attendanceRecord = playerRecords.find(record => 
+        record.date === formattedDate
+      );
+
+      return {
+        date: formattedDate,
+        status: attendanceRecord?.status || null
+      };
+    });
+  }
+
+  loadMatchAttendanceDetailsFromService(): void {
+    const futureDates = this.futureMatches.map(match => this.formatDate(match.parsedDate!));
+    const detailRequests = futureDates.map(date => 
+      this.attendanceService.getMatchAttendanceDetails(date)
+    );
+
+    // Use forkJoin to get all match details in parallel, but from cached data
+    forkJoin(detailRequests).subscribe({
+        next: (allDetails) => {
+          this.matchAttendanceDetails = allDetails.map(details => ({
+            date: details.date,
+            aanwezig: details.present.map(p => ({ 
+              name: p.name, 
+              status: 'Ja' as const, 
+              position: p.position 
+            })),
+            afwezig: details.absent.map(p => ({ 
+              name: p.name, 
+              status: 'Nee' as const, 
+              position: p.position 
+            })),
+            geenReactie: details.noResponse.map(p => ({ 
+              name: p.name, 
+              position: p.position, 
+              actief: p.playerData?.actief || true 
+            }))
+          }));
+        },
+        error: (err) => {
+          console.error('Error loading attendance details:', err);
+          this.matchAttendanceDetails = [];
+        }
+      });
   }
 
   loadPlayerAttendanceStatus(): void {
@@ -200,22 +309,21 @@ export class KalenderComponent implements OnInit {
     this.isLoadingStatus = true;
     const currentPlayer = this.selectedPlayer;
 
-    this.googleSheetsService.getSheetData(this.SHEET_NAME)
+    // Use attendance service to get player attendance for all future dates
+    this.attendanceService.getAttendanceForPlayer(currentPlayer)
       .pipe(finalize(() => this.isLoadingStatus = false))
       .subscribe({
-        next: (data) => {
+        next: (attendanceRecords) => {
           if (this.selectedPlayer === currentPlayer) {
             this.playerAttendanceStatus = this.futureMatches.map(match => {
               const formattedDate = this.formatDate(match.parsedDate!);
-              const attendanceRow = data.find((row, index) =>
-                index > 0 &&
-                row[0] === formattedDate &&
-                row[1] === currentPlayer
+              const attendanceRecord = attendanceRecords.find(record => 
+                record.date === formattedDate
               );
 
               return {
                 date: formattedDate,
-                status: attendanceRow ? (attendanceRow[2] as 'Ja' | 'Nee') : null
+                status: attendanceRecord?.status || null
               };
             });
           }
@@ -233,146 +341,33 @@ export class KalenderComponent implements OnInit {
       });
   }
 
-  loadMatchPresenceCounts(): void {
-    if (this.futureMatches.length === 0) {
-      this.matchPresenceCounts = [];
-      return;
-    }
-
-    this.isLoadingCounts = true;
-
-    this.googleSheetsService.getSheetData(this.SHEET_NAME)
-      .pipe(finalize(() => this.isLoadingCounts = false))
-      .subscribe({
-        next: (data) => {
-          this.matchPresenceCounts = this.futureMatches.map(match => {
-            const formattedDate = this.formatDate(match.parsedDate!);
-            
-            // Count present and absent for this match date
-            let aanwezig = 0;
-            let afwezig = 0;
-
-            data.forEach((row, index) => {
-              if (index > 0 && row[0] === formattedDate) { // Skip header row
-                if (row[2] === 'Ja') {
-                  aanwezig++;
-                } else if (row[2] === 'Nee') {
-                  afwezig++;
-                }
-              }
-            });
-
-            return {
-              date: formattedDate,
-              aanwezig,
-              afwezig
-            };
-          });
-        },
-        error: (err) => {
-          console.error('Error loading presence counts:', err);
-          this.matchPresenceCounts = [];
-          this.snackBar.open('Fout bij ophalen aanwezigheid aantallen.', 'Sluiten', { 
-            duration: 5000, 
-            panelClass: ['snackbar-error'] 
-          });
-        }
-      });
-  }
-
-  loadMatchAttendanceDetails(): void {
-    if (this.futureMatches.length === 0) {
-      this.matchAttendanceDetails = [];
-      return;
-    }
-
-    this.googleSheetsService.getSheetData(this.SHEET_NAME)
-      .subscribe({
-        next: (data) => {
-          this.matchAttendanceDetails = this.futureMatches.map(match => {
-            const formattedDate = this.formatDate(match.parsedDate!);
-            
-            // Get all players with their positions
-            const playerMap = new Map();
-            this.players.forEach(player => {
-              playerMap.set(player.name, player.position);
-            });
-
-            // Collect attendance for this match date
-            const aanwezig: PlayerAttendance[] = [];
-            const afwezig: PlayerAttendance[] = [];
-
-            data.forEach((row, index) => {
-              if (index > 0 && row[0] === formattedDate) { // Skip header row
-                const playerName = row[1];
-                const status = row[2] as 'Ja' | 'Nee';
-                const position = playerMap.get(playerName) || '';
-
-                if (status === 'Ja') {
-                  aanwezig.push({ name: playerName, status, position });
-                } else if (status === 'Nee') {
-                  afwezig.push({ name: playerName, status, position });
-                }
-              }
-            });
-
-            // Find players who haven't responded (only active players)
-            const respondedPlayers = new Set([...aanwezig.map(p => p.name), ...afwezig.map(p => p.name)]);
-            const geenReactie = this.players
-              .filter(player => !respondedPlayers.has(player.name) && player.actief)
-              .map(player => ({ name: player.name, position: player.position, actief: player.actief }));
-
-            return {
-              date: formattedDate,
-              aanwezig: aanwezig.sort((a, b) => a.name.localeCompare(b.name)),
-              afwezig: afwezig.sort((a, b) => a.name.localeCompare(b.name)),
-              geenReactie: geenReactie.sort((a, b) => a.name.localeCompare(b.name))
-            };
-          });
-        },
-        error: (err) => {
-          console.error('Error loading attendance details:', err);
-          this.matchAttendanceDetails = [];
-        }
-      });
-  }
-
   updateMatchPresenceCount(matchDate: string): void {
     this.updatingCounts[matchDate] = true;
     
-    this.googleSheetsService.getSheetData(this.SHEET_NAME)
+    // Use attendance service to get updated counts for specific match
+    this.attendanceService.getMatchAttendanceOverviews({ date: matchDate })
       .pipe(finalize(() => this.updatingCounts[matchDate] = false))
       .subscribe({
-        next: (data) => {
-          // Count present and absent for this specific match date
-          let aanwezig = 0;
-          let afwezig = 0;
-
-          data.forEach((row, index) => {
-            if (index > 0 && row[0] === matchDate) { // Skip header row
-              if (row[2] === 'Ja') {
-                aanwezig++;
-              } else if (row[2] === 'Nee') {
-                afwezig++;
-              }
+        next: (overviews) => {
+          if (overviews.length > 0) {
+            const overview = overviews[0];
+            
+            // Update only the specific match in the array
+            const matchIndex = this.matchPresenceCounts.findIndex(c => c.date === matchDate);
+            if (matchIndex >= 0) {
+              this.matchPresenceCounts[matchIndex] = {
+                date: matchDate,
+                aanwezig: overview.presentCount,
+                afwezig: overview.absentCount
+              };
+            } else {
+              // Add new entry if it doesn't exist
+              this.matchPresenceCounts.push({
+                date: matchDate,
+                aanwezig: overview.presentCount,
+                afwezig: overview.absentCount
+              });
             }
-          });
-
-          // Update only the specific match in the array
-          const matchIndex = this.matchPresenceCounts.findIndex(c => c.date === matchDate);
-          if (matchIndex >= 0) {
-            this.matchPresenceCounts[matchIndex] = {
-              date: matchDate,
-              aanwezig,
-              afwezig
-            };
-          } else {
-            // Add new entry if it doesn't exist
-            this.matchPresenceCounts.push({
-              date: matchDate,
-              aanwezig,
-              afwezig
-            });
           }
         },
         error: (err) => {
@@ -382,56 +377,36 @@ export class KalenderComponent implements OnInit {
   }
 
   updateMatchAttendanceDetails(matchDate: string): void {
-    this.googleSheetsService.getSheetData(this.SHEET_NAME)
+    this.attendanceService.getMatchAttendanceDetails(matchDate)
       .subscribe({
-        next: (data) => {
-          // Get all players with their positions
-          const playerMap = new Map();
-          this.players.forEach(player => {
-            playerMap.set(player.name, player.position);
-          });
-
-          // Collect attendance for this specific match date
-          const aanwezig: PlayerAttendance[] = [];
-          const afwezig: PlayerAttendance[] = [];
-
-          data.forEach((row, index) => {
-            if (index > 0 && row[0] === matchDate) { // Skip header row
-              const playerName = row[1];
-              const status = row[2] as 'Ja' | 'Nee';
-              const position = playerMap.get(playerName) || '';
-
-              if (status === 'Ja') {
-                aanwezig.push({ name: playerName, status, position });
-              } else if (status === 'Nee') {
-                afwezig.push({ name: playerName, status, position });
-              }
-            }
-          });
-
-          // Find players who haven't responded (only active players)
-          const respondedPlayers = new Set([...aanwezig.map(p => p.name), ...afwezig.map(p => p.name)]);
-          const geenReactie = this.players
-            .filter(player => !respondedPlayers.has(player.name) && player.actief)
-            .map(player => ({ name: player.name, position: player.position, actief: player.actief }));
-
+        next: (details) => {
           // Update only the specific match in the array
           const matchIndex = this.matchAttendanceDetails.findIndex(m => m.date === matchDate);
+          
+          const matchDetails = {
+            date: matchDate,
+            aanwezig: details.present.map(p => ({ 
+              name: p.name, 
+              status: 'Ja' as const, 
+              position: p.position 
+            })),
+            afwezig: details.absent.map(p => ({ 
+              name: p.name, 
+              status: 'Nee' as const, 
+              position: p.position 
+            })),
+            geenReactie: details.noResponse.map(p => ({ 
+              name: p.name, 
+              position: p.position, 
+              actief: p.playerData?.actief || true 
+            }))
+          };
+
           if (matchIndex >= 0) {
-            this.matchAttendanceDetails[matchIndex] = {
-              date: matchDate,
-              aanwezig: aanwezig.sort((a, b) => a.name.localeCompare(b.name)),
-              afwezig: afwezig.sort((a, b) => a.name.localeCompare(b.name)),
-              geenReactie: geenReactie.sort((a, b) => a.name.localeCompare(b.name))
-            };
+            this.matchAttendanceDetails[matchIndex] = matchDetails;
           } else {
             // Add new entry if it doesn't exist
-            this.matchAttendanceDetails.push({
-              date: matchDate,
-              aanwezig: aanwezig.sort((a, b) => a.name.localeCompare(b.name)),
-              afwezig: afwezig.sort((a, b) => a.name.localeCompare(b.name)),
-              geenReactie: geenReactie.sort((a, b) => a.name.localeCompare(b.name))
-            });
+            this.matchAttendanceDetails.push(matchDetails);
           }
         },
         error: (err) => {
@@ -450,72 +425,45 @@ export class KalenderComponent implements OnInit {
 
     this.savingStates[matchDate] = true;
     const currentPlayer = this.selectedPlayer;
-    const rowData = [matchDate, currentPlayer, dbStatus];
 
-    this.googleSheetsService.getSheetData(this.SHEET_NAME)
-      .subscribe({
-        next: (data) => {
-          if (this.selectedPlayer !== currentPlayer) {
-            this.savingStates[matchDate] = false;
-            return;
-          }
-
-          const rowIndex = data.findIndex((row, index) =>
-            index > 0 &&
-            row[0] === matchDate &&
-            row[1] === currentPlayer
-          );
-
-          let operation: Observable<any>;
-          if (rowIndex > 0) {
-            const sheetRowIndex = rowIndex + 1;
-            operation = this.googleSheetsService.updateSheetRow(this.SHEET_NAME, sheetRowIndex, rowData);
+    // Use attendance service to set attendance
+    this.attendanceService.setAttendance({
+      date: matchDate,
+      playerName: currentPlayer,
+      status: dbStatus
+    })
+    .pipe(finalize(() => this.savingStates[matchDate] = false))
+    .subscribe({
+      next: (response) => {
+        if (this.selectedPlayer === currentPlayer) {
+          // Update local status
+          const statusIndex = this.playerAttendanceStatus.findIndex(s => s.date === matchDate);
+          if (statusIndex >= 0) {
+            this.playerAttendanceStatus[statusIndex].status = dbStatus;
           } else {
-            operation = this.googleSheetsService.appendSheetRow(this.SHEET_NAME, rowData);
+            this.playerAttendanceStatus.push({ date: matchDate, status: dbStatus });
           }
 
-          operation.pipe(finalize(() => this.savingStates[matchDate] = false)).subscribe({
-            next: (response) => {
-              if (this.selectedPlayer === currentPlayer) {
-                // Update local status
-                const statusIndex = this.playerAttendanceStatus.findIndex(s => s.date === matchDate);
-                if (statusIndex >= 0) {
-                  this.playerAttendanceStatus[statusIndex].status = dbStatus;
-                } else {
-                  this.playerAttendanceStatus.push({ date: matchDate, status: dbStatus });
-                }
+          // Refresh presence counts only for this specific match
+          this.updateMatchPresenceCount(matchDate);
+          this.updateMatchAttendanceDetails(matchDate);
 
-                // Refresh presence counts only for this specific match
-                this.updateMatchPresenceCount(matchDate);
-                this.updateMatchAttendanceDetails(matchDate);
-
-                this.snackBar.open(
-                  `Aanwezigheid (${dbStatus === 'Ja' ? 'Aanwezig' : 'Afwezig'}) voor ${currentPlayer} opgeslagen!`, 
-                  'Ok', 
-                  { duration: 3000 }
-                );
-              }
-            },
-            error: (err) => {
-              console.error('Error saving attendance:', err);
-              const message = (err instanceof Error) ? err.message : 'Fout bij opslaan aanwezigheid.';
-              this.snackBar.open(message, 'Sluiten', { 
-                duration: 5000, 
-                panelClass: ['snackbar-error'] 
-              });
-            }
-          });
-        },
-        error: (err) => {
-          console.error('Error fetching sheet data before saving:', err);
-          const message = (err instanceof Error) ? err.message : 'Kon bestaande data niet controleren, opslaan mislukt.';
-          this.snackBar.open(message, 'Sluiten', { 
-            duration: 5000, 
-            panelClass: ['snackbar-error'] 
-          });
-          this.savingStates[matchDate] = false;
+          this.snackBar.open(
+            `Aanwezigheid (${dbStatus === 'Ja' ? 'Aanwezig' : 'Afwezig'}) voor ${currentPlayer} opgeslagen!`, 
+            'Ok', 
+            { duration: 3000 }
+          );
         }
-      });
+      },
+      error: (err) => {
+        console.error('Error saving attendance:', err);
+        const message = (err instanceof Error) ? err.message : 'Fout bij opslaan aanwezigheid.';
+        this.snackBar.open(message, 'Sluiten', { 
+          duration: 5000, 
+          panelClass: ['snackbar-error'] 
+        });
+      }
+    });
   }
 
   getAttendanceStatus(matchDate: string): 'aanwezig' | 'afwezig' | null {

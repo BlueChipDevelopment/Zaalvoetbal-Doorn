@@ -5,6 +5,7 @@ import { Positions } from '../../enums/positions.enum';
 import { Team, Teams } from '../../interfaces/ITeam';
 import { TeamGenerateService } from '../../services/team-generate.service';
 import { GoogleSheetsService } from '../../services/google-sheets-service';
+import { AttendanceService } from '../../services/attendance.service';
 import { PlayerService } from '../../services/player.service';
 import { PlayerSheetData } from '../../interfaces/IPlayerSheet';
 import { finalize } from 'rxjs/operators';
@@ -81,6 +82,7 @@ export class TeamGeneratorComponent implements OnInit {
     private teamGenerateService: TeamGenerateService,
     private nextMatchService: NextMatchService,
     private googleSheetsService: GoogleSheetsService,
+    private attendanceService: AttendanceService,
     private playerService: PlayerService,
     private snackBar: MatSnackBar,
     private iconRegistry: MatIconRegistry,
@@ -226,6 +228,7 @@ export class TeamGeneratorComponent implements OnInit {
   protected GetAanwezigSpelers(): void {
     this.loadingSubject.next(true);
     this.errorMessage = null;
+    
     // Eerst alle ratings ophalen
     this.teamGenerateService.getFullPlayerStats().pipe(
       finalize(() => this.loadingSubject.next(false))
@@ -237,28 +240,32 @@ export class TeamGeneratorComponent implements OnInit {
               this.snackBar.open('Geen aankomende wedstrijd gevonden.', 'Sluiten', { duration: 5000, panelClass: ['snackbar-error'] });
               return;
             }
-            const dateString = matchInfo.parsedDate ? `${matchInfo.parsedDate.getFullYear()}-${(matchInfo.parsedDate.getMonth() + 1).toString().padStart(2, '0')}-${matchInfo.parsedDate.getDate().toString().padStart(2, '0')}` : matchInfo.date;
-            this.googleSheetsService.getSheetData('Aanwezigheid').subscribe({
-              next: (aanwezigheidData: any[][]) => {
-                const aanwezigen = aanwezigheidData
-                  .filter((row, idx) => idx > 0 && row[0] === dateString && row[2] === 'Ja')
-                  .map(row => row[1]);
-                if (aanwezigen.length === 0) {
+            
+            const dateString = matchInfo.parsedDate 
+              ? this.attendanceService.formatDate(matchInfo.parsedDate)
+              : matchInfo.date;
+            
+            // Gebruik AttendanceService in plaats van direct Google Sheets
+            this.attendanceService.getPresentPlayers(dateString).subscribe({
+              next: (presentPlayers) => {
+                if (presentPlayers.length === 0) {
                   this.snackBar.open('Geen aanwezige spelers gevonden voor de volgende wedstrijd.', 'Sluiten', { duration: 5000, panelClass: ['snackbar-error'] });
                   return;
                 }
+                
                 let formArr = new FormArray<FormGroup>([]);
-                for (let name of aanwezigen) {
-                  const playerStat = playerStats.find((p: any) => p.name === name);
+                for (let player of presentPlayers) {
+                  const playerStat = playerStats.find((p: any) => p.name === player.name);
                   let form = new FormGroup({
-                    name: new FormControl<string | null>(name, [Validators.required]),
-                    position: new FormControl<string | null>(playerStat ? playerStat.position : Positions.PLAYER.toString(), [Validators.required]),
+                    name: new FormControl<string | null>(player.name, [Validators.required]),
+                    position: new FormControl<string | null>(playerStat ? playerStat.position : player.position || Positions.PLAYER.toString(), [Validators.required]),
                     rating: new FormControl<number | null>(playerStat ? playerStat.rating : null, [Validators.required]),
                   });
                   formArr.push(form);
                 }
+                
                 this.playerForms.controls['players'] = formArr;
-                this.numOfPlayers = aanwezigen.length;
+                this.numOfPlayers = presentPlayers.length;
                 this.isFirst = false;
                 this.isGenerated = false;
                 this.errorMessage = null;

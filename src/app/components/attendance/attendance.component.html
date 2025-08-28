@@ -51,10 +51,6 @@
               <span>Je hebt aangegeven afwezig te zijn.</span>
               <mat-icon color="warn">cancel</mat-icon>
             </div>
-            <div *ngSwitchCase="'Misschien'" class="status-row status-maybe">
-              <span>Je hebt aangegeven misschien aanwezig te zijn.</span>
-              <mat-icon color="accent">help_outline</mat-icon>
-            </div>
           </ng-container>
         </div>
       </div>
@@ -73,8 +69,8 @@
         <h3>Aanwezig ({{ presentCount }})</h3>
         <ng-container *ngFor="let item of attendanceList" >
           <ng-container *ngIf="item.status === 'Ja'">
-            <app-player-card *ngIf="item.playerObj" [player]="item.playerObj"></app-player-card>
-            <span *ngIf="!item.playerObj">{{ item.speler }}</span>
+            <app-player-card *ngIf="item.playerData" [player]="item.playerData"></app-player-card>
+            <span *ngIf="!item.playerData">{{ item.name }}</span>
           </ng-container>
         </ng-container>
       </div>
@@ -82,8 +78,8 @@
         <h3>Afwezig ({{ absentCount }})</h3>
         <ng-container *ngFor="let item of attendanceList">
           <ng-container *ngIf="item.status === 'Nee'">
-            <app-player-card *ngIf="item.playerObj" [player]="item.playerObj"></app-player-card>
-            <span *ngIf="!item.playerObj">{{ item.speler }}</span>
+            <app-player-card *ngIf="item.playerData" [player]="item.playerData"></app-player-card>
+            <span *ngIf="!item.playerData">{{ item.name }}</span>
           </ng-container>
         </ng-container>
       </div>

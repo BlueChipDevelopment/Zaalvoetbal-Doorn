@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { GoogleSheetsService } from '../../services/google-sheets-service';
+import { AttendanceService } from '../../services/attendance.service';
 import { PlayerService } from '../../services/player.service';
 import { PlayerSheetData } from '../../interfaces/IPlayerSheet';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
@@ -16,7 +16,6 @@ import { finalize, Observable } from 'rxjs';
 import { NextMatchService, NextMatchInfo } from '../../services/next-match.service';
 import { NextMatchInfoComponent } from '../next-match-info/next-match-info.component';
 import { PlayerCardComponent } from '../player-card/player-card.component';
-import { GameStatisticsService } from '../../services/game.statistics.service';
 import { Player } from '../../interfaces/IPlayer';
 import { environment } from '../../../environments/environment';
 
@@ -47,12 +46,17 @@ export class AttendanceComponent implements OnInit {
   nextMatchInfo: NextMatchInfo | null = null;
   isLoadingPlayers: boolean = false;
   isLoadingStatus: boolean = false;
-  attendanceStatus: 'Ja' | 'Nee' | 'Misschien' | null = null;
-  attendanceList: { speler: string, status: 'Ja' | 'Nee' | 'Misschien', playerObj?: Player }[] = [];
+  attendanceStatus: 'Ja' | 'Nee' | null = null;
+  attendanceList: { 
+    speler: string; 
+    status: 'Ja' | 'Nee'; 
+    playerObj?: Player;
+    playerData?: Player;  // Voor template compatibility
+    name: string;         // Voor template compatibility
+  }[] = [];
   presentCount = 0;
   absentCount = 0;
   readonly LAST_PLAYER_KEY = 'lastSelectedPlayer';
-  readonly SHEET_NAME = 'Aanwezigheid';
   public errorMessage: string | null = null; // Algemene foutmeldingen (API, etc)
   public playerSelectError: string | null = null; // Alleen voor veldvalidatie spelerselectie
 
@@ -61,11 +65,10 @@ export class AttendanceComponent implements OnInit {
   pushPermissionError: string | null = null;
 
   constructor(
-    private googleSheetsService: GoogleSheetsService,
+    private attendanceService: AttendanceService,
     private playerService: PlayerService,
     private snackBar: MatSnackBar,
-    private nextMatchService: NextMatchService,
-    private gameStatisticsService: GameStatisticsService
+    private nextMatchService: NextMatchService
   ) {}
 
   ngOnInit(): void {
@@ -96,43 +99,38 @@ export class AttendanceComponent implements OnInit {
       this.absentCount = 0;
       return;
     }
+    
     const formattedDate = this.formatDate(this.nextGameDate);
-    this.googleSheetsService.getSheetData(this.SHEET_NAME).subscribe({
-      next: (data) => {
-        this.gameStatisticsService.getFullPlayerStats().subscribe((playerStats: Player[]) => {
-          this.attendanceList = data
-            .filter((row, idx) => idx > 0 && row[0] === formattedDate)
-            .map(row => {
-              const spelerNaam = row[1];
-              const foundPlayer = playerStats.find((p: Player) => p.name === spelerNaam);
-              const playerMeta = this.players.find(p => p.name === spelerNaam);
-              const playerObj = foundPlayer || {
-                name: spelerNaam,
-                position: playerMeta ? playerMeta.position : '',
-                rating: 1,
-                gamesPlayed: 0,
-                totalPoints: 0,
-                wins: 0,
-                losses: 0,
-                ties: 0,
-                winRatio: 0,
-                gameHistory: [],
-                zlatanPoints: 0,
-                ventielPoints: 0,
-                actief: true
-              };
-              return { speler: spelerNaam, status: row[2] as 'Ja' | 'Nee' | 'Misschien', playerObj };
-            });
-          this.presentCount = this.attendanceList.filter(item => item.status === 'Ja').length;
-          this.absentCount = this.attendanceList.filter(item => item.status === 'Nee').length;
-          this.errorMessage = null;
-        });
+    this.attendanceService.getMatchAttendanceDetails(formattedDate).subscribe({
+      next: (details) => {
+        // Combineer present en absent spelers voor de lijst
+        this.attendanceList = [
+          ...details.present.map(player => ({
+            speler: player.name,
+            status: 'Ja' as 'Ja' | 'Nee',
+            playerObj: player.playerData || this.createDefaultPlayer(player.name, player.position),
+            playerData: player.playerData || this.createDefaultPlayer(player.name, player.position),
+            name: player.name
+          })),
+          ...details.absent.map(player => ({
+            speler: player.name,
+            status: 'Nee' as 'Ja' | 'Nee',
+            playerObj: player.playerData || this.createDefaultPlayer(player.name, player.position),
+            playerData: player.playerData || this.createDefaultPlayer(player.name, player.position),
+            name: player.name
+          }))
+        ];
+        
+        this.presentCount = details.present.length;
+        this.absentCount = details.absent.length;
+        this.errorMessage = null;
       },
       error: (err) => {
         this.attendanceList = [];
         this.presentCount = 0;
         this.absentCount = 0;
         this.errorMessage = 'Fout bij het laden van aanwezigheid.';
+        console.error('Error loading attendance list:', err);
       }
     });
   }
@@ -183,26 +181,17 @@ export class AttendanceComponent implements OnInit {
       this.attendanceStatus = null;
       return;
     }
+    
     this.isLoadingStatus = true;
     const formattedDate = this.formatDate(this.nextGameDate);
     const currentPlayer = this.selectedPlayer;
 
-    this.googleSheetsService.getSheetData(this.SHEET_NAME)
+    this.attendanceService.getPlayerAttendanceStatus(currentPlayer, formattedDate)
       .pipe(finalize(() => this.isLoadingStatus = false))
       .subscribe({
-        next: (data) => {
+        next: (status) => {
           if (this.selectedPlayer === currentPlayer) {
-            const rowIndex = data.findIndex((row, index) =>
-              index > 0 &&
-              row[0] === formattedDate &&
-              row[1] === currentPlayer
-            );
-
-            if (rowIndex > 0) {
-              this.attendanceStatus = data[rowIndex][2] as 'Ja' | 'Nee' | 'Misschien';
-            } else {
-              this.attendanceStatus = null;
-            }
+            this.attendanceStatus = status;
             this.errorMessage = null;
           }
         },
@@ -210,13 +199,16 @@ export class AttendanceComponent implements OnInit {
           console.error(`Error fetching attendance status for ${currentPlayer}:`, err);
           if (this.selectedPlayer === currentPlayer) {
             this.attendanceStatus = null;
-            this.snackBar.open('Fout bij ophalen aanwezigheid status.', 'Sluiten', { duration: 5000, panelClass: ['snackbar-error'] });
+            this.snackBar.open('Fout bij ophalen aanwezigheid status.', 'Sluiten', { 
+              duration: 5000, 
+              panelClass: ['snackbar-error'] 
+            });
           }
         }
       });
   }
 
-  setAttendance(status: 'Ja' | 'Nee' | 'Misschien'): void {
+  setAttendance(status: 'Ja' | 'Nee'): void {
     this.playerSelectError = null;
     if (!this.selectedPlayer || !this.nextGameDate || this.isLoadingStatus) {
       if (!this.selectedPlayer || !this.nextGameDate) {
@@ -228,58 +220,36 @@ export class AttendanceComponent implements OnInit {
     this.isLoadingStatus = true;
     const formattedDate = this.formatDate(this.nextGameDate);
     const currentPlayer = this.selectedPlayer;
-    const rowData = [formattedDate, currentPlayer, status];
 
-    this.googleSheetsService.getSheetData(this.SHEET_NAME)
-      .subscribe({
-        next: (data) => {
-          if (this.selectedPlayer !== currentPlayer) {
-            this.isLoadingStatus = false;
-            return;
-          }
-
-          const rowIndex = data.findIndex((row, index) =>
-            index > 0 &&
-            row[0] === formattedDate &&
-            row[1] === currentPlayer
-          );
-
-          let operation: Observable<any>;
-          if (rowIndex > 0) {
-            const sheetRowIndex = rowIndex + 1;
-            console.log(`Updating row ${sheetRowIndex} for ${currentPlayer} on ${formattedDate}`);
-            operation = this.googleSheetsService.updateSheetRow(this.SHEET_NAME, sheetRowIndex, rowData);
-          } else {
-            console.log(`Appending row for ${currentPlayer} on ${formattedDate}`);
-            operation = this.googleSheetsService.appendSheetRow(this.SHEET_NAME, rowData);
-          }
-
-          operation.pipe(finalize(() => this.isLoadingStatus = false)).subscribe({
-            next: (response) => {
-              console.log('Attendance saved:', response);
-              if (this.selectedPlayer === currentPlayer) {
-                this.attendanceStatus = status;
-                this.snackBar.open(`Aanwezigheid (${status}) voor ${currentPlayer} opgeslagen!`, 'Ok', { duration: 3000 });
-              }
-              this.loadAttendanceList(); // Refresh de lijst na opslaan
-            },
-            error: (err) => {
-              console.error('Error saving attendance:', err);
-              const message = (err instanceof Error) ? err.message : 'Fout bij opslaan aanwezigheid.';
-              this.snackBar.open(message, 'Sluiten', { duration: 5000, panelClass: ['snackbar-error'] });
-            }
+    this.attendanceService.setAttendance({
+      date: formattedDate,
+      playerName: currentPlayer,
+      status: status
+    })
+    .pipe(finalize(() => this.isLoadingStatus = false))
+    .subscribe({
+      next: (response) => {
+        console.log('Attendance saved:', response);
+        if (this.selectedPlayer === currentPlayer) {
+          this.attendanceStatus = status;
+          this.snackBar.open(`Aanwezigheid (${status}) voor ${currentPlayer} opgeslagen!`, 'Ok', { 
+            duration: 3000 
           });
-        },
-        error: (err) => {
-          console.error('Error fetching sheet data before saving:', err);
-          const message = (err instanceof Error) ? err.message : 'Kon bestaande data niet controleren, opslaan mislukt.';
-          this.snackBar.open(message, 'Sluiten', { duration: 5000, panelClass: ['snackbar-error'] });
-          this.isLoadingStatus = false;
         }
-      });
+        this.loadAttendanceList(); // Refresh de lijst na opslaan
+      },
+      error: (err) => {
+        console.error('Error saving attendance:', err);
+        const message = (err instanceof Error) ? err.message : 'Fout bij opslaan aanwezigheid.';
+        this.snackBar.open(message, 'Sluiten', { 
+          duration: 5000, 
+          panelClass: ['snackbar-error'] 
+        });
+      }
+    });
   }
 
-  requestPushPermission() {
+  requestPushPermission(): void {
     this.pushPermissionError = null;
     this.pushPermissionLoading = true;
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
@@ -315,7 +285,7 @@ export class AttendanceComponent implements OnInit {
           const convertedVapidKey = this.urlBase64ToUint8Array(vapidPublicKey);
           registration.pushManager.subscribe({
             userVisibleOnly: true,
-            applicationServerKey: convertedVapidKey
+            applicationServerKey: convertedVapidKey as BufferSource
           }).then(subscription => {
             // Subscription opslaan in Google Sheets
             this.savePushSubscription(subscription);
@@ -376,7 +346,25 @@ export class AttendanceComponent implements OnInit {
     for (let i = 0; i < rawData.length; ++i) {
       outputArray[i] = rawData.charCodeAt(i);
     }
-    return outputArray;
+    return new Uint8Array(outputArray.buffer);
+  }
+
+  private createDefaultPlayer(name: string, position?: string): Player {
+    return {
+      name: name,
+      position: position || '',
+      rating: 1,
+      gamesPlayed: 0,
+      totalPoints: 0,
+      wins: 0,
+      losses: 0,
+      ties: 0,
+      winRatio: 0,
+      gameHistory: [],
+      zlatanPoints: 0,
+      ventielPoints: 0,
+      actief: true
+    };
   }
 
   private formatDate(date: Date): string {
