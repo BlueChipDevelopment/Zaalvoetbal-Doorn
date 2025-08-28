@@ -76,31 +76,13 @@ export class NextMatchService {
           parsedDate = null;
         }
 
-        // Debug logging voor wedstrijdnummer probleem
-        const matchNumber = nextWedstrijd.seizoenWedstrijdNummer ?? nextWedstrijd.id ?? null;
-        
-        // Tijdelijke alert voor mobile debugging
-        const debugInfo = `NextMatch: datum=${nextWedstrijd.datum}, seizoenNr=${nextWedstrijd.seizoenWedstrijdNummer}, id=${nextWedstrijd.id}, final=${matchNumber}`;
-        console.log('NextMatch Debug:', {
-          datum: nextWedstrijd.datum,
-          seizoenWedstrijdNummer: nextWedstrijd.seizoenWedstrijdNummer,
-          id: nextWedstrijd.id,
-          finalMatchNumber: matchNumber,
-          seizoen: nextWedstrijd.seizoen
-        });
-        
-        // Alert voor mobile (tijdelijk)
-        if (navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('Mobile')) {
-          alert(debugInfo);
-        }
-
         return {
           date: dateString,
           parsedDate: parsedDate,
           wedstrijd: nextWedstrijd,
           location: nextWedstrijd.locatie || 'Sporthal Steinheim',
           time: '20:30',
-          matchNumber: matchNumber,
+          matchNumber: nextWedstrijd.seizoenWedstrijdNummer ?? nextWedstrijd.id ?? null,
           rowNumber: nextWedstrijd.absoluteRowNumber || (nextWedstrijd.id ? Number(nextWedstrijd.id) + 1 : undefined),
           seizoen: nextWedstrijd.seizoen,
         };
@@ -141,23 +123,13 @@ export class NextMatchService {
               parsedDate = null;
             }
 
-            // Debug logging voor wedstrijdnummer probleem in toekomstige wedstrijden
-            const matchNumber = wedstrijd.seizoenWedstrijdNummer ?? wedstrijd.id ?? null;
-            console.log('FutureMatch Debug:', {
-              datum: wedstrijd.datum,
-              seizoenWedstrijdNummer: wedstrijd.seizoenWedstrijdNummer,
-              id: wedstrijd.id,
-              finalMatchNumber: matchNumber,
-              seizoen: wedstrijd.seizoen
-            });
-
             return {
               date: dateString,
               parsedDate: parsedDate,
               wedstrijd: wedstrijd,
               location: wedstrijd.locatie || 'Sporthal Steinheim',
               time: '20:30',
-              matchNumber: matchNumber
+              matchNumber: wedstrijd.seizoenWedstrijdNummer ?? wedstrijd.id ?? null
             };
           })
           .filter(match => match.parsedDate && match.parsedDate >= today)

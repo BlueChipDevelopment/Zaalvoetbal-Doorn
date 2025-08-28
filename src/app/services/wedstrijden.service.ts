@@ -49,7 +49,7 @@ export class WedstrijdenService {
         wedstrijden
           .filter(w => w.datum && w.datum.trim() !== '')
           .forEach(wedstrijd => {
-            const seizoen = this.getSeizoenFromDate(wedstrijd.datum);
+            const seizoen = wedstrijd.seizoen;
             if (seizoen) {
               if (!seizoenMap.has(seizoen)) {
                 seizoenMap.set(seizoen, { totaal: 0, gespeeld: 0 });
@@ -134,8 +134,8 @@ export class WedstrijdenService {
       .filter(row => row && row.length > 0)
       .map((row, index) => {
         const absoluteRowNumber = index + 2; // +2 omdat we header overslaan en Excel is 1-based
-        const datum = row[1] || '';
-        const seizoen = this.getSeizoenFromDate(datum);
+        const seizoen = row[1] || ''; // Kolom B = seizoen (bijvoorbeeld "2025-2026")
+        const datum = row[2] || ''; // Datum is nu kolom C
         
         // Probeer eerst ID uit sheet (kolom A), fallback naar berekening
         let id: number;
@@ -149,15 +149,15 @@ export class WedstrijdenService {
         
         return {
           id: id,
-          seizoen: seizoen,
+          seizoen: seizoen.trim(), // Direct uit kolom B
           absoluteRowNumber: absoluteRowNumber,
           datum: datum,
-          teamWit: row[2] || '',
-          teamRood: row[3] || '',
-          scoreWit: this.parseScore(row[4]),
-          scoreRood: this.parseScore(row[5]),
-          zlatan: row[6] || '',
-          ventiel: row[7] || '',
+          teamWit: row[3] || '', // Kolom D
+          teamRood: row[4] || '', // Kolom E
+          scoreWit: this.parseScore(row[5]), // Kolom F
+          scoreRood: this.parseScore(row[6]), // Kolom G
+          zlatan: row[7] || '', // Kolom H
+          ventiel: row[8] || '', // Kolom I
           locatie: 'Sporthal Steinheim' // Default locatie
         };
       });
@@ -166,18 +166,20 @@ export class WedstrijdenService {
     const seizoenCounters = new Map<string, number>();
     
     return baseWedstrijden.map(wedstrijd => {
-      if (wedstrijd.seizoen) {
-        const currentCount = seizoenCounters.get(wedstrijd.seizoen) || 0;
-        const seizoenWedstrijdNummer = currentCount + 1;
-        seizoenCounters.set(wedstrijd.seizoen, seizoenWedstrijdNummer);
-        
-        return {
-          ...wedstrijd,
-          seizoenWedstrijdNummer
-        };
+      // Controleer of seizoen aanwezig is (uit kolom B)
+      if (!wedstrijd.seizoen) {
+        console.warn(`Wedstrijd ${wedstrijd.datum}: Geen seizoen in kolom B gevonden`);
+        return wedstrijd; // Geen seizoenWedstrijdNummer als seizoen ontbreekt
       }
       
-      return wedstrijd;
+      const currentCount = seizoenCounters.get(wedstrijd.seizoen) || 0;
+      const seizoenWedstrijdNummer = currentCount + 1;
+      seizoenCounters.set(wedstrijd.seizoen, seizoenWedstrijdNummer);
+      
+      return {
+        ...wedstrijd,
+        seizoenWedstrijdNummer
+      };
     });
   }
 
@@ -199,8 +201,7 @@ export class WedstrijdenService {
     // Filter by seizoen
     if (filter.seizoen) {
       filtered = filtered.filter(w => {
-        const wedstrijdSeizoen = this.getSeizoenFromDate(w.datum);
-        return wedstrijdSeizoen === filter.seizoen;
+        return w.seizoen === filter.seizoen; // Nu direct uit kolom B
       });
     }
 
@@ -222,53 +223,5 @@ export class WedstrijdenService {
     }
 
     return filtered;
-  }
-
-  private getSeizoenFromDate(dateString: string): string | null {
-    if (!dateString || dateString.trim() === '') {
-      return null;
-    }
-
-    try {
-      // Ondersteun verschillende datumformaten
-      let parsedDate: Date;
-      
-      if (dateString.includes('-')) {
-        const parts = dateString.split('-');
-        if (parts.length === 3) {
-          if (parts[0].length === 4) {
-            // YYYY-MM-DD format
-            parsedDate = new Date(dateString);
-          } else {
-            // DD-MM-YYYY format
-            parsedDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
-          }
-        } else {
-          return null;
-        }
-      } else {
-        // Probeer direct te parsen
-        parsedDate = new Date(dateString);
-      }
-
-      if (isNaN(parsedDate.getTime())) {
-        return null;
-      }
-
-      const year = parsedDate.getFullYear();
-      const month = parsedDate.getMonth() + 1; // getMonth() is 0-based
-
-      // Futsal seizoen loopt typisch van augustus tot juli
-      if (month >= 8) {
-        // Augustus-December: seizoen YYYY-(YYYY+1)
-        return `${year}-${year + 1}`;
-      } else {
-        // Januari-Juli: seizoen (YYYY-1)-YYYY
-        return `${year - 1}-${year}`;
-      }
-    } catch (error) {
-      console.warn('Error parsing date for seizoen:', dateString, error);
-      return null;
-    }
   }
 }
