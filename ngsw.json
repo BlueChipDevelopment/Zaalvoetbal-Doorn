@@ -1,6 +1,6 @@
 {
   "configVersion": 1,
-  "timestamp": 1756404906066,
+  "timestamp": 1756405258663,
   "index": "/index.html",
   "assetGroups": [
     {
@@ -14,7 +14,7 @@
         "/favicon.ico",
         "/firebase-messaging-sw.js",
         "/index.html",
-        "/main-7IPJBK7J.js",
+        "/main-4OFJSLPU.js",
         "/manifest.webmanifest",
         "/polyfills-FFHMD2TL.js",
         "/styles-NJK5IFUV.css"
@@ -61,8 +61,8 @@
     "/assets/images/football-shirt-white.png": "b18ac6d8f00e6f5e00cb440b80a2a72b0e1658f3",
     "/favicon.ico": "43528d083572386b5f788141a0a2d6619d1409cd",
     "/firebase-messaging-sw.js": "09ae43f826c182db7016a4f2096ea4c685609d71",
-    "/index.html": "ce75c6127e6476ecfaf57d32cce003fded839900",
-    "/main-7IPJBK7J.js": "4d77f8d68d6da0e54309ccbbdc92eb09cb7b5e29",
+    "/index.html": "5cb329268592d8565c99940c50d0cd1b382cc92c",
+    "/main-4OFJSLPU.js": "7e998bcc98d512a2c0c1f357b1b0305425498347",
     "/manifest.webmanifest": "f55078249defc81f0f13e2d5bb6e9e899577ec1c",
     "/media/football-shirt-red-F6V5GQGU.png": "0df1723bfe98a67e423479be18fee4e7cde55834",
     "/media/football-shirt-white-36U2R2RQ.png": "b18ac6d8f00e6f5e00cb440b80a2a72b0e1658f3",
