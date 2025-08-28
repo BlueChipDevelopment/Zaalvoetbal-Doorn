@@ -154,8 +154,6 @@
                       </div>
                     </mat-list>
 
-                    <mat-divider *ngIf="details.aanwezig.length > 0 && (details.afwezig.length > 0 || details.geenReactie.length > 0)"></mat-divider>
-
                     <!-- Absent players -->
                     <mat-list *ngIf="details.afwezig.length > 0" class="player-list absent-list">
                       <div matSubheader class="absent-subheader">
@@ -176,8 +174,6 @@
                         </mat-chip-set>
                       </div>
                     </mat-list>
-
-                    <mat-divider *ngIf="details.afwezig.length > 0 && details.geenReactie.length > 0"></mat-divider>
 
                     <!-- No response players -->
                     <mat-list *ngIf="details.geenReactie.length > 0" class="player-list no-response-list">
