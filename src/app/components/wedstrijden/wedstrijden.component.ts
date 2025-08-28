@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { GoogleSheetsService } from '../../services/google-sheets-service';
+import { WedstrijdenService } from '../../services/wedstrijden.service';
+import { WedstrijdData } from '../../interfaces/IWedstrijd';
 import { CommonModule } from '@angular/common';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatError } from '@angular/material/form-field';
@@ -13,37 +14,25 @@ import { MatIconModule } from '@angular/material/icon';
   styleUrl: './wedstrijden.component.scss'
 })
 export class WedstrijdenComponent implements OnInit {
-  wedstrijden: any[] = [];
+  wedstrijden: WedstrijdData[] = [];
   isLoading = true;
   errorMessage: string | null = null;
 
-  constructor(private googleSheetsService: GoogleSheetsService) {}
+  constructor(private wedstrijdenService: WedstrijdenService) {}
 
   ngOnInit(): void {
-    this.googleSheetsService.getSheetData('Wedstrijden').subscribe({
-      next: (data: any[][]) => {
-        // Eerste rij is header, filter alleen wedstrijden met score
-        this.wedstrijden = (data || [])
-          .filter((row, idx) => idx > 0 && row[4] && row[5])
-          .map(row => ({
-            date: row[1],
-            teamWhite: row[2],
-            teamRed: row[3],
-            scoreWhite: row[4],
-            scoreRed: row[5],
-            zlatan: row[6],
-            ventiel: row[7],
-            locatie: 'Sporthal Steinheim'
-          }))
-          .sort((a, b) => {
-            // Verwacht formaat: DD-MM-YYYY of YYYY-MM-DD
-            const parse = (d: string) => {
-              const parts = d.split('-');
-              if (parts[0].length === 4) return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
-              return new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
-            };
-            return parse(b.date).getTime() - parse(a.date).getTime();
-          });
+    this.wedstrijdenService.getGespeeldeWedstrijden().subscribe({
+      next: (wedstrijden: WedstrijdData[]) => {
+        // Sort by date, most recent first
+        this.wedstrijden = wedstrijden.sort((a, b) => {
+          // Verwacht formaat: DD-MM-YYYY of YYYY-MM-DD
+          const parse = (d: string) => {
+            const parts = d.split('-');
+            if (parts[0].length === 4) return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+            return new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
+          };
+          return parse(b.datum).getTime() - parse(a.datum).getTime();
+        });
         this.isLoading = false;
       },
       error: () => {

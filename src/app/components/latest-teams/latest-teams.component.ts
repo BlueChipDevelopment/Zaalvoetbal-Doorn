@@ -43,7 +43,7 @@ export class LatestTeamsComponent implements OnInit {
     this.nextMatchService.getNextMatchInfo().subscribe({
       next: (info) => {
         this.nextMatchInfo = info;
-        if (info && info.row && info.row[2] && info.row[3]) {
+        if (info && info.wedstrijd && info.wedstrijd.teamWit && info.wedstrijd.teamRood) {
           // Opstelling is bekend
           this.loadPlayerCards(info);
         } else {
@@ -62,8 +62,8 @@ export class LatestTeamsComponent implements OnInit {
   private loadPlayerCards(info: NextMatchInfo) {
     this.gameStatisticsService.getFullPlayerStats().subscribe({
       next: (playerStats) => {
-        const teamWhite = this.parsePlayers(info.row[2], playerStats);
-        const teamRed = this.parsePlayers(info.row[3], playerStats);
+        const teamWhite = this.parsePlayers(info.wedstrijd.teamWit, playerStats);
+        const teamRed = this.parsePlayers(info.wedstrijd.teamRood, playerStats);
         this.teams = { teamWhite, teamRed };
         this.orderedTeams = [
           { key: 'teamWhite', value: teamWhite },

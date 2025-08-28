@@ -4,6 +4,7 @@ import { Observable, forkJoin } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { GoogleSheetsService } from './google-sheets-service';
 import { PlayerService } from './player.service';
+import { WedstrijdenService } from './wedstrijden.service';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +16,8 @@ export class GameStatisticsService {
 
   constructor(
     private googleSheetsService: GoogleSheetsService,
-    private playerService: PlayerService
+    private playerService: PlayerService,
+    private wedstrijdenService: WedstrijdenService
   ) {}
 
   /**
@@ -83,33 +85,8 @@ export class GameStatisticsService {
    * @returns Observable array van seizoen strings, gesorteerd van nieuw naar oud
    */
   getAvailableSeasons(): Observable<string[]> {
-    return this.googleSheetsService.getSheetData('Wedstrijden').pipe(
-      map(wedstrijden => {
-        // Sla de header over (eerste rij) in wedstrijden
-        const wedstrijdenData = (wedstrijden || []).slice(1);
-        
-        // Filter op wedstrijden met een geldige datum (ongeacht of ze al gespeeld zijn)
-        const wedstrijdenMetDatum = wedstrijdenData.filter(match => {
-          return match[1] && match[1].trim() !== ''; // Alleen wedstrijden met een datum
-        });
-
-        const seizoenen = new Set<string>();
-        wedstrijdenMetDatum.forEach(match => {
-          if (match[1]) { // datum kolom
-            const seizoen = this.getSeasonFromDate(match[1]);
-            if (seizoen) { // Alleen toevoegen als het seizoen geldig is
-              seizoenen.add(seizoen);
-            }
-          }
-        });
-
-        return Array.from(seizoenen).sort((a, b) => {
-          // Sorteer van nieuw naar oud (2024-2025 komt vóór 2023-2024)
-          const yearA = parseInt(a.split('-')[0]);
-          const yearB = parseInt(b.split('-')[0]);
-          return yearB - yearA;
-        });
-      })
+    return this.wedstrijdenService.getBeschikbareSeizoen().pipe(
+      map(seizoenData => seizoenData.map(s => s.seizoen))
     );
   }
 
@@ -142,7 +119,7 @@ export class GameStatisticsService {
   getFullPlayerStats(season?: string | null): Observable<Player[]> {
     return forkJoin({
       spelers: this.playerService.getPlayers(),
-      wedstrijden: this.googleSheetsService.getSheetData('Wedstrijden')
+      wedstrijden: this.wedstrijdenService.getGespeeldeWedstrijden()
     }).pipe(
       map(({ spelers, wedstrijden }) => {
         // spelers is already typed and processed by PlayerService
@@ -152,25 +129,13 @@ export class GameStatisticsService {
           actieveSpelersMap[player.name.trim().toLowerCase()] = player;
         });
 
-        let geldigeWedstrijden = (wedstrijden || []).filter(match => {
-          const wit = match[4];
-          const rood = match[5];
-          const isValidMatch = wit != null && wit !== '' && rood != null && rood !== '';
-          
-          // Ook controleren of de datum geldig is
-          if (isValidMatch && match[1]) {
-            const seizoen = this.getSeasonFromDate(match[1]);
-            return seizoen !== null; // Alleen wedstrijden met geldige datum
-          }
-          
-          return isValidMatch && !match[1]; // Wedstrijden zonder datum (voor backward compatibility)
-        });
+        let geldigeWedstrijden = wedstrijden;
 
         // Filter wedstrijden op seizoen indien opgegeven
         if (season) {
           geldigeWedstrijden = geldigeWedstrijden.filter(match => {
-            if (match[1]) { // datum kolom
-              const matchSeason = this.getSeasonFromDate(match[1]);
+            if (match.datum) { // datum kolom
+              const matchSeason = this.getSeasonFromDate(match.datum);
               return matchSeason === season;
             }
             return false;
@@ -179,7 +144,7 @@ export class GameStatisticsService {
 
         // Sorteer geldigeWedstrijden op datum (oud -> nieuw) zodat gameHistory altijd chronologisch is
         const geldigeWedstrijdenSorted = [...geldigeWedstrijden].sort((a, b) => {
-          // Verwacht: match[1] is datum in DD-MM-YYYY of YYYY-MM-DD
+          // Verwacht: datum in DD-MM-YYYY of YYYY-MM-DD
           const parseDate = (d: string) => {
             const parts = d.split('-');
             if (parts.length === 3) {
@@ -193,17 +158,19 @@ export class GameStatisticsService {
             }
             return new Date(d);
           };
-          return parseDate(a[1]).getTime() - parseDate(b[1]).getTime();
+          return parseDate(a.datum).getTime() - parseDate(b.datum).getTime();
         });
+        
         // Statistieken per speler
         const playerStats: { [player: string]: { gamesPlayed: number; totalPoints: number; wins: number; losses: number; ties: number; gameHistory: any[]; zlatanPoints: number; ventielPoints: number } } = {};
         geldigeWedstrijdenSorted.forEach(match => {
-          const teamWhitePlayers = (match[2] || '').split(',').map((p: string) => p.trim().toLowerCase()).filter((p: string) => p && p !== 'team wit');
-          const teamRedPlayers = (match[3] || '').split(',').map((p: string) => p.trim().toLowerCase()).filter((p: string) => p && p !== 'team rood');
+          const teamWhitePlayers = (match.teamWit || '').split(',').map((p: string) => p.trim().toLowerCase()).filter((p: string) => p && p !== 'team wit');
+          const teamRedPlayers = (match.teamRood || '').split(',').map((p: string) => p.trim().toLowerCase()).filter((p: string) => p && p !== 'team rood');
           const allPlayers = [...teamWhitePlayers, ...teamRedPlayers];
-          const teamWhiteGoals = parseInt(match[4]);
-          const teamRedGoals = parseInt(match[5]);
-          // White
+          const teamWhiteGoals = match.scoreWit || 0;
+          const teamRedGoals = match.scoreRood || 0;
+          
+          // White team players
           teamWhitePlayers.forEach((player: string) => {
             if (!playerStats[player]) playerStats[player] = { gamesPlayed: 0, totalPoints: 0, wins: 0, losses: 0, ties: 0, gameHistory: [], zlatanPoints: 0, ventielPoints: 0 };
             playerStats[player].gamesPlayed++;
@@ -212,17 +179,18 @@ export class GameStatisticsService {
             else playerStats[player].ties++;
             playerStats[player].gameHistory.push({
               result: teamWhiteGoals > teamRedGoals ? 3 : teamWhiteGoals === teamRedGoals ? 2 : 1,
-              date: match[1],
+              date: match.datum,
               playerIds: allPlayers
             });
-            if (match[6] && match[6].trim().toLowerCase() === player) {
+            if (match.zlatan && match.zlatan.trim().toLowerCase() === player) {
               playerStats[player].zlatanPoints = (playerStats[player].zlatanPoints || 0) + 1;
             }
-            if (match[7] && match[7].trim().toLowerCase() === player) {
+            if (match.ventiel && match.ventiel.trim().toLowerCase() === player) {
               playerStats[player].ventielPoints = (playerStats[player].ventielPoints || 0) + 1;
             }
           });
-          // Red
+          
+          // Red team players
           teamRedPlayers.forEach((player: string) => {
             if (!playerStats[player]) playerStats[player] = { gamesPlayed: 0, totalPoints: 0, wins: 0, losses: 0, ties: 0, gameHistory: [], zlatanPoints: 0, ventielPoints: 0 };
             playerStats[player].gamesPlayed++;
@@ -231,13 +199,13 @@ export class GameStatisticsService {
             else playerStats[player].ties++;
             playerStats[player].gameHistory.push({
               result: teamRedGoals > teamWhiteGoals ? 3 : teamRedGoals === teamWhiteGoals ? 2 : 1,
-              date: match[1],
+              date: match.datum,
               playerIds: allPlayers
             });
-            if (match[6] && match[6].trim().toLowerCase() === player) {
+            if (match.zlatan && match.zlatan.trim().toLowerCase() === player) {
               playerStats[player].zlatanPoints = (playerStats[player].zlatanPoints || 0) + 1;
             }
-            if (match[7] && match[7].trim().toLowerCase() === player) {
+            if (match.ventiel && match.ventiel.trim().toLowerCase() === player) {
               playerStats[player].ventielPoints = (playerStats[player].ventielPoints || 0) + 1;
             }
           });

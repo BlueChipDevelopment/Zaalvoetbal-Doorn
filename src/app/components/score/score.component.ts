@@ -86,21 +86,21 @@ export class ScoreComponent implements OnInit {
         this.nextMatchService.getNextMatchInfo().subscribe({
           next: (info) => {
             this.nextMatchInfo = info;
-            if (info && info.row) {
-              const matchRow = info.row;
+            if (info && info.wedstrijd) {
+              const wedstrijd = info.wedstrijd;
               this.nextMatch = {
-                matchNumber: matchRow[0],
+                matchNumber: wedstrijd.id?.toString() ?? '',
                 date: info.parsedDate ? info.parsedDate.toISOString() : info.date,
-                teamWhitePlayers: matchRow[2] ?? '',
-                teamRedPlayers: matchRow[3] ?? '',
-                teamWhiteGoals: matchRow[4],
-                teamRedGoals: matchRow[5],
-                zlatan: matchRow[6],
+                teamWhitePlayers: wedstrijd.teamWit ?? '',
+                teamRedPlayers: wedstrijd.teamRood ?? '',
+                teamWhiteGoals: wedstrijd.scoreWit ?? undefined,
+                teamRedGoals: wedstrijd.scoreRood ?? undefined,
+                zlatan: wedstrijd.zlatan,
                 rowNumber: info.rowNumber // direct uit NextMatchInfo
               };
               // Bouw de player objecten voor de cards
-              this.teamWhitePlayers = this.parsePlayers(this.nextMatch.teamWhitePlayers, playerStats);
-              this.teamRedPlayers = this.parsePlayers(this.nextMatch.teamRedPlayers, playerStats);
+              this.teamWhitePlayers = this.parsePlayers(this.nextMatch.teamWhitePlayers || '', playerStats);
+              this.teamRedPlayers = this.parsePlayers(this.nextMatch.teamRedPlayers || '', playerStats);
               const combinedPlayers = [...new Set([
                 ...this.teamWhitePlayers.map(p => p.name),
                 ...this.teamRedPlayers.map(p => p.name)
