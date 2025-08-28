@@ -23,6 +23,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { WEDSTRIJD_RANGES } from '../../constants/sheet-columns';
 import { PlayerCardComponent } from '../player-card/player-card.component';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CdkDragDrop, transferArrayItem } from '@angular/cdk/drag-drop';
@@ -370,7 +371,7 @@ export class TeamGeneratorComponent implements OnInit {
 
     const updateData = [
       {
-        range: `Wedstrijden!C${sheetRowIndex}:D${sheetRowIndex}`,
+        range: WEDSTRIJD_RANGES.TEAMS(sheetRowIndex),
         values: [[teamWhiteNames, teamRedNames]]
       }
     ];

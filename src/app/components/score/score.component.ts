@@ -16,6 +16,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { PlayerCardComponent } from '../player-card/player-card.component';
 import { GameStatisticsService } from '../../services/game.statistics.service';
 import { Player } from '../../interfaces/IPlayer';
+import { WEDSTRIJD_RANGES } from '../../constants/sheet-columns';
 
 interface Match {
   rowNumber?: number; // Make optional
@@ -204,7 +205,7 @@ export class ScoreComponent implements OnInit {
     
     const updateData = [
       {
-        range: `Wedstrijden!E${rowIndexToUpdate}:G${rowIndexToUpdate}`,
+        range: WEDSTRIJD_RANGES.SCORES_AND_ZLATAN(rowIndexToUpdate),
         values: [
           [this.whiteGoals, this.redGoals, this.selectedZlatan || '']
         ]

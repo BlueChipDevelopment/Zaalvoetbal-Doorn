@@ -15,7 +15,7 @@
 
   <ng-container *ngIf="!isLoading && !errorMessage">
     <div *ngFor="let wedstrijd of wedstrijden" class="wedstrijd-card">
-      <div class="wedstrijd-header">{{ wedstrijd.datum }}</div>
+      <div class="wedstrijd-header">{{ wedstrijd.datum | date:'dd-MM-yyyy' }}</div>
       <div class="wedstrijd-teams">
         <span class="team team-wit">
           <img src="assets/images/football-shirt-white.png" alt="Team Wit" />

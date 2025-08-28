@@ -3,6 +3,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
+import { SPELER_COLUMNS } from '../constants/sheet-columns';
 
 @Injectable({
   providedIn: 'root',
@@ -116,14 +117,14 @@ export class GoogleSheetsService {
    * @param pushPermission true/false
    */
   updatePlayerPushSubscription(rowIndex: number, pushSubscription: string, pushPermission: boolean): Observable<any> {
-    // Kolom D = 3 (NotificatieToestemming), Kolom E = 4 (PushSubscription)
+    // Use column constants instead of magic numbers
     const sheetName = 'Spelers';
     return this.getSheetData(sheetName).pipe(
       map(rows => {
         const row = rows[rowIndex + 1]; // +1 vanwege header op rij 0
         if (!row) throw new Error('Player row not found');
-        row[3] = pushPermission ? 'TRUE' : 'FALSE'; // Kolom D
-        row[4] = pushSubscription; // Kolom E
+        row[SPELER_COLUMNS.PUSH_PERMISSION] = pushPermission ? 'TRUE' : 'FALSE'; // Kolom D
+        row[SPELER_COLUMNS.PUSH_SUBSCRIPTION] = pushSubscription; // Kolom E
         return row;
       }),
       switchMap(row => this.updateSheetRow(sheetName, rowIndex + 2, row)) // +2: 1-based + header

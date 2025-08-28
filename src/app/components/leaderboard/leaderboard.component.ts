@@ -105,26 +105,26 @@ export class LeaderboardComponent implements OnInit {
     this.loadLeaderboard();
   }
 
-  protected getLastFiveGames(player: any): { result: number; date: string; dateDisplay: string }[] {
+  protected getLastFiveGames(player: any): { result: number; date: Date | null; dateDisplay: string }[] {
     if (!player.gameHistory || player.gameHistory.length === 0) {
       return [];
     }
     return [...player.gameHistory]
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .sort((a, b) => {
+        if (!a.date || !b.date) return 0;
+        return a.date.getTime() - b.date.getTime();
+      })
       .slice(-5)
       .map(game => {
-        let dateDisplay = game.date;
-        if (game.date) {
-          const dateParts = game.date.split('-');
-          if (dateParts.length === 3) {
-            if (dateParts[0].length === 4) {
-              // YYYY-MM-DD → DD-MM-YYYY
-              dateDisplay = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
-            } else {
-              // DD-MM-YYYY of andere volgorde, laat staan
-              dateDisplay = game.date;
-            }
-          }
+        let dateDisplay = '';
+        if (game.date && game.date instanceof Date) {
+          // Format Date object as DD-MM-YYYY
+          const day = game.date.getDate().toString().padStart(2, '0');
+          const month = (game.date.getMonth() + 1).toString().padStart(2, '0');
+          const year = game.date.getFullYear();
+          dateDisplay = `${day}-${month}-${year}`;
+        } else {
+          dateDisplay = 'Geen datum';
         }
         return {
           result: game.result,
@@ -134,7 +134,7 @@ export class LeaderboardComponent implements OnInit {
       });
   }
 
-  getLastFiveGamesTooltip(game: { result: number; date: string; dateDisplay: string }): string {
+  getLastFiveGamesTooltip(game: { result: number; date: Date | null; dateDisplay: string }): string {
     const resultText = game.result === 3 ? 'Winst' : game.result === 1 ? 'Verlies' : 'Gelijkspel';
     return `Datum: ${game.dateDisplay} - ${resultText}`;
   }
@@ -193,6 +193,7 @@ export class LeaderboardComponent implements OnInit {
 
   trackByGame(index: number, game: any): string {
     // Combineer datum en resultaat voor een unieke key
-    return `${game.date}-${game.result}`;
+    const dateKey = game.date instanceof Date ? game.date.getTime().toString() : 'no-date';
+    return `${dateKey}-${game.result}`;
   }
 }

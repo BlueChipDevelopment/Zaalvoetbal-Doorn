@@ -25,13 +25,9 @@ export class WedstrijdenComponent implements OnInit {
       next: (wedstrijden: WedstrijdData[]) => {
         // Sort by date, most recent first
         this.wedstrijden = wedstrijden.sort((a, b) => {
-          // Verwacht formaat: DD-MM-YYYY of YYYY-MM-DD
-          const parse = (d: string) => {
-            const parts = d.split('-');
-            if (parts[0].length === 4) return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
-            return new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
-          };
-          return parse(b.datum).getTime() - parse(a.datum).getTime();
+          // Datum is now a Date object, so compare directly
+          if (!a.datum || !b.datum) return 0;
+          return b.datum.getTime() - a.datum.getTime();
         });
         this.isLoading = false;
       },

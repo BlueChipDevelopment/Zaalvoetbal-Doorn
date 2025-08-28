@@ -3,6 +3,8 @@ import { Observable, of, BehaviorSubject } from 'rxjs';
 import { map, tap, catchError, shareReplay } from 'rxjs/operators';
 import { GoogleSheetsService } from './google-sheets-service';
 import { WedstrijdData, WedstrijdFilter, SeizoenData } from '../interfaces/IWedstrijd';
+import { parseWedstrijdDateTime } from '../utils/date-utils';
+import { WEDSTRIJD_COLUMNS } from '../constants/sheet-columns';
 
 @Injectable({
   providedIn: 'root'
@@ -47,7 +49,7 @@ export class WedstrijdenService {
         const seizoenMap = new Map<string, { totaal: number; gespeeld: number }>();
         
         wedstrijden
-          .filter(w => w.datum && w.datum.trim() !== '')
+          .filter(w => w.datum !== null)
           .forEach(wedstrijd => {
             const seizoen = wedstrijd.seizoen;
             if (seizoen) {
@@ -134,30 +136,32 @@ export class WedstrijdenService {
       .filter(row => row && row.length > 0)
       .map((row, index) => {
         const absoluteRowNumber = index + 2; // +2 omdat we header overslaan en Excel is 1-based
-        const seizoen = row[1] || ''; // Kolom B = seizoen (bijvoorbeeld "2025-2026")
-        const datum = row[2] || ''; // Datum is nu kolom C
+        const seizoen = row[WEDSTRIJD_COLUMNS.SEIZOEN] || ''; // Kolom B = seizoen (bijvoorbeeld "2025-2026")
+        const datumString = row[WEDSTRIJD_COLUMNS.DATUM] || ''; // Datum is nu kolom C
+        const parsedDatum = parseWedstrijdDateTime(datumString); // Parse to Date object
         
         // Probeer eerst ID uit sheet (kolom A), fallback naar berekening
         let id: number;
-        const sheetId = this.parseScore(row[0]); // row[0] = kolom A
+        const sheetId = this.parseScore(row[WEDSTRIJD_COLUMNS.ID]); // row[0] = kolom A
         if (sheetId !== null && sheetId > 0) {
           id = sheetId; // Gebruik ID uit sheet
         } else {
           id = index + 1; // Fallback naar oude berekening
-          console.warn(`Wedstrijd rij ${absoluteRowNumber}: Geen geldig ID in kolom A (${row[0]}), gebruik fallback ${id}`);
+          console.warn(`Wedstrijd rij ${absoluteRowNumber}: Geen geldig ID in kolom A (${row[WEDSTRIJD_COLUMNS.ID]}), gebruik fallback ${id}`);
         }
         
         return {
           id: id,
           seizoen: seizoen.trim(), // Direct uit kolom B
           absoluteRowNumber: absoluteRowNumber,
-          datum: datum,
-          teamWit: row[3] || '', // Kolom D
-          teamRood: row[4] || '', // Kolom E
-          scoreWit: this.parseScore(row[5]), // Kolom F
-          scoreRood: this.parseScore(row[6]), // Kolom G
-          zlatan: row[7] || '', // Kolom H
-          ventiel: row[8] || '', // Kolom I
+          datum: parsedDatum, // Now a Date object or null
+          datumString: datumString, // Keep original string for reference
+          teamWit: row[WEDSTRIJD_COLUMNS.TEAM_WIT] || '', // Kolom D
+          teamRood: row[WEDSTRIJD_COLUMNS.TEAM_ROOD] || '', // Kolom E
+          scoreWit: this.parseScore(row[WEDSTRIJD_COLUMNS.SCORE_WIT]), // Kolom F
+          scoreRood: this.parseScore(row[WEDSTRIJD_COLUMNS.SCORE_ROOD]), // Kolom G
+          zlatan: row[WEDSTRIJD_COLUMNS.ZLATAN] || '', // Kolom H
+          ventiel: row[WEDSTRIJD_COLUMNS.VENTIEL] || '', // Kolom I
           locatie: 'Sporthal Steinheim' // Default locatie
         };
       });
@@ -168,7 +172,7 @@ export class WedstrijdenService {
     return baseWedstrijden.map(wedstrijd => {
       // Controleer of seizoen aanwezig is (uit kolom B)
       if (!wedstrijd.seizoen) {
-        console.warn(`Wedstrijd ${wedstrijd.datum}: Geen seizoen in kolom B gevonden`);
+        console.warn(`Wedstrijd ${wedstrijd.datumString}: Geen seizoen in kolom B gevonden`);
         return wedstrijd; // Geen seizoenWedstrijdNummer als seizoen ontbreekt
       }
       

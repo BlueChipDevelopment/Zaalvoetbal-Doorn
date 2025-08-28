@@ -2,7 +2,8 @@ export interface WedstrijdData {
   id?: number;
   seizoen?: string | null; // Seizoen in formaat "2024-2025", null als datum niet parseerbaar is
   seizoenWedstrijdNummer?: number; // Wedstrijdnummer binnen het seizoen (1, 2, 3, ...)
-  datum: string;
+  datum: Date | null; // Parsed date object, null if parsing fails
+  datumString?: string; // Original string for reference/debugging
   teamWit: string;
   teamRood: string;
   scoreWit: number | null;

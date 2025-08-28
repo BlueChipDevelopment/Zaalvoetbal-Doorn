@@ -14,6 +14,7 @@ import {
   AttendancePlayerInfo
 } from '../interfaces/IAttendance';
 import { PlayerSheetData } from '../interfaces/IPlayerSheet';
+import { AANWEZIGHEID_COLUMNS } from '../constants/sheet-columns';
 
 @Injectable({
   providedIn: 'root'
@@ -272,12 +273,12 @@ export class AttendanceService {
 
     return rawData
       .slice(1) // Skip header row
-      .filter(row => row && row.length >= 3 && row[0] && row[1] && row[2])
+      .filter(row => row && row.length >= 3 && row[AANWEZIGHEID_COLUMNS.DATE] && row[AANWEZIGHEID_COLUMNS.PLAYER_NAME] && row[AANWEZIGHEID_COLUMNS.STATUS])
       .map(row => ({
-        date: row[0].toString(),
-        playerName: row[1].toString(),
-        status: row[2] as AttendanceStatus,
-        timestamp: row[3] ? row[3].toString() : undefined
+        date: row[AANWEZIGHEID_COLUMNS.DATE].toString(),
+        playerName: row[AANWEZIGHEID_COLUMNS.PLAYER_NAME].toString(),
+        status: row[AANWEZIGHEID_COLUMNS.STATUS] as AttendanceStatus,
+        timestamp: row[AANWEZIGHEID_COLUMNS.TIMESTAMP] ? row[AANWEZIGHEID_COLUMNS.TIMESTAMP].toString() : undefined
       }));
   }
 

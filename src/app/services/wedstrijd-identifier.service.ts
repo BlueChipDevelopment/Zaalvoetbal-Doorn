@@ -45,7 +45,10 @@ export class WedstrijdIdentifierService {
     }
     
     // Fallback: vergelijk op basis van datum en id
-    return wedstrijd1.datum === wedstrijd2.datum && wedstrijd1.id === wedstrijd2.id;
+    // For Date objects, compare time values, and handle null dates
+    const datum1Time = wedstrijd1.datum?.getTime();
+    const datum2Time = wedstrijd2.datum?.getTime();
+    return datum1Time === datum2Time && wedstrijd1.id === wedstrijd2.id;
   }
 
   /**

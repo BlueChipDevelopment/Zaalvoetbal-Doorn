@@ -4,7 +4,7 @@ import { WedstrijdData } from '../interfaces/IWedstrijd';
 import { Observable, map } from 'rxjs';
 
 export interface NextMatchInfo {
-  date: string;
+  date: string; // Keep original string for display
   parsedDate: Date | null;
   wedstrijd: WedstrijdData;
   location: string;
@@ -15,7 +15,7 @@ export interface NextMatchInfo {
 }
 
 export interface FutureMatchInfo {
-  date: string;
+  date: string; // Keep original string for display
   parsedDate: Date | null;
   wedstrijd: WedstrijdData;
   location: string;
@@ -32,53 +32,17 @@ export class NextMatchService {
       map((wedstrijden: WedstrijdData[]) => {
         // Vind de eerst volgende wedstrijd (gesorteerd op datum)
         const nextWedstrijd = wedstrijden
-          .filter(w => w.datum && w.datum.trim() !== '')
+          .filter(w => w.datum !== null) // Filter out matches with no valid date
           .sort((a, b) => {
-            const parseDate = (dateString: string): Date => {
-              const parts = dateString.split('-');
-              if (parts.length === 3) {
-                if (parts[0].length === 4) {
-                  // YYYY-MM-DD
-                  return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
-                } else {
-                  // DD-MM-YYYY
-                  return new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
-                }
-              }
-              return new Date(dateString);
-            };
-            return parseDate(a.datum).getTime() - parseDate(b.datum).getTime();
+            // Both dates are already parsed Date objects, so just compare time values
+            return a.datum!.getTime() - b.datum!.getTime();
           })[0];
 
-        if (!nextWedstrijd) return null;
-
-        const dateString = nextWedstrijd.datum;
-        
-        // Parse dateString as DD-MM-YYYY or YYYY-MM-DD
-        let parsedDate: Date | null = null;
-        if (typeof dateString === 'string') {
-          const parts = dateString.split('-');
-          if (parts.length === 3) {
-            if (parts[0].length === 4) {
-              // YYYY-MM-DD
-              parsedDate = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
-            } else {
-              // DD-MM-YYYY
-              parsedDate = new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
-            }
-          } else {
-            parsedDate = new Date(dateString);
-          }
-        }
-        if (parsedDate && !isNaN(parsedDate.getTime())) {
-          parsedDate.setHours(20, 30, 0, 0); // vaste tijd 20:30
-        } else {
-          parsedDate = null;
-        }
+        if (!nextWedstrijd || !nextWedstrijd.datum) return null;
 
         return {
-          date: dateString,
-          parsedDate: parsedDate,
+          date: nextWedstrijd.datumString || '', // Use original string for display
+          parsedDate: nextWedstrijd.datum, // Already a Date object
           wedstrijd: nextWedstrijd,
           location: nextWedstrijd.locatie || 'Sporthal Steinheim',
           time: '20:30',
@@ -97,41 +61,15 @@ export class NextMatchService {
         today.setHours(0, 0, 0, 0);
 
         return wedstrijden
-          .filter(wedstrijd => wedstrijd.datum && wedstrijd.datum.trim() !== '')
-          .map(wedstrijd => {
-            const dateString = wedstrijd.datum;
-            
-            // Parse dateString as DD-MM-YYYY or YYYY-MM-DD
-            let parsedDate: Date | null = null;
-            if (typeof dateString === 'string') {
-              const parts = dateString.split('-');
-              if (parts.length === 3) {
-                if (parts[0].length === 4) {
-                  // YYYY-MM-DD
-                  parsedDate = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
-                } else {
-                  // DD-MM-YYYY
-                  parsedDate = new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
-                }
-              } else {
-                parsedDate = new Date(dateString);
-              }
-            }
-            if (parsedDate && !isNaN(parsedDate.getTime())) {
-              parsedDate.setHours(20, 30, 0, 0); // vaste tijd 20:30
-            } else {
-              parsedDate = null;
-            }
-
-            return {
-              date: dateString,
-              parsedDate: parsedDate,
-              wedstrijd: wedstrijd,
-              location: wedstrijd.locatie || 'Sporthal Steinheim',
-              time: '20:30',
-              matchNumber: wedstrijd.seizoenWedstrijdNummer ?? wedstrijd.id ?? null
-            };
-          })
+          .filter(wedstrijd => wedstrijd.datum !== null) // Filter out matches with no valid date
+          .map(wedstrijd => ({
+            date: wedstrijd.datumString || '', // Use original string for display
+            parsedDate: wedstrijd.datum, // Already a Date object
+            wedstrijd: wedstrijd,
+            location: wedstrijd.locatie || 'Sporthal Steinheim',
+            time: '20:30',
+            matchNumber: wedstrijd.seizoenWedstrijdNummer ?? wedstrijd.id ?? null
+          }))
           .filter(match => match.parsedDate && match.parsedDate >= today)
           .sort((a, b) => {
             if (!a.parsedDate || !b.parsedDate) return 0;
