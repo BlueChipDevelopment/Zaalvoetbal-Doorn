@@ -8,6 +8,7 @@ import {
   AttendanceStatus, 
   MatchAttendanceOverview, 
   MatchAttendanceDetails,
+  MatchAttendanceDetailsWithPlayerStatus,
   AttendanceFilter,
   AttendanceUpdate,
   AttendancePlayerInfo
@@ -129,6 +130,38 @@ export class AttendanceService {
   getPlayerAttendanceStatus(playerName: string, date: string): Observable<AttendanceStatus | null> {
     return this.getAttendanceRecords({ playerName, date }).pipe(
       map(records => records.length > 0 ? records[0].status : null)
+    );
+  }
+
+  /**
+   * Get detailed attendance information for a specific match including player status
+   * This method combines getMatchAttendanceDetails and getPlayerAttendanceStatus for efficiency
+   */
+  getMatchAttendanceDetailsWithPlayerStatus(date: string, playerName?: string): Observable<MatchAttendanceDetailsWithPlayerStatus> {
+    return this.getMatchAttendanceDetails(date).pipe(
+      map(details => {
+        let playerStatus: AttendanceStatus | null = null;
+        
+        if (playerName) {
+          // Check if player is in present list
+          const presentPlayer = details.present.find(p => p.name === playerName);
+          if (presentPlayer) {
+            playerStatus = 'Ja';
+          } else {
+            // Check if player is in absent list
+            const absentPlayer = details.absent.find(p => p.name === playerName);
+            if (absentPlayer) {
+              playerStatus = 'Nee';
+            }
+            // If not found in either list, playerStatus remains null (no response)
+          }
+        }
+
+        return {
+          ...details,
+          playerStatus
+        };
+      })
     );
   }
 

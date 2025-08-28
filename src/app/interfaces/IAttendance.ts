@@ -46,6 +46,14 @@ export interface MatchAttendanceDetails {
 }
 
 /**
+ * Interface voor gedetailleerde aanwezigheid per wedstrijd inclusief specifieke speler status
+ */
+export interface MatchAttendanceDetailsWithPlayerStatus extends MatchAttendanceDetails {
+  /** Status van een specifieke speler (indien opgevraagd) */
+  playerStatus?: AttendanceStatus | null;
+}
+
+/**
  * Interface voor speler informatie in aanwezigheidscontext
  */
 export interface AttendancePlayerInfo {

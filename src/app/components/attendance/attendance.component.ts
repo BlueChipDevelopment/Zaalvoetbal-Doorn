@@ -12,11 +12,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { finalize, Observable } from 'rxjs';
+import { finalize, Observable, switchMap, of } from 'rxjs';
 import { NextMatchService, NextMatchInfo } from '../../services/next-match.service';
 import { NextMatchInfoComponent } from '../next-match-info/next-match-info.component';
 import { PlayerCardComponent } from '../player-card/player-card.component';
 import { Player } from '../../interfaces/IPlayer';
+import { MatchAttendanceDetailsWithPlayerStatus } from '../../interfaces/IAttendance';
 import { environment } from '../../../environments/environment';
 
 @Component({
@@ -79,8 +80,9 @@ export class AttendanceComponent implements OnInit {
         this.nextGameDate = info?.parsedDate || null;
         this.nextGameDateRaw = info?.date || null;
         this.errorMessage = null;
-        this.loadPlayers();
-        this.loadAttendanceList();
+        
+        // Eerst laden we de players, dan pas de attendance list
+        this.loadPlayersAndThenAttendance();
       },
       error: (err) => {
         this.nextMatchInfo = null;
@@ -92,6 +94,73 @@ export class AttendanceComponent implements OnInit {
     });
   }
 
+  loadPlayersAndThenAttendance(): void {
+    this.isLoadingPlayers = true;
+    this.playerService.getPlayers()
+      .pipe(
+        finalize(() => this.isLoadingPlayers = false),
+        switchMap(players => {
+          // Zet de players data
+          this.players = players;
+          this.errorMessage = null;
+          
+          // Laad de laatst geselecteerde speler
+          this.loadLastSelectedPlayer();
+          
+          // Nu laden we de attendance list met de juiste selectedPlayer
+          if (!this.nextGameDate) {
+            this.attendanceList = [];
+            this.presentCount = 0;
+            this.absentCount = 0;
+            // Return empty observable dat direct completes
+            return of(null);
+          }
+          
+          const formattedDate = this.formatDate(this.nextGameDate);
+          return this.attendanceService.getMatchAttendanceDetailsWithPlayerStatus(formattedDate, this.selectedPlayer || undefined);
+        })
+      )
+      .subscribe({
+        next: (details: MatchAttendanceDetailsWithPlayerStatus | null) => {
+          if (!details) return; // Voor het geval er geen nextGameDate was
+          
+          // Combineer present en absent spelers voor de lijst
+          this.attendanceList = [
+            ...details.present.map((player: any) => ({
+              speler: player.name,
+              status: 'Ja' as 'Ja' | 'Nee',
+              playerObj: player.playerData || this.createDefaultPlayer(player.name, player.position),
+              playerData: player.playerData || this.createDefaultPlayer(player.name, player.position),
+              name: player.name
+            })),
+            ...details.absent.map((player: any) => ({
+              speler: player.name,
+              status: 'Nee' as 'Ja' | 'Nee',
+              playerObj: player.playerData || this.createDefaultPlayer(player.name, player.position),
+              playerData: player.playerData || this.createDefaultPlayer(player.name, player.position),
+              name: player.name
+            }))
+          ];
+          
+          this.presentCount = details.present.length;
+          this.absentCount = details.absent.length;
+          this.errorMessage = null;
+          
+          // Zet de attendance status direct vanuit de gecombineerde response
+          if (this.selectedPlayer && details.playerStatus !== undefined) {
+            this.attendanceStatus = details.playerStatus;
+          }
+        },
+        error: (err) => {
+          console.error('Error loading players or attendance:', err);
+          this.errorMessage = 'Fout bij het laden van gegevens.';
+          this.attendanceList = [];
+          this.presentCount = 0;
+          this.absentCount = 0;
+        }
+      });
+  }
+
   loadAttendanceList(): void {
     if (!this.nextGameDate) {
       this.attendanceList = [];
@@ -101,18 +170,19 @@ export class AttendanceComponent implements OnInit {
     }
     
     const formattedDate = this.formatDate(this.nextGameDate);
-    this.attendanceService.getMatchAttendanceDetails(formattedDate).subscribe({
-      next: (details) => {
+    // Gebruik de gecombineerde methode die zowel de lijst als player status in één keer ophaalt
+    this.attendanceService.getMatchAttendanceDetailsWithPlayerStatus(formattedDate, this.selectedPlayer || undefined).subscribe({
+      next: (details: MatchAttendanceDetailsWithPlayerStatus) => {
         // Combineer present en absent spelers voor de lijst
         this.attendanceList = [
-          ...details.present.map(player => ({
+          ...details.present.map((player: any) => ({
             speler: player.name,
             status: 'Ja' as 'Ja' | 'Nee',
             playerObj: player.playerData || this.createDefaultPlayer(player.name, player.position),
             playerData: player.playerData || this.createDefaultPlayer(player.name, player.position),
             name: player.name
           })),
-          ...details.absent.map(player => ({
+          ...details.absent.map((player: any) => ({
             speler: player.name,
             status: 'Nee' as 'Ja' | 'Nee',
             playerObj: player.playerData || this.createDefaultPlayer(player.name, player.position),
@@ -124,8 +194,13 @@ export class AttendanceComponent implements OnInit {
         this.presentCount = details.present.length;
         this.absentCount = details.absent.length;
         this.errorMessage = null;
+        
+        // Zet de attendance status direct vanuit de gecombineerde response
+        if (this.selectedPlayer && details.playerStatus !== undefined) {
+          this.attendanceStatus = details.playerStatus;
+        }
       },
-      error: (err) => {
+      error: (err: any) => {
         this.attendanceList = [];
         this.presentCount = 0;
         this.absentCount = 0;
@@ -156,7 +231,7 @@ export class AttendanceComponent implements OnInit {
     const lastPlayer = localStorage.getItem(this.LAST_PLAYER_KEY);
     if (lastPlayer && this.players.some(player => player.name === lastPlayer)) {
       this.selectedPlayer = lastPlayer;
-      this.fetchCurrentAttendanceStatus();
+      // De attendance status wordt nu gecontroleerd in loadAttendanceList() na het laden van de data
     } else {
       this.selectedPlayer = null;
       this.attendanceStatus = null;
@@ -169,7 +244,8 @@ export class AttendanceComponent implements OnInit {
     this.playerSelectError = null;
     if (this.selectedPlayer) {
       localStorage.setItem(this.LAST_PLAYER_KEY, this.selectedPlayer);
-      this.fetchCurrentAttendanceStatus();
+      // Herlaad de attendance list met de nieuwe player status
+      this.loadAttendanceList();
     } else {
       localStorage.removeItem(this.LAST_PLAYER_KEY);
       this.playerSelectError = 'Selecteer eerst een speler.';
@@ -182,16 +258,24 @@ export class AttendanceComponent implements OnInit {
       return;
     }
     
+    // Eerst proberen de status uit de reeds geladen attendanceList te halen
+    const existingEntry = this.attendanceList.find(entry => entry.speler === this.selectedPlayer);
+    if (existingEntry) {
+      this.attendanceStatus = existingEntry.status;
+      return;
+    }
+
+    // Fallback: gebruik de gecombineerde methode voor consistentie
     this.isLoadingStatus = true;
     const formattedDate = this.formatDate(this.nextGameDate);
     const currentPlayer = this.selectedPlayer;
 
-    this.attendanceService.getPlayerAttendanceStatus(currentPlayer, formattedDate)
+    this.attendanceService.getMatchAttendanceDetailsWithPlayerStatus(formattedDate, currentPlayer)
       .pipe(finalize(() => this.isLoadingStatus = false))
       .subscribe({
-        next: (status) => {
+        next: (details) => {
           if (this.selectedPlayer === currentPlayer) {
-            this.attendanceStatus = status;
+            this.attendanceStatus = details.playerStatus || null;
             this.errorMessage = null;
           }
         },
