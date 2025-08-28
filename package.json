@@ -26,7 +26,6 @@
     "@angular/router": "18.2.13",
     "@angular/service-worker": "18.2.13",
     "gapi-script": "^1.2.0",
-    "html2canvas": "^1.4.1",
     "node-fetch": "^2.7.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",

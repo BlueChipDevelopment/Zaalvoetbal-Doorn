@@ -28,7 +28,6 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CdkDragDrop, transferArrayItem } from '@angular/cdk/drag-drop';
 import { DomSanitizer } from '@angular/platform-browser';
 import { MatIconRegistry } from '@angular/material/icon';
-import html2canvas from 'html2canvas';
 
 @Component({
   selector: 'app-team-generator',
@@ -432,20 +431,6 @@ export class TeamGeneratorComponent implements OnInit {
       `${teamToText(this.teams.teamWhite)}%0A%0A${teamToText(this.teams.teamRed)}`;
     const url = `https://wa.me/?text=${message}`;
     window.open(url, '_blank');
-  }
-
-  /**
-   * Maak een screenshot van het teamoverzicht en download als afbeelding
-   */
-  downloadTeamsScreenshot(): void {
-    const resultsElement = document.querySelector('.results') as HTMLElement;
-    if (!resultsElement) return;
-    html2canvas(resultsElement, { backgroundColor: null }).then(canvas => {
-      const link = document.createElement('a');
-      link.download = `teams_${new Date().toISOString().slice(0,10)}.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-    });
   }
 
   /**
