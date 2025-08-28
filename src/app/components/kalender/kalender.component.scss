@@ -566,13 +566,15 @@
   }
   
   .presence-counts {
-    flex-direction: column;
+    flex-direction: row;
     gap: 6px;
+    justify-content: space-between;
     
     .count-button {
-      width: 100%;
+      flex: 1;
       justify-content: center;
       min-width: auto;
+      max-width: none;
     }
   }
   
