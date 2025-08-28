@@ -348,11 +348,26 @@ export class TeamGeneratorComponent implements OnInit {
     // Save to Wedstrijden sheet as before
     const teamWhiteNames = this.teams.teamWhite.squad.map(p => p.name).join(', ');
     const teamRedNames = this.teams.teamRed.squad.map(p => p.name).join(', ');
-    let sheetRowIndex = this.nextMatchInfo.matchNumber ? Number(this.nextMatchInfo.matchNumber) + 1 : null;
+    
+    // Gebruik de absoluteRowNumber uit de wedstrijd voor veilig opslaan
+    let sheetRowIndex = this.nextMatchInfo.rowNumber;
+    
+    if (!sheetRowIndex) {
+      // Fallback naar oude methode voor backwards compatibility
+      sheetRowIndex = this.nextMatchInfo.matchNumber ? Number(this.nextMatchInfo.matchNumber) + 1 : undefined;
+    }
+    
     if (!sheetRowIndex) {
       this.snackBar.open('Kan rijnummer van de wedstrijd niet bepalen.', 'Sluiten', { duration: 5000, panelClass: ['snackbar-error'] });
       return;
     }
+
+    // Extra validatie: controleer seizoen en wedstrijdnummer
+    const seizoen = this.nextMatchInfo.seizoen;
+    const matchNumber = this.nextMatchInfo.matchNumber;
+    
+    console.log(`💾 Teams opslaan - Seizoen: ${seizoen || 'onbekend'}, Wedstrijd: ${matchNumber}, Rij: ${sheetRowIndex}`);
+
     const updateData = [
       {
         range: `Wedstrijden!C${sheetRowIndex}:D${sheetRowIndex}`,
@@ -363,6 +378,7 @@ export class TeamGeneratorComponent implements OnInit {
     this.googleSheetsService.batchUpdateSheet(updateData)
       .subscribe({
         next: () => {
+          console.log(`✅ Teams succesvol opgeslagen voor ${seizoen || 'onbekend'} wedstrijd ${matchNumber}`);
           this.isTeamsSaved = true;
           this.snackBar.open('Teams opgeslagen!', 'Sluiten', { duration: 3000, panelClass: ['snackbar-success'] });
           // Push notificatie sturen naar alle spelers met toestemming
@@ -373,6 +389,7 @@ export class TeamGeneratorComponent implements OnInit {
           );
         },
         error: (err) => {
+          console.error(`❌ Fout bij opslaan teams voor ${seizoen || 'onbekend'} wedstrijd ${matchNumber}:`, err);
           this.snackBar.open('Fout bij opslaan teams: ' + (err.message || err), 'Sluiten', { duration: 5000, panelClass: ['snackbar-error'] });
         }
       });

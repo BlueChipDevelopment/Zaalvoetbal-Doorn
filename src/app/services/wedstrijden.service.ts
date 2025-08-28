@@ -89,6 +89,19 @@ export class WedstrijdenService {
     return this.getCachedWedstrijden();
   }
 
+  /**
+   * Find a wedstrijd by seizoen and wedstrijdnummer for safe updates
+   */
+  findWedstrijdBySeizoenAndNummer(seizoen: string, wedstrijdNummer: number): Observable<WedstrijdData | null> {
+    return this.getCachedWedstrijden().pipe(
+      map(wedstrijden => {
+        return wedstrijden.find(w => 
+          w.seizoen === seizoen && w.id === wedstrijdNummer
+        ) || null;
+      })
+    );
+  }
+
   private getCachedWedstrijden(): Observable<WedstrijdData[]> {
     const now = Date.now();
     const cachedData = this.wedstrijdenCache$.value;
@@ -116,20 +129,56 @@ export class WedstrijdenService {
       return [];
     }
 
-    // Skip header row (index 0)
-    return rawData.slice(1)
+    // Skip header row (index 0) en transform eerst alle basis data
+    const baseWedstrijden = rawData.slice(1)
       .filter(row => row && row.length > 0)
-      .map((row, index) => ({
-        id: index + 1,
-        datum: row[1] || '',
-        teamWit: row[2] || '',
-        teamRood: row[3] || '',
-        scoreWit: this.parseScore(row[4]),
-        scoreRood: this.parseScore(row[5]),
-        zlatan: row[6] || '',
-        ventiel: row[7] || '',
-        locatie: 'Sporthal Steinheim' // Default locatie
-      }));
+      .map((row, index) => {
+        const absoluteRowNumber = index + 2; // +2 omdat we header overslaan en Excel is 1-based
+        const datum = row[1] || '';
+        const seizoen = this.getSeizoenFromDate(datum);
+        
+        // Probeer eerst ID uit sheet (kolom A), fallback naar berekening
+        let id: number;
+        const sheetId = this.parseScore(row[0]); // row[0] = kolom A
+        if (sheetId !== null && sheetId > 0) {
+          id = sheetId; // Gebruik ID uit sheet
+        } else {
+          id = index + 1; // Fallback naar oude berekening
+          console.warn(`Wedstrijd rij ${absoluteRowNumber}: Geen geldig ID in kolom A (${row[0]}), gebruik fallback ${id}`);
+        }
+        
+        return {
+          id: id,
+          seizoen: seizoen,
+          absoluteRowNumber: absoluteRowNumber,
+          datum: datum,
+          teamWit: row[2] || '',
+          teamRood: row[3] || '',
+          scoreWit: this.parseScore(row[4]),
+          scoreRood: this.parseScore(row[5]),
+          zlatan: row[6] || '',
+          ventiel: row[7] || '',
+          locatie: 'Sporthal Steinheim' // Default locatie
+        };
+      });
+
+    // Nu seizoen wedstrijdnummers berekenen per seizoen
+    const seizoenCounters = new Map<string, number>();
+    
+    return baseWedstrijden.map(wedstrijd => {
+      if (wedstrijd.seizoen) {
+        const currentCount = seizoenCounters.get(wedstrijd.seizoen) || 0;
+        const seizoenWedstrijdNummer = currentCount + 1;
+        seizoenCounters.set(wedstrijd.seizoen, seizoenWedstrijdNummer);
+        
+        return {
+          ...wedstrijd,
+          seizoenWedstrijdNummer
+        };
+      }
+      
+      return wedstrijd;
+    });
   }
 
   private parseScore(scoreValue: any): number | null {

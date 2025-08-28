@@ -1,5 +1,7 @@
 export interface WedstrijdData {
   id?: number;
+  seizoen?: string | null; // Seizoen in formaat "2024-2025", null als datum niet parseerbaar is
+  seizoenWedstrijdNummer?: number; // Wedstrijdnummer binnen het seizoen (1, 2, 3, ...)
   datum: string;
   teamWit: string;
   teamRood: string;
@@ -8,6 +10,8 @@ export interface WedstrijdData {
   zlatan: string;
   ventiel: string;
   locatie?: string;
+  // Voor backwards compatibility
+  absoluteRowNumber?: number; // De werkelijke rijnummer in de sheet
 }
 
 export interface WedstrijdFilter {

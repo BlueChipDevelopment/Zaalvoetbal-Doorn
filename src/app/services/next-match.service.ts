@@ -9,8 +9,9 @@ export interface NextMatchInfo {
   wedstrijd: WedstrijdData;
   location: string;
   time: string;
-  matchNumber: string | number | null;
+  matchNumber: number | null;
   rowNumber?: number;
+  seizoen?: string | null; // Seizoen voor unieke identificatie
 }
 
 export interface FutureMatchInfo {
@@ -19,7 +20,7 @@ export interface FutureMatchInfo {
   wedstrijd: WedstrijdData;
   location: string;
   time: string;
-  matchNumber: string | number | null;
+  matchNumber: number | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -81,8 +82,9 @@ export class NextMatchService {
           wedstrijd: nextWedstrijd,
           location: nextWedstrijd.locatie || 'Sporthal Steinheim',
           time: '20:30',
-          matchNumber: nextWedstrijd.id ?? null,
-          rowNumber: nextWedstrijd.id ? Number(nextWedstrijd.id) : undefined,
+          matchNumber: nextWedstrijd.seizoenWedstrijdNummer ?? nextWedstrijd.id ?? null,
+          rowNumber: nextWedstrijd.absoluteRowNumber || (nextWedstrijd.id ? Number(nextWedstrijd.id) + 1 : undefined),
+          seizoen: nextWedstrijd.seizoen,
         };
       })
     );
@@ -127,7 +129,7 @@ export class NextMatchService {
               wedstrijd: wedstrijd,
               location: wedstrijd.locatie || 'Sporthal Steinheim',
               time: '20:30',
-              matchNumber: wedstrijd.id ?? null
+              matchNumber: wedstrijd.seizoenWedstrijdNummer ?? wedstrijd.id ?? null
             };
           })
           .filter(match => match.parsedDate && match.parsedDate >= today)

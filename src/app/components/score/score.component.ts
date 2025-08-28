@@ -19,7 +19,7 @@ import { Player } from '../../interfaces/IPlayer';
 
 interface Match {
   rowNumber?: number; // Make optional
-  matchNumber: number | string;
+  matchNumber: number;
   date: string;
   teamWhitePlayers: string;
   teamRedPlayers: string;
@@ -89,7 +89,7 @@ export class ScoreComponent implements OnInit {
             if (info && info.wedstrijd) {
               const wedstrijd = info.wedstrijd;
               this.nextMatch = {
-                matchNumber: wedstrijd.id?.toString() ?? '',
+                matchNumber: wedstrijd.id ?? 0,
                 date: info.parsedDate ? info.parsedDate.toISOString() : info.date,
                 teamWhitePlayers: wedstrijd.teamWit ?? '',
                 teamRedPlayers: wedstrijd.teamRood ?? '',
@@ -99,13 +99,15 @@ export class ScoreComponent implements OnInit {
                 rowNumber: info.rowNumber // direct uit NextMatchInfo
               };
               // Bouw de player objecten voor de cards
-              this.teamWhitePlayers = this.parsePlayers(this.nextMatch.teamWhitePlayers || '', playerStats);
-              this.teamRedPlayers = this.parsePlayers(this.nextMatch.teamRedPlayers || '', playerStats);
-              const combinedPlayers = [...new Set([
-                ...this.teamWhitePlayers.map(p => p.name),
-                ...this.teamRedPlayers.map(p => p.name)
-              ])];
-              this.participatingPlayers = combinedPlayers.filter(player => !!player);
+              if (this.nextMatch) {
+                this.teamWhitePlayers = this.parsePlayers(this.nextMatch.teamWhitePlayers || '', playerStats);
+                this.teamRedPlayers = this.parsePlayers(this.nextMatch.teamRedPlayers || '', playerStats);
+                const combinedPlayers = [...new Set([
+                  ...this.teamWhitePlayers.map(p => p.name),
+                  ...this.teamRedPlayers.map(p => p.name)
+                ])];
+                this.participatingPlayers = combinedPlayers.filter(player => !!player);
+              }
               this.isLoading = false;
             } else {
               this.errorMessage = 'Geen aankomende wedstrijd gevonden.';
@@ -151,34 +153,79 @@ export class ScoreComponent implements OnInit {
     if (this.nextMatch && this.whiteGoals !== null && this.redGoals !== null) {
       const rowIndexToUpdate = this.nextMatch.rowNumber;
 
-      const updateData = [
-        {
-          range: `Wedstrijden!E${rowIndexToUpdate}:G${rowIndexToUpdate}`,
-          values: [
-            [this.whiteGoals, this.redGoals, this.selectedZlatan || '']
-          ]
-        }
-      ];
+      if (!rowIndexToUpdate) {
+        this._snackBar.open('Kan wedstrijd niet identificeren voor het opslaan van scores.', 'OK', {
+          duration: 5000
+        });
+        return;
+      }
 
-      this.googleSheetsService.batchUpdateSheet(updateData).subscribe({
-        next: () => {
-          this._snackBar.open('Scores en Zlatan succesvol opgeslagen!', 'OK', {
-            duration: 3000
-          }).afterDismissed().subscribe(() => {
-            this.router.navigate(['/klassement']);
-          });
-        },
-        error: error => {
-          console.error('Error updating match scores/Zlatan in Wedstrijden sheet', error);
-          this._snackBar.open('Fout bij opslaan. Probeer het opnieuw.', 'Sluiten', {
-            duration: 5000
-          });
-        }
-      });
+      // Extra validatie: controleer of we de juiste wedstrijd hebben
+      const matchNumber = this.nextMatch.matchNumber;
+      const seizoen = this.nextMatchInfo?.wedstrijd?.seizoen;
+      const absoluteId = this.nextMatchInfo?.wedstrijd?.id; // Gebruik het absolute ID voor vergelijking
+      
+      if (seizoen && absoluteId) {
+        // Dubbele controle via wedstrijdenService
+        this.nextMatchService.getNextMatchInfo().subscribe({
+          next: (currentMatchInfo) => {
+            // Vergelijk op seizoen + absolute ID (stabiel)
+            if (currentMatchInfo?.wedstrijd?.seizoen === seizoen && 
+                currentMatchInfo?.wedstrijd?.id === absoluteId) {
+              // Veilig om scores op te slaan
+              this.performScoreUpdate(rowIndexToUpdate);
+            } else {
+              this._snackBar.open('Wedstrijdgegevens zijn veranderd. Herlaad de pagina.', 'OK', {
+                duration: 5000
+              });
+            }
+          },
+          error: () => {
+            // Fallback: gebruik de oorspronkelijke methode
+            this.performScoreUpdate(rowIndexToUpdate);
+          }
+        });
+      } else {
+        // Fallback voor bestaande wedstrijden zonder seizoen of ID
+        this.performScoreUpdate(rowIndexToUpdate);
+      }
     } else {
       this._snackBar.open('Vul eerst beide scores in.', 'OK', {
         duration: 3000
       });
     }
+  }
+
+  private performScoreUpdate(rowIndexToUpdate: number): void {
+    // Log voor debugging en monitoring
+    const matchNumber = this.nextMatch?.matchNumber;
+    const seizoen = this.nextMatchInfo?.wedstrijd?.seizoen;
+    console.log(`💾 Scores opslaan - Seizoen: ${seizoen || 'onbekend'}, Wedstrijd: ${matchNumber}, Rij: ${rowIndexToUpdate}`);
+    
+    const updateData = [
+      {
+        range: `Wedstrijden!E${rowIndexToUpdate}:G${rowIndexToUpdate}`,
+        values: [
+          [this.whiteGoals, this.redGoals, this.selectedZlatan || '']
+        ]
+      }
+    ];
+
+    this.googleSheetsService.batchUpdateSheet(updateData).subscribe({
+      next: () => {
+        console.log(`✅ Scores succesvol opgeslagen voor ${seizoen || 'onbekend'} wedstrijd ${matchNumber}`);
+        this._snackBar.open('Scores en Zlatan succesvol opgeslagen!', 'OK', {
+          duration: 3000
+        }).afterDismissed().subscribe(() => {
+          this.router.navigate(['/klassement']);
+        });
+      },
+      error: error => {
+        console.error(`❌ Fout bij opslaan scores voor ${seizoen || 'onbekend'} wedstrijd ${matchNumber}:`, error);
+        this._snackBar.open('Fout bij opslaan. Probeer het opnieuw.', 'Sluiten', {
+          duration: 5000
+        });
+      }
+    });
   }
 }
