@@ -143,7 +143,7 @@
                         <mat-chip-set>
                           <mat-chip *ngFor="let player of details.aanwezig" class="player-chip present-chip">
                             <div class="chip-content">
-                              <span class="player-avatar">{{ getPlayerInitials(player.name) }}</span>
+                              <span class="player-avatar"></span>
                               <div class="player-info">
                                 <span class="player-name">{{ player.name }}</span>
                                 <span class="player-position" *ngIf="player.position">{{ player.position }}</span>
@@ -166,7 +166,7 @@
                         <mat-chip-set>
                           <mat-chip *ngFor="let player of details.afwezig" class="player-chip absent-chip">
                             <div class="chip-content">
-                              <span class="player-avatar">{{ getPlayerInitials(player.name) }}</span>
+                              <span class="player-avatar"></span>
                               <div class="player-info">
                                 <span class="player-name">{{ player.name }}</span>
                                 <span class="player-position" *ngIf="player.position">{{ player.position }}</span>
@@ -189,7 +189,7 @@
                         <mat-chip-set>
                           <mat-chip *ngFor="let player of details.geenReactie" class="player-chip no-response-chip">
                             <div class="chip-content">
-                              <span class="player-avatar">{{ getPlayerInitials(player.name) }}</span>
+                              <span class="player-avatar"></span>
                               <div class="player-info">
                                 <span class="player-name">{{ player.name }}</span>
                                 <span class="player-position" *ngIf="player.position">{{ player.position }}</span>
