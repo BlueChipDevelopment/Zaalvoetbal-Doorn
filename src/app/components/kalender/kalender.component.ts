@@ -20,11 +20,12 @@ import { AttendanceService } from '../../services/attendance.service';
 import { PlayerService } from '../../services/player.service';
 import { PlayerSheetData } from '../../interfaces/IPlayerSheet';
 import { NextMatchService, FutureMatchInfo } from '../../services/next-match.service';
+import { AttendanceStatus } from '../../interfaces/IAttendance';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 
 interface PlayerAttendanceStatus {
   date: string;
-  status: 'Ja' | 'Nee' | null;
+  status: AttendanceStatus | null;
 }
 
 interface MatchPresenceCounts {
@@ -35,7 +36,7 @@ interface MatchPresenceCounts {
 
 interface PlayerAttendance {
   name: string;
-  status: 'Ja' | 'Nee';
+  status: AttendanceStatus;
   position?: string;
 }
 
@@ -421,7 +422,7 @@ export class KalenderComponent implements OnInit {
     }
 
     // Convert UI values to database values
-    const dbStatus: 'Ja' | 'Nee' = uiStatus === 'aanwezig' ? 'Ja' : 'Nee';
+    const dbStatus: AttendanceStatus = uiStatus === 'aanwezig' ? 'Ja' : 'Nee';
 
     this.savingStates[matchDate] = true;
     const currentPlayer = this.selectedPlayer;

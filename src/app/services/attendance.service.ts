@@ -76,7 +76,7 @@ export class AttendanceService {
   getMatchAttendanceDetails(date: string): Observable<MatchAttendanceDetails> {
     return combineLatest([
       this.getAttendanceForDate(date),
-      this.playerService.getActivePlayers()
+      this.playerService.getPlayers()
     ]).pipe(
       map(([attendanceRecords, allPlayers]) => {
         const attendanceMap = new Map<string, AttendanceRecord>();
@@ -88,26 +88,53 @@ export class AttendanceService {
         const absent: AttendancePlayerInfo[] = [];
         const noResponse: AttendancePlayerInfo[] = [];
 
+        // Helper function to categorize player based on attendance status
+        const categorizePlayer = (playerInfo: AttendancePlayerInfo) => {
+          switch (playerInfo.status) {
+            case 'Ja':
+              present.push(playerInfo);
+              break;
+            case 'Nee':
+              absent.push(playerInfo);
+              break;
+            case 'Geen Reactie':
+              noResponse.push(playerInfo);
+              break;
+          }
+        };
+
+        // Process all players from the player list
         allPlayers.forEach((player: PlayerSheetData) => {
           const attendance = attendanceMap.get(player.name);
           const playerInfo: AttendancePlayerInfo = {
             name: player.name,
             position: player.position,
-            status: attendance?.status,
+            status: attendance?.status || (player.actief ? 'Geen Reactie' : undefined),
             playerData: player
           };
 
-          if (attendance) {
-            switch (attendance.status) {
-              case 'Ja':
-                present.push(playerInfo);
-                break;
-              case 'Nee':
-                absent.push(playerInfo);
-                break;
-            }
-          } else {
-            noResponse.push(playerInfo);
+          if (playerInfo.status) {
+            categorizePlayer(playerInfo);
+          }
+        });
+
+        attendanceRecords.forEach(record => {
+          const playerExists = allPlayers.some(p => p.name === record.playerName);
+          if (!playerExists) {
+            const playerInfo: AttendancePlayerInfo = {
+              name: record.playerName,
+              position: '',
+              status: record.status,
+              playerData: {
+                name: record.playerName,
+                position: '',
+                actief: false,
+                pushPermission: false,
+                pushSubscription: undefined
+              }
+            };
+
+            categorizePlayer(playerInfo);
           }
         });
 
@@ -144,18 +171,9 @@ export class AttendanceService {
         let playerStatus: AttendanceStatus | null = null;
         
         if (playerName) {
-          // Check if player is in present list
-          const presentPlayer = details.present.find(p => p.name === playerName);
-          if (presentPlayer) {
-            playerStatus = 'Ja';
-          } else {
-            // Check if player is in absent list
-            const absentPlayer = details.absent.find(p => p.name === playerName);
-            if (absentPlayer) {
-              playerStatus = 'Nee';
-            }
-            // If not found in either list, playerStatus remains null (no response)
-          }
+          const allPlayers = [...details.present, ...details.absent, ...details.noResponse];
+          const player = allPlayers.find(p => p.name === playerName);
+          playerStatus = player?.status || null;
         }
 
         return {

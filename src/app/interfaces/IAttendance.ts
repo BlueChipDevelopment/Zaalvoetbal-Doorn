@@ -15,7 +15,7 @@ export interface AttendanceRecord {
 /**
  * Aanwezigheid status opties
  */
-export type AttendanceStatus = 'Ja' | 'Nee';
+export type AttendanceStatus = 'Ja' | 'Nee' | 'Geen Reactie';
 
 /**
  * Interface voor aanwezigheids overzicht per wedstrijd

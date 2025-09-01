@@ -17,7 +17,7 @@ import { NextMatchService, NextMatchInfo } from '../../services/next-match.servi
 import { NextMatchInfoComponent } from '../next-match-info/next-match-info.component';
 import { PlayerCardComponent } from '../player-card/player-card.component';
 import { Player } from '../../interfaces/IPlayer';
-import { MatchAttendanceDetailsWithPlayerStatus } from '../../interfaces/IAttendance';
+import { MatchAttendanceDetailsWithPlayerStatus, AttendanceStatus } from '../../interfaces/IAttendance';
 import { environment } from '../../../environments/environment';
 
 @Component({
@@ -47,10 +47,10 @@ export class AttendanceComponent implements OnInit {
   nextMatchInfo: NextMatchInfo | null = null;
   isLoadingPlayers: boolean = false;
   isLoadingStatus: boolean = false;
-  attendanceStatus: 'Ja' | 'Nee' | null = null;
+  attendanceStatus: AttendanceStatus | null = null;
   attendanceList: { 
     speler: string; 
-    status: 'Ja' | 'Nee'; 
+    status: AttendanceStatus; 
     playerObj?: Player;
     playerData?: Player;  // Voor template compatibility
     name: string;         // Voor template compatibility
@@ -292,7 +292,7 @@ export class AttendanceComponent implements OnInit {
       });
   }
 
-  setAttendance(status: 'Ja' | 'Nee'): void {
+  setAttendance(status: AttendanceStatus): void {
     this.playerSelectError = null;
     if (!this.selectedPlayer || !this.nextGameDate || this.isLoadingStatus) {
       if (!this.selectedPlayer || !this.nextGameDate) {
