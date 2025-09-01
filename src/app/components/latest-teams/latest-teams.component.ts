@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { switchMap } from 'rxjs/operators';
 import { Player } from '../../interfaces/IPlayer';
 
 @Component({
@@ -31,6 +32,7 @@ export class LatestTeamsComponent implements OnInit {
   error: string | null = null;
   latestTeamsUrl = window.location.origin + '/opstelling';
   nextMatchInfo: NextMatchInfo | null = null;
+  showDetailedAnalysis = false;
   revealTime: Date | null = null;
   countdown: string | null = null;
 
@@ -62,7 +64,9 @@ export class LatestTeamsComponent implements OnInit {
   }
 
   private loadPlayerCards(info: NextMatchInfo) {
-    this.gameStatisticsService.getFullPlayerStats().subscribe({
+    this.gameStatisticsService.getCurrentSeason().pipe(
+      switchMap(currentSeason => this.gameStatisticsService.getFullPlayerStats(currentSeason))
+    ).subscribe({
       next: (playerStats) => {
         const teamWhite = this.parsePlayers(info.wedstrijd.teamWit, playerStats);
         const teamRed = this.parsePlayers(info.wedstrijd.teamRood, playerStats);
@@ -152,5 +156,29 @@ export class LatestTeamsComponent implements OnInit {
     } else {
       return 'Duidelijk verschil in sterkte - underdog kan verrassen! 🌟';
     }
+  }
+
+  getDetailedBalanceAnalysis(): string {
+    const diff = parseFloat(this.getTeamRatingDifference());
+    const whiteRating = this.getTeamRating(this.teams?.teamWhite || []);
+    const redRating = this.getTeamRating(this.teams?.teamRed || []);
+    
+    let analysis = `Met een verschil van ${diff} punten tussen de teams, `;
+    
+    if (diff < 1.0) {
+      analysis += 'is deze wedstrijd bijna perfecte gebalanceerd. Beide teams hebben vrijwel gelijke kansen op winst. Vorm op de dag en teamwork zullen het verschil maken.';
+    } else if (diff < 2.0) {
+      const strongerTeam = whiteRating > redRating ? 'Team Wit' : 'Team Rood';
+      analysis += `heeft ${strongerTeam} een licht voordeel op papier. Dit kleine verschil kan echter gemakkelijk weggenomen worden door goede tactiek en inzet.`;
+    } else if (diff < 3.0) {
+      const strongerTeam = whiteRating > redRating ? 'Team Wit' : 'Team Rood';
+      analysis += `is ${strongerTeam} de favoriet voor deze wedstrijd. Toch blijft voetbal onvoorspelbaar en kan de underdog met de juiste mentaliteit verrassen.`;
+    } else {
+      const strongerTeam = whiteRating > redRating ? 'Team Wit' : 'Team Rood';
+      const weakerTeam = whiteRating > redRating ? 'Team Rood' : 'Team Wit';
+      analysis += `heeft ${strongerTeam} een duidelijke voorsprong. ${weakerTeam} zal extra hard moeten werken, maar in zaalvoetbal kunnen individuele acties en geluk alles veranderen!`;
+    }
+    
+    return analysis;
   }
 }

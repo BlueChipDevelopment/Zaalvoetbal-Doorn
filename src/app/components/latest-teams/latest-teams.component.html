@@ -7,10 +7,39 @@
   <span>{{ error }}</span>
 </div>
 <div *ngIf="teams && !loading">
-  <!-- Team Analysis - just the quote without card -->
+  <!-- Team Analysis - clickable quote that shows detailed analysis -->
   <div class="team-analysis-quote" *ngIf="teams && teams.teamWhite && teams.teamRed">
-    <p class="balance-description">{{ getBalanceDescription() }}</p>
+    <p class="balance-description clickable" 
+       (click)="showDetailedAnalysis = !showDetailedAnalysis"
+       [title]="'Klik voor uitgebreide analyse'">
+      {{ getBalanceDescription() }}
+      <mat-icon class="expand-icon">{{ showDetailedAnalysis ? 'expand_less' : 'expand_more' }}</mat-icon>
+    </p>
   </div>
+
+  <!-- Detailed team analysis card (shown when clicked) -->
+  <mat-card class="algorithm-explanation-card" *ngIf="showDetailedAnalysis && teams && teams.teamWhite && teams.teamRed">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>analytics</mat-icon>
+        Teamanalyse
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="detailed-analysis">
+        <div class="analysis-summary">
+          <p><strong>⚖️ Score-verschil:</strong> {{ getTeamRatingDifference() }} punten</p>
+          <p>{{ getDetailedBalanceAnalysis() }}</p>
+        </div>
+      </div>
+    </mat-card-content>
+    <mat-card-actions align="end">
+      <button mat-button color="primary" (click)="showDetailedAnalysis = false">
+        <mat-icon>expand_less</mat-icon>
+        Verberg details
+      </button>
+    </mat-card-actions>
+  </mat-card>
 
   <div class="results">
     <div class="each-result" *ngFor="let team of orderedTeams">

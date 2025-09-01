@@ -1,19 +1,83 @@
 @import '../../../styles_variables';
 
-// Team analysis quote - just the text without card background
+// Team analysis quote - styled as blockquote
 .team-analysis-quote {
   max-width: 600px;
-  margin: 16px auto 24px auto; // More space below quote
-  padding: 0 16px; // Side padding for mobile
+  margin: 16px auto 24px auto;
+  padding: 0 16px;
   
   .balance-description {
     text-align: center;
-    font-size: 16px;
-    font-weight: 500;
-    color: $secondary-color;
+    font-size: 18px;
+    font-weight: 400;
     font-style: italic;
     margin: 0;
-    line-height: 1.4;
+    line-height: 1.5;
+    padding: 16px 24px;
+    
+    &.clickable {
+      cursor: pointer;
+      transition: color 0.2s ease, transform 0.1s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border-radius: 4px;
+      
+      &:hover {
+        transform: translateY(-1px);
+      }
+      
+      .expand-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        color: $secondary-color;
+        transition: color 0.2s ease;
+      }
+    }
+  }
+}
+
+// Detailed analysis card styling
+.algorithm-explanation-card {
+  max-width: 800px;
+  margin: 16px auto 24px auto;
+  
+  mat-card-header {
+    mat-card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      
+      mat-icon {
+        color: $primary-color;
+      }
+    }
+  }
+  
+  .detailed-analysis {
+    line-height: 1.6;
+    
+    p {
+      margin: 12px 0;
+      
+      strong {
+        color: $primary-color;
+      }
+    }
+    
+    .analysis-summary {
+      background: $light-bg;
+      padding: 16px;
+      border-radius: 4px;
+      border-left: 4px solid $primary-color;
+      margin-top: 16px;
+      
+      p:last-child {
+        margin-bottom: 0;
+      }
+    }
   }
 }
 
@@ -23,7 +87,8 @@
     padding: 0 8px;
     
     .balance-description {
-      font-size: 14px;
+      font-size: 15px;
+      padding: 12px 20px;
     }
   }
   
@@ -31,7 +96,7 @@
     flex-wrap: nowrap !important; // Force teams to stay side by side
     flex-direction: row !important;
     gap: 4px;
-    padding: 0 4px;
+    padding: 10px 4px;
     overflow-x: auto; // Allow horizontal scroll if needed
   }
   
@@ -43,6 +108,7 @@
     flex-shrink: 0; // Prevent shrinking below min-width
     
     .team-header {
+      margin-top: 10px;
       margin-bottom: 8px;
       
       h4 {

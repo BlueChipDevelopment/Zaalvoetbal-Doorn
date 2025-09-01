@@ -5,6 +5,7 @@ import { Team } from '../interfaces/ITeam';
 import { GoogleSheetsService } from './google-sheets-service';
 import { GameStatisticsService } from './game.statistics.service';
 import { Observable } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -45,8 +46,16 @@ export class TeamGenerateService {
     return this.generatedTeams;
   }
 
-  getFullPlayerStats(): Observable<any[]> {
-    return this.gameStatisticsService.getFullPlayerStats();
+  getFullPlayerStats(season?: string | null): Observable<any[]> {
+    return this.gameStatisticsService.getFullPlayerStats(season);
+  }
+
+  getCurrentSeasonPlayerStats(): Observable<any[]> {
+    return this.gameStatisticsService.getCurrentSeason().pipe(
+      switchMap(currentSeason => {
+        return this.gameStatisticsService.getFullPlayerStats(currentSeason);
+      })
+    );
   }
 
   // Helper method to shuffle an array

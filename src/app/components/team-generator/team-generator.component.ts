@@ -410,8 +410,8 @@ export class TeamGeneratorComponent implements OnInit {
     this.loadingSubject.next(true);
     this.errorMessage = null;
     
-    // Eerst alle ratings ophalen
-    this.teamGenerateService.getFullPlayerStats().pipe(
+    // Eerst alle ratings ophalen (huidige seizoen)
+    this.teamGenerateService.getCurrentSeasonPlayerStats().pipe(
       finalize(() => this.loadingSubject.next(false))
     ).subscribe({
       next: (playerStats: any[]) => {
@@ -472,8 +472,8 @@ export class TeamGeneratorComponent implements OnInit {
     this.loadingSubject.next(true);
     this.errorMessage = null;
     
-    // Get statistics data to merge with player data
-    this.teamGenerateService.getFullPlayerStats()
+    // Get statistics data to merge with player data (huidige seizoen)
+    this.teamGenerateService.getCurrentSeasonPlayerStats()
       .pipe(
         finalize(() => this.loadingSubject.next(false))
       )
