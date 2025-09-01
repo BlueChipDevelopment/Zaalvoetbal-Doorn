@@ -102,6 +102,30 @@
     
     @if(isGenerated){
       <hr class="solid" />
+      
+      <!-- Algorithm explanation using Angular Material -->
+      @if(algorithmExplanation) {
+        <mat-card class="algorithm-explanation-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>analytics</mat-icon>
+              Teamanalyse
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="explanation-content" [innerHTML]="algorithmExplanation"></div>
+          </mat-card-content>
+          @if(algorithmExplanation.length > 800) {
+            <mat-card-actions align="end">
+              <button mat-button color="primary" (click)="showFullExplanation = !showFullExplanation">
+                <mat-icon>{{ showFullExplanation ? 'expand_less' : 'expand_more' }}</mat-icon>
+                {{ showFullExplanation ? 'Minder tonen' : 'Meer details' }}
+              </button>
+            </mat-card-actions>
+          }
+        </mat-card>
+      }
+      
       <!-- Team results -->
       <div class="results">
         <div class="each-result" *ngFor="let teamKey of getTeams(); trackBy: trackByTeamKey">

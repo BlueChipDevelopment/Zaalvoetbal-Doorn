@@ -7,6 +7,11 @@
   <span>{{ error }}</span>
 </div>
 <div *ngIf="teams && !loading">
+  <!-- Team Analysis - just the quote without card -->
+  <div class="team-analysis-quote" *ngIf="teams && teams.teamWhite && teams.teamRed">
+    <p class="balance-description">{{ getBalanceDescription() }}</p>
+  </div>
+
   <div class="results">
     <div class="each-result" *ngFor="let team of orderedTeams">
       <div class="team-header">

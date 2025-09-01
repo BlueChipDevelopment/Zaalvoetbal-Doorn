@@ -227,6 +227,101 @@ app-next-match-info {
   background: #e0e0e0;
 }
 
+// Algorithm explanation using Angular Material Card
+.algorithm-explanation-card {
+  max-width: 800px;
+  width: 90%;
+  margin: 20px auto;
+  
+  mat-card-header {
+    mat-card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      
+      mat-icon {
+        color: $primary-color;
+      }
+    }
+  }
+  
+  .explanation-content {
+    line-height: 1.6;
+    
+    p {
+      margin: 8px 0;
+      padding: 4px 0;
+      
+      strong {
+        color: $primary-color;
+      }
+      
+      // Emoji-based styling for different sections
+      &:first-child:contains("🏆") {
+        background: rgba(33, 150, 243, 0.05);
+        padding: 8px;
+        border-radius: 4px;
+        border-left: 3px solid $primary-color;
+      }
+      
+      // Form indicators
+      &:contains("🔥") {
+        background: rgba(255, 87, 34, 0.05);
+        padding: 6px;
+        border-radius: 4px;
+        margin: 4px 0;
+      }
+      
+      // Keeper indicators  
+      &:contains("🥅") {
+        background: rgba(76, 175, 80, 0.05);
+        padding: 6px;
+        border-radius: 4px;
+        margin: 4px 0;
+      }
+      
+      // Development indicators
+      &:contains("🌟") {
+        background: rgba(255, 193, 7, 0.05);
+        padding: 6px;
+        border-radius: 4px;
+        margin: 4px 0;
+      }
+      
+      // Key matchup indicators
+      &:contains("⭐") {
+        background: rgba(156, 39, 176, 0.05);
+        padding: 6px;
+        border-radius: 4px;
+        margin: 4px 0;
+        font-weight: 500;
+      }
+      
+      // Final balance
+      &:contains("⚖️") {
+        background: $light-bg;
+        padding: 8px;
+        border-radius: 4px;
+        border-left: 3px solid $secondary-color;
+        font-weight: 500;
+        margin-top: 8px;
+      }
+    }
+  }
+}
+
+// Responsive design for explanation card
+@media (max-width: 768px) {
+  .algorithm-explanation-card {
+    width: 95%;
+    margin: 16px auto;
+    
+    .explanation-content p {
+      font-size: 14px;
+    }
+  }
+}
+
 /* Media queries */
 @media only screen and (max-width: 600px) {
   .container {

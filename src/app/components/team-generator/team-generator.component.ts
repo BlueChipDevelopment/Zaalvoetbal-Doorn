@@ -64,6 +64,7 @@ export class TeamGeneratorComponent implements OnInit {
   public isTeamsSaved = false;
 
   public algorithmExplanation = '';
+  public showFullExplanation = false;
   
   protected positions: string[] = Object.values(Positions);
   protected ratings: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -158,15 +159,195 @@ export class TeamGeneratorComponent implements OnInit {
   private createAlgorithmExplanation() {
     const teams = this.teamGenerateService.getGeneratedTeams();
     if (!teams || teams.length < 2) return;
-    // Gebruik direct de ratings uit de Player-objecten in squad
-    const team1Score = teams[0].squad && Array.isArray(teams[0].squad)
-      ? teams[0].squad.reduce((sum, p) => sum + (p && p.rating ? p.rating : 0), 0).toFixed(2)
-      : '0.00';
-    const team2Score = teams[1].squad && Array.isArray(teams[1].squad)
-      ? teams[1].squad.reduce((sum, p) => sum + (p && p.rating ? p.rating : 0), 0).toFixed(2)
-      : '0.00';
-    const scoreDiff = Math.abs(parseFloat(team1Score) - parseFloat(team2Score)).toFixed(2);
-    this.algorithmExplanation = `De teams zijn in balans met een puntenverschil van slechts ${scoreDiff} punten.\nOns algoritme houdt rekening met spelersbeoordelingen, posities en historische chemiegegevens om gelijkwaardige teams te creëren.\nDe bijdrage van elke speler wordt gewogen op basis van hun prestaties in eerdere wedstrijden.`;
+    
+    const teamWhite = teams[0];
+    const teamRed = teams[1];
+    
+    // Analyze team characteristics
+    const whiteAnalysis = this.analyzeTeam(teamWhite);
+    const redAnalysis = this.analyzeTeam(teamRed);
+    
+    // Determine main balancing factors
+    const mainFactors = this.determineMainFactors(whiteAnalysis, redAnalysis);
+    
+    // Generate personalized explanation
+    this.algorithmExplanation = this.generatePersonalizedExplanation(
+      teamWhite, teamRed, whiteAnalysis, redAnalysis, mainFactors
+    );
+  }
+
+  private analyzeTeam(team: Team) {
+    const squad = team.squad;
+    
+    // Find players with exceptional form (last 5 games > 70% win rate)
+    const playersInForm = squad.filter(player => {
+      if (!player.gameHistory || player.gameHistory.length < 3) return false;
+      const recentGames = player.gameHistory.slice(-5);
+      const wins = recentGames.filter(game => game.result === 3).length;
+      return (wins / recentGames.length) > 0.7;
+    });
+    
+    // Find players with poor form (last 5 games < 30% win rate)
+    const playersInPoorForm = squad.filter(player => {
+      if (!player.gameHistory || player.gameHistory.length < 3) return false;
+      const recentGames = player.gameHistory.slice(-5);
+      const wins = recentGames.filter(game => game.result === 3).length;
+      return (wins / recentGames.length) < 0.3;
+    });
+    
+    // Find experienced players (>10 games played)
+    const experiencedPlayers = squad.filter(player => 
+      player.gamesPlayed && player.gamesPlayed > 10
+    );
+    
+    // Find new players (<=3 games played)
+    const newPlayers = squad.filter(player => 
+      !player.gamesPlayed || player.gamesPlayed <= 3
+    );
+    
+    // Find keepers
+    const keepers = squad.filter(player => 
+      player.position === 'Keeper' || player.position === 'GOAL_KEEPER'
+    );
+    
+    // Find top rated player
+    const topPlayer = squad.reduce((top, player) => 
+      (player.rating || 0) > (top.rating || 0) ? player : top
+    );
+    
+    // Calculate average rating
+    const avgRating = squad.length > 0 
+      ? squad.reduce((sum, p) => sum + (p.rating || 0), 0) / squad.length 
+      : 0;
+    
+    return {
+      playersInForm,
+      playersInPoorForm,
+      experiencedPlayers,
+      newPlayers,
+      keepers,
+      topPlayer,
+      avgRating,
+      totalScore: team.totalScore || 0
+    };
+  }
+
+  private determineMainFactors(whiteAnalysis: any, redAnalysis: any) {
+    const factors = [];
+    
+    // Check if form is a major factor
+    if (whiteAnalysis.playersInForm.length > 0 || redAnalysis.playersInForm.length > 0) {
+      factors.push('form');
+    }
+    
+    // Check if experience balancing is important
+    const expDiff = Math.abs(whiteAnalysis.experiencedPlayers.length - redAnalysis.experiencedPlayers.length);
+    if (expDiff <= 1 && (whiteAnalysis.experiencedPlayers.length > 0 || redAnalysis.experiencedPlayers.length > 0)) {
+      factors.push('experience');
+    }
+    
+    // Check if new player integration is happening
+    if (whiteAnalysis.newPlayers.length > 0 || redAnalysis.newPlayers.length > 0) {
+      factors.push('development');
+    }
+    
+    // Check keeper situation
+    if (whiteAnalysis.keepers.length > 0 && redAnalysis.keepers.length > 0) {
+      factors.push('keepers');
+    }
+    
+    // Always include balance as base factor
+    factors.push('balance');
+    
+    return factors;
+  }
+
+  private generatePersonalizedExplanation(
+    teamWhite: Team, 
+    teamRed: Team, 
+    whiteAnalysis: any, 
+    redAnalysis: any, 
+    factors: string[]
+  ): string {
+    let explanation = '';
+    const scoreDiff = Math.abs(whiteAnalysis.totalScore - redAnalysis.totalScore).toFixed(1);
+    
+    // Team composition overview  
+    explanation += `<p><strong>🏆 ${teamWhite.name}</strong>: ${teamWhite.squad.map(p => p.name).join(', ')}</p>`;
+    explanation += `<p><strong>🔴 ${teamRed.name}</strong>: ${teamRed.squad.map(p => p.name).join(', ')}</p><br>`;
+    
+    // Form analysis
+    if (factors.includes('form')) {
+      if (whiteAnalysis.playersInForm.length > 0) {
+        const formPlayers = whiteAnalysis.playersInForm.map((p: Player) => p.name).join(' en ');
+        explanation += `<p>🔥 <strong>Team Wit</strong> heeft een voordeel door de uitstekende vorm van ${formPlayers}.</p>`;
+      }
+      if (redAnalysis.playersInForm.length > 0) {
+        const formPlayers = redAnalysis.playersInForm.map((p: Player) => p.name).join(' en ');
+        explanation += `<p>🔥 <strong>Team Rood</strong> heeft een voordeel door de uitstekende vorm van ${formPlayers}.</p>`;
+      }
+      
+      // Mention players in poor form
+      const allPoorForm = [...whiteAnalysis.playersInPoorForm, ...redAnalysis.playersInPoorForm];
+      if (allPoorForm.length > 0) {
+        const poorFormNames = allPoorForm.map((p: Player) => p.name).join(', ');
+        explanation += `<p>⚠️ ${poorFormNames} ${allPoorForm.length === 1 ? 'heeft' : 'hebben'} recent mindere vorm - kans op comeback!</p>`;
+      }
+    }
+    
+    // Keeper analysis
+    if (factors.includes('keepers')) {
+      const whiteKeeper = whiteAnalysis.keepers[0];
+      const redKeeper = redAnalysis.keepers[0];
+      
+      if (whiteKeeper && redKeeper) {
+        explanation += `<p>🥅 Keeper-duel: <strong>${whiteKeeper.name}</strong> vs <strong>${redKeeper.name}</strong> - beide teams hebben sterke laatste verdediging.</p>`;
+      } else if (whiteKeeper) {
+        explanation += `<p>🥅 <strong>Team Wit</strong> heeft voordeel met keeper ${whiteKeeper.name}, Team Rood moet creatief verdedigen.</p>`;
+      } else if (redKeeper) {
+        explanation += `<p>🥅 <strong>Team Rood</strong> heeft voordeel met keeper ${redKeeper.name}, Team Wit moet creatief verdedigen.</p>`;
+      }
+    }
+    
+    // Experience vs Development
+    if (factors.includes('development')) {
+      const allNewPlayers = [...whiteAnalysis.newPlayers, ...redAnalysis.newPlayers];
+      if (allNewPlayers.length > 0) {
+        const newNames = allNewPlayers.map((p: Player) => p.name).join(', ');
+        explanation += `<p>🌟 <strong>Ontwikkeling</strong>: ${newNames} ${allNewPlayers.length === 1 ? 'speelt' : 'spelen'} tussen ervaren spelers voor optimale groei.</p>`;
+      }
+    }
+    
+    if (factors.includes('experience')) {
+      const whiteExp = whiteAnalysis.experiencedPlayers;
+      const redExp = redAnalysis.experiencedPlayers;
+      
+      if (whiteExp.length > redExp.length) {
+        explanation += `<p>🏆 <strong>Team Wit</strong> heeft meer ervaring met ${whiteExp.map((p: Player) => p.name).join(', ')}.</p>`;
+      } else if (redExp.length > whiteExp.length) {
+        explanation += `<p>🏆 <strong>Team Rood</strong> heeft meer ervaring met ${redExp.map((p: Player) => p.name).join(', ')}.</p>`;
+      } else if (whiteExp.length > 0 && redExp.length > 0) {
+        explanation += `<p>🏆 Ervaring is gelijk verdeeld: ${whiteExp.map((p: Player) => p.name).join(', ')} vs ${redExp.map((p: Player) => p.name).join(', ')}.</p>`;
+      }
+    }
+    
+    // Key player matchups
+    if (whiteAnalysis.topPlayer && redAnalysis.topPlayer) {
+      explanation += `<p>⭐ <strong>Sleutel-duel</strong>: ${whiteAnalysis.topPlayer.name} (${whiteAnalysis.topPlayer.rating}) vs ${redAnalysis.topPlayer.name} (${redAnalysis.topPlayer.rating}) - deze strijd kan de wedstrijd bepalen!</p>`;
+    }
+    
+    // Final balance assessment
+    explanation += `<p><strong>⚖️ Score-verschil</strong>: ${scoreDiff} punten - `;
+    if (parseFloat(scoreDiff) < 1.0) {
+      explanation += 'extreem spannende wedstrijd verwacht!';
+    } else if (parseFloat(scoreDiff) < 2.0) {
+      explanation += 'evenwichtige wedstrijd met kleine voordelen.';
+    } else {
+      explanation += 'één team heeft voordeel, maar vorm kan alles veranderen!';
+    }
+    explanation += '</p>';
+    
+    return explanation;
   }
 
   protected clean(): void {

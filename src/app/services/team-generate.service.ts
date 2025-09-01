@@ -98,14 +98,16 @@ export class TeamGenerateService {
     // For better performance, distribute players in batches by position
     this.distributePlayersByPosition(players, teamWhite, teamRed);
 
-    // Calculate final scores as the sum of individual player ratings
+    // Calculate final scores including form factor
     teamWhite.sumOfRatings = teamWhite.squad.reduce((sum, player) => sum + (player.rating || 0), 0);
     teamWhite.chemistryScore = this.calculateTeamChemistry(teamWhite.squad.map(player => player.name));
-    teamWhite.totalScore = teamWhite.sumOfRatings;
+    // Total score now includes form-adjusted ratings
+    teamWhite.totalScore = this.calculateTeamScore(teamWhite.squad.map(player => player.name));
 
     teamRed.sumOfRatings = teamRed.squad.reduce((sum, player) => sum + (player.rating || 0), 0);
     teamRed.chemistryScore = this.calculateTeamChemistry(teamRed.squad.map(player => player.name));
-    teamRed.totalScore = teamRed.sumOfRatings;
+    // Total score now includes form-adjusted ratings
+    teamRed.totalScore = this.calculateTeamScore(teamRed.squad.map(player => player.name));
 
     return [teamWhite, teamRed];
   }
@@ -137,6 +139,29 @@ export class TeamGenerateService {
         }
       }
     }
+  }
+
+  // Calculate player's recent form based on last 5 games (0.5 to 1.5 multiplier)
+  private calculateRecentForm(player: Player): number {
+    if (!player.gameHistory || player.gameHistory.length === 0) {
+      return 1.0; // Neutral form for players without history
+    }
+    
+    // Get last 5 games, sorted by date (most recent first)
+    const recentGames = player.gameHistory
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .slice(0, 5);
+    
+    if (recentGames.length === 0) return 1.0;
+    
+    // Calculate form based on results (3=win, 2=tie, 1=loss)
+    const recentPoints = recentGames.reduce((sum, game) => sum + game.result, 0);
+    const maxPossible = recentGames.length * 3;
+    const formRatio = recentPoints / maxPossible;
+    
+    // Convert to multiplier between 0.5 (very poor form) and 1.5 (excellent form)
+    // 0.0 ratio = 0.5 multiplier, 0.5 ratio = 1.0 multiplier, 1.0 ratio = 1.5 multiplier
+    return 0.5 + (formRatio * 1.0);
   }
 
   // Calculate player's performance bonus (up to 10% based on previous games)
@@ -195,14 +220,17 @@ export class TeamGenerateService {
   private calculateTeamScore(playerNames: string[]): number {
     if (!playerNames.length) return 0;
 
-    let sumOfRatings = 0;
+    let totalScore = 0;
     for (const name of playerNames) {
       const player = this.getPlayerByName(name);
       if (player && player.rating) {
-        sumOfRatings += player.rating;
+        // Apply form factor to the player's rating
+        const formMultiplier = this.calculateRecentForm(player);
+        const adjustedRating = player.rating * formMultiplier;
+        totalScore += adjustedRating;
       }
     }
 
-    return sumOfRatings;
+    return totalScore;
   }
 }

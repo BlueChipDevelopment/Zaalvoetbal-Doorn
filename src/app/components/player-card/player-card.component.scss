@@ -27,8 +27,74 @@
   color: $secondary-color;
 }
 
+// Mobile specific override
+@media (max-width: 768px) {
+  .player-card {
+    min-width: auto !important;
+    max-width: none !important;
+    width: 100% !important;
+    margin: 1px !important;
+  }
+  
+  mat-card {
+    padding: 4px !important;
+  }
+  
+  mat-card-header {
+    padding: 4px 6px !important;
+    margin-bottom: 0 !important;
+    min-height: auto !important;
+    align-items: center !important;
+    
+    .mat-card-header-text {
+      margin: 0 !important;
+    }
+  }
+  
+  mat-card-content {
+    padding: 2px 6px 4px !important;
+    margin: 0 !important;
+  }
+  
+  .player-card mat-card-header mat-card-title {
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    line-height: 1.1 !important;
+    margin-bottom: 1px !important;
+  }
+  
+  .player-card mat-card-header mat-card-subtitle {
+    font-size: 14px !important;
+    line-height: 1 !important;
+    font-weight: 400 !important;
+    margin: 0 !important;
+  }
+  
+  .player-card-image-white,
+  .player-card-image-red {
+    width: 18px !important;
+    height: 18px !important;
+    margin-right: 6px !important;
+    flex-shrink: 0 !important;
+    align-self: center !important;
+  }
+}
+
 mat-card-header {
   align-items: center;
+}
+
+// Also ensure desktop icons are centered
+.player-card-image-white,
+.player-card-image-red {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// Remove bottom margin from Material card avatar
+.mat-mdc-card-avatar {
+  margin-bottom: 0px !important;
 }
 
 mat-card-title {

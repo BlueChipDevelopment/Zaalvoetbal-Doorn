@@ -6,6 +6,7 @@ import { CommonModule } from '@angular/common';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Player } from '../../interfaces/IPlayer';
 
@@ -19,6 +20,7 @@ import { Player } from '../../interfaces/IPlayer';
     MatProgressSpinnerModule,
     MatIconModule,
     MatButtonModule,
+    MatCardModule,
     PlayerCardComponent
   ]
 })
@@ -124,5 +126,31 @@ export class LatestTeamsComponent implements OnInit {
   getTeamRating(team: any[]): number {
     if (!team || !Array.isArray(team)) return 0;
     return team.reduce((sum, p) => sum + (p && p.rating ? p.rating : 0), 0);
+  }
+
+  getTeamPlayerNames(teamKey: string): string {
+    const team = this.teams?.[teamKey as keyof typeof this.teams];
+    if (!team || !Array.isArray(team)) return '';
+    return team.map(p => p.name).join(', ');
+  }
+
+  getTeamRatingDifference(): string {
+    if (!this.teams) return '0.0';
+    const whiteRating = this.getTeamRating(this.teams.teamWhite);
+    const redRating = this.getTeamRating(this.teams.teamRed);
+    return Math.abs(whiteRating - redRating).toFixed(1);
+  }
+
+  getBalanceDescription(): string {
+    const diff = parseFloat(this.getTeamRatingDifference());
+    if (diff < 1.0) {
+      return 'Extreem evenwichtige opstelling - spannende wedstrijd gegarandeerd! 🔥';
+    } else if (diff < 2.0) {
+      return 'Goede balans tussen de teams met kleine tactische verschillen. ⚽';
+    } else if (diff < 3.0) {
+      return 'Één team heeft een licht voordeel, maar vorm kan alles veranderen. 💪';
+    } else {
+      return 'Duidelijk verschil in sterkte - underdog kan verrassen! 🌟';
+    }
   }
 }

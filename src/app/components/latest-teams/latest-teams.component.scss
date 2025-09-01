@@ -1,5 +1,103 @@
 @import '../../../styles_variables';
 
+// Team analysis quote - just the text without card background
+.team-analysis-quote {
+  max-width: 600px;
+  margin: 16px auto 24px auto; // More space below quote
+  padding: 0 16px; // Side padding for mobile
+  
+  .balance-description {
+    text-align: center;
+    font-size: 16px;
+    font-weight: 500;
+    color: $secondary-color;
+    font-style: italic;
+    margin: 0;
+    line-height: 1.4;
+  }
+}
+
+@media (max-width: 768px) {
+  .team-analysis-quote {
+    margin: 8px auto 16px auto;
+    padding: 0 8px;
+    
+    .balance-description {
+      font-size: 14px;
+    }
+  }
+  
+  .results {
+    flex-wrap: nowrap !important; // Force teams to stay side by side
+    flex-direction: row !important;
+    gap: 4px;
+    padding: 0 4px;
+    overflow-x: auto; // Allow horizontal scroll if needed
+  }
+  
+  .each-result {
+    margin: 2px 1px !important;
+    padding: 4px 2px !important;
+    min-width: calc(50% - 6px) !important; // Force exactly 50% width
+    max-width: calc(50% - 6px) !important;
+    flex-shrink: 0; // Prevent shrinking below min-width
+    
+    .team-header {
+      margin-bottom: 8px;
+      
+      h4 {
+        font-size: 16px;
+        margin: 0 0 4px 0;
+        line-height: 1.1;
+        font-weight: 600;
+      }
+      
+      .team-rating {
+        font-size: 12px;
+        margin: 0 0 4px 0;
+        line-height: 1;
+      }
+    }
+  }
+  
+  // Hide share link container on mobile
+  .share-link-container {
+    display: none;
+  }
+  
+  // Make player cards much smaller on mobile
+  ::ng-deep app-player-card .player-card {
+    min-width: auto;
+    max-width: none;
+    width: 100%;
+    margin: 2px;
+    
+    mat-card-content {
+      padding: 8px !important;
+    }
+    
+    mat-card-header {
+      padding: 4px 8px !important;
+      
+      mat-card-title {
+        font-size: 12px !important;
+        line-height: 1.2;
+      }
+      
+      mat-card-subtitle {
+        font-size: 10px !important;
+        line-height: 1.1;
+      }
+    }
+    
+    .player-card-image-white,
+    .player-card-image-red {
+      width: 40px !important;
+      height: 40px !important;
+    }
+  }
+}
+
 .results {
   width: 100%;
   display: flex;
@@ -39,6 +137,13 @@
   align-items: center;
   gap: 12px;
   justify-content: center;
+}
+
+// Hide share link on mobile
+@media (max-width: 768px) {
+  .share-link-container {
+    display: none !important;
+  }
 }
 
 .countdown-container {
