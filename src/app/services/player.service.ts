@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, of, BehaviorSubject } from 'rxjs';
-import { map, tap, catchError, shareReplay } from 'rxjs/operators';
+import { map, tap, catchError, shareReplay, switchMap } from 'rxjs/operators';
 import { GoogleSheetsService } from './google-sheets-service';
 import { PlayerSheetData, PlayerFilter } from '../interfaces/IPlayerSheet';
 
@@ -65,24 +65,15 @@ export class PlayerService {
     pushSubscription: string, 
     pushPermission: boolean
   ): Observable<any> {
-    return this.getCachedPlayers().pipe(
-      map(players => {
-        const playerIndex = players.findIndex(p => 
-          p.name.toLowerCase() === playerName.toLowerCase()
-        );
-        if (playerIndex === -1) {
-          throw new Error('Player not found');
-        }
-        // Row index in sheet (0-based, +1 for header, +1 for sheet indexing)
-        return playerIndex + 1;
+    return this.googleSheetsService.updatePlayerPushSubscription(
+      playerName, 
+      pushSubscription, 
+      pushPermission
+    ).pipe(
+      catchError(error => {
+        console.error('❌ PlayerService error:', error);
+        throw error;
       }),
-      map(rowIndex => 
-        this.googleSheetsService.updatePlayerPushSubscription(
-          rowIndex, 
-          pushSubscription, 
-          pushPermission
-        )
-      ),
       tap(() => this.clearCache()) // Clear cache after update
     );
   }

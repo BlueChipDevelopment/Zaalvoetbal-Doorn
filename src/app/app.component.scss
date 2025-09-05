@@ -56,3 +56,88 @@
   }
    /* Optionele aanpassingen voor desktop kunnen hier */
 }
+
+/* Futsal Push Notification Styling */
+::ng-deep .futsal-notification {
+  /* Base styling for all futsal notifications */
+  font-family: 'Roboto', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  
+  .mat-mdc-snack-bar-container {
+    border-radius: 8px;
+    max-width: 400px;
+    margin: 16px;
+  }
+  
+  .mdc-snackbar__surface {
+    border-radius: 8px !important;
+  }
+  
+  .mat-mdc-snack-bar-action {
+    color: #ffc107 !important; /* Amber accent color */
+    font-weight: 600 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+/* Info notification styling (default) */
+::ng-deep .futsal-notification-info {
+  .mdc-snackbar__surface {
+    background-color: #673ab7 !important; /* Deep purple primary */
+    color: white !important;
+  }
+  
+  .mat-mdc-snack-bar-label {
+    color: white !important;
+  }
+  
+  .mat-mdc-snack-bar-action {
+    color: #ffc107 !important; /* Amber accent */
+    
+    &:hover {
+      background-color: rgba(255, 193, 7, 0.1) !important;
+    }
+  }
+}
+
+/* Success notification styling */
+::ng-deep .futsal-notification-success {
+  .mdc-snackbar__surface {
+    background-color: #4caf50 !important; /* Green */
+    color: white !important;
+  }
+  
+  .mat-mdc-snack-bar-label {
+    color: white !important;
+  }
+}
+
+/* Warning notification styling */
+::ng-deep .futsal-notification-warning {
+  .mdc-snackbar__surface {
+    background-color: #ff9800 !important; /* Orange */
+    color: white !important;
+  }
+  
+  .mat-mdc-snack-bar-label {
+    color: white !important;
+  }
+}
+
+/* Mobile responsive styling */
+@media (max-width: 600px) {
+  ::ng-deep .futsal-notification {
+    .mat-mdc-snack-bar-container {
+      max-width: calc(100vw - 32px);
+      margin: 8px 16px;
+    }
+    
+    .mdc-snackbar__surface {
+      font-size: 13px;
+    }
+  }
+}

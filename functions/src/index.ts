@@ -205,9 +205,15 @@ export const sendPushToAll = onRequest(
       return;
     }
     try {
+      logger.info('📧 Starting push notification request...');
+      
+      // Log request body for debugging
+      logger.info('Request body:', JSON.stringify(req.body));
+      
       const spreadsheetId = '11xN1m371F8Tj0bX6TTRgnL_x_1_pXipox3giBuuUK1I';
       const sheetName = 'Spelers';
       const sheets = await getSheetsClient();
+      logger.info('✅ Google Sheets client created');
       const result = await sheets.spreadsheets.values.get({
         spreadsheetId,
         range: `${sheetName}!A1:Z`,
@@ -284,6 +290,7 @@ export const sendPushToAll = onRequest(
  * Scheduled function: stuur automatisch reminders 24u en 12u voor de eerstvolgende wedstrijd
  * Houdt bij in een 'ReminderLog' sheet of een reminder al is verstuurd voor een bepaalde wedstrijd en tijdstip
  */
+
 export const scheduledAttendanceReminders = onSchedule(
   { schedule: "every 60 minutes", region: "europe-west1" },
   async (event) => {
@@ -333,17 +340,59 @@ export const scheduledAttendanceReminders = onSchedule(
       if (alreadySent) continue;
       const msUntilMatch = nextMatchDate.getTime() - now.getTime();
       if (msUntilMatch < msBefore && msUntilMatch > msBefore - 60 * 60 * 1000) { // binnen het uur van het moment
-        // 4. Stuur reminder via bestaande functie
+        // 4. Stuur reminder direct (zonder circulaire HTTP call)
         const title = `Reminder: geef je aanwezigheid door! (${hoursBefore}u voor de wedstrijd)`;
         const body = 'Laat even weten of je er bent bij de volgende wedstrijd.';
         const url = 'https://zaalvoetbaldoorn.nl/aanwezigheid';
-        // Call sendPushToAll via HTTP (intern)
-        const fetch = (await import('node-fetch')).default;
-        await fetch('https://europe-west1-zaalvoetbal-doorn-74a8c.cloudfunctions.net/sendPushToAll', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title, body, url, type: 'attendance-reminder' })
-        });
+        
+        try {
+          // Haal spelers op
+          const result = await sheets.spreadsheets.values.get({
+            spreadsheetId,
+            range: `Spelers!A1:Z`,
+          });
+          const rows = result.data.values || [];
+          const notifCol = 3; // D
+          const subCol = 4;   // E
+          const actiefCol = 2; // C (actief)
+          const nameCol = 0; // A (naam)
+          
+          // Filter voor reminders: alleen actieve spelers zonder aanwezigheid
+          const aanwezigheidResult = await sheets.spreadsheets.values.get({
+            spreadsheetId,
+            range: `Aanwezigheid!A1:Z`,
+          });
+          const aanwezigheidRows = aanwezigheidResult.data.values || [];
+          
+          // Verzamel namen die al gereageerd hebben voor deze datum
+          const respondedNames = new Set(
+            aanwezigheidRows.filter(r => r[0] === nextMatchDateStr).map(r => r[1])
+          );
+          
+          // Filter alleen actieve spelers zonder reactie
+          const targetRows = rows.filter((row, i) =>
+            i > 0 &&
+            row[actiefCol] === 'TRUE' &&
+            row[notifCol] === 'TRUE' &&
+            row[subCol] &&
+            !respondedNames.has(row[nameCol])
+          );
+          
+          const notifications: Promise<any>[] = [];
+          for (const row of targetRows) {
+            try {
+              const subscription = JSON.parse(row[subCol]);
+              const payload = JSON.stringify({ title, body, url });
+              notifications.push(webpush.sendNotification(subscription, payload));
+            } catch (err) {
+              logger.error('Invalid subscription', err);
+            }
+          }
+          await Promise.allSettled(notifications);
+          logger.info(`📧 Sent ${notifications.length} reminder notifications for ${hoursBefore}h reminder`);
+        } catch (error) {
+          logger.error(`❌ Failed to send reminder notifications:`, error);
+        }
         // 5. Log reminder in ReminderLog
         await sheets.spreadsheets.values.append({
           spreadsheetId,

@@ -339,11 +339,21 @@ export class AttendanceComponent implements OnInit {
   requestPushPermission(): void {
     this.pushPermissionError = null;
     this.pushPermissionLoading = true;
+    
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+      console.error('❌ Push notifications not supported');
       this.showPushError('Push-notificaties worden niet ondersteund in deze browser.');
       this.pushPermissionLoading = false;
       return;
     }
+    
+    if (Notification.permission === 'denied') {
+      console.error('❌ Push notifications denied by user');
+      this.showPushError('Push-notificaties zijn geblokkeerd. Reset de toestemming in je browser instellingen.');
+      this.pushPermissionLoading = false;
+      return;
+    }
+    
     navigator.serviceWorker.ready.then(registration => {
       // Voeg een timeout toe voor het geval de gebruiker niet reageert
       let permissionHandled = false;
@@ -353,6 +363,7 @@ export class AttendanceComponent implements OnInit {
           this.showPushError('Geen reactie op push-melding. Probeer het opnieuw.');
         }
       }, 15000); // 15 seconden
+      
       Promise.resolve(Notification.requestPermission())
         .then(permission => {
           permissionHandled = true;
@@ -370,6 +381,7 @@ export class AttendanceComponent implements OnInit {
             return;
           }
           const convertedVapidKey = this.urlBase64ToUint8Array(vapidPublicKey);
+          
           registration.pushManager.subscribe({
             userVisibleOnly: true,
             applicationServerKey: convertedVapidKey as BufferSource
@@ -377,6 +389,7 @@ export class AttendanceComponent implements OnInit {
             // Subscription opslaan in Google Sheets
             this.savePushSubscription(subscription);
           }).catch(err => {
+            console.error('❌ Push subscription failed:', err);
             this.showPushError('Kon geen push subscription aanmaken: ' + err);
             this.pushPermissionLoading = false;
           });
@@ -394,6 +407,7 @@ export class AttendanceComponent implements OnInit {
   }
 
   private savePushSubscription(subscription: PushSubscription) {
+    console.log('💾 Saving push subscription for player:', this.selectedPlayer);
     if (!this.selectedPlayer) {
       this.showPushError('Geen speler geselecteerd.');
       this.pushPermissionLoading = false;
@@ -410,6 +424,7 @@ export class AttendanceComponent implements OnInit {
         this.pushPermissionLoading = false;
       },
       error: (err) => {
+        console.error('❌ Failed to save push subscription:', err);
         this.showPushError('Fout bij opslaan subscription: ' + err);
         this.pushPermissionLoading = false;
       }

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import { catchError, map, switchMap, tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { SPELER_COLUMNS } from '../constants/sheet-columns';
 
@@ -116,18 +116,40 @@ export class GoogleSheetsService {
    * @param pushSubscription JSON-stringified push subscription
    * @param pushPermission true/false
    */
-  updatePlayerPushSubscription(rowIndex: number, pushSubscription: string, pushPermission: boolean): Observable<any> {
-    // Use column constants instead of magic numbers
+  updatePlayerPushSubscription(playerName: string, pushSubscription: string, pushPermission: boolean): Observable<any> {
     const sheetName = 'Spelers';
     return this.getSheetData(sheetName).pipe(
       map(rows => {
-        const row = rows[rowIndex + 1]; // +1 vanwege header op rij 0
-        if (!row) throw new Error('Player row not found');
-        row[SPELER_COLUMNS.PUSH_PERMISSION] = pushPermission ? 'TRUE' : 'FALSE'; // Kolom D
-        row[SPELER_COLUMNS.PUSH_SUBSCRIPTION] = pushSubscription; // Kolom E
-        return row;
+        // Find the player by name in the actual sheet data
+        let foundRowIndex = -1;
+        let foundRow: any[] | null = null;
+        
+        for (let i = 1; i < rows.length; i++) { // Skip header row (index 0)
+          const row = rows[i];
+          if (row && row[0] && row[0].toLowerCase().trim() === playerName.toLowerCase().trim()) {
+            foundRowIndex = i;
+            foundRow = row;
+            break;
+          }
+        }
+        
+        if (!foundRow || foundRowIndex === -1) {
+          throw new Error(`Player not found in sheet: ${playerName}`);
+        }
+        
+        foundRow[SPELER_COLUMNS.PUSH_PERMISSION] = pushPermission ? 'TRUE' : 'FALSE'; // Kolom D
+        foundRow[SPELER_COLUMNS.PUSH_SUBSCRIPTION] = pushSubscription; // Kolom E
+        
+        const sheetRowNumber = foundRowIndex + 1; // Convert to 1-based indexing
+        return { row: foundRow, sheetRowNumber };
       }),
-      switchMap(row => this.updateSheetRow(sheetName, rowIndex + 2, row)) // +2: 1-based + header
+      switchMap(({row, sheetRowNumber}) => {
+        return this.updateSheetRow(sheetName, sheetRowNumber, row);
+      }),
+      catchError(error => {
+        console.error('❌ GoogleSheetsService error:', error);
+        throw error;
+      })
     );
   }
 
