@@ -24,7 +24,8 @@
       "Read(/C:\\bluechip\\Futsal-Doorn\\src\\app\\components\\attendance/**)",
       "Read(/C:\\bluechip\\Futsal-Doorn\\src\\app\\components\\player-card/**)",
       "Read(/C:\\bluechip\\Futsal-Doorn\\src\\app\\components\\player-card/**)",
-      "Read(/C:\\bluechip\\Futsal-Doorn\\src\\app\\components\\opstelling/**)"
+      "Read(/C:\\bluechip\\Futsal-Doorn\\src\\app\\components\\opstelling/**)",
+      "Read(/C:\\bluechip\\Futsal-Doorn\\src\\app\\components\\kalender/**)"
     ],
     "deny": [],
     "ask": []

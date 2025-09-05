@@ -196,7 +196,7 @@
     letter-spacing: 0.01em;
     text-transform: none;
     transition: all 0.2s ease;
-    border-width: 1px !important;
+    border: none !important;
     cursor: pointer;
     opacity: 0.8;
     
@@ -216,46 +216,14 @@
       height: 16px;
     }
     
-    &.present-count {
-      border-color: #4caf50;
-      color: #388e3c;
-      background-color: transparent;
-      
-      &:hover {
-        background-color: rgba(76, 175, 80, 0.08);
-        border-color: #388e3c;
-        box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
-      }
-      
-      mat-icon {
-        color: #4caf50;
-      }
-    }
-    
-    &.absent-count {
-      border-color: #f44336;
-      color: #d32f2f;
-      background-color: transparent;
-      
-      &:hover {
-        background-color: rgba(244, 67, 54, 0.08);
-        border-color: #d32f2f;
-        box-shadow: 0 2px 8px rgba(244, 67, 54, 0.2);
-      }
-      
-      mat-icon {
-        color: #f44336;
-      }
-    }
-    
+    &.present-count,
+    &.absent-count,
     &.no-response-count {
-      border-color: #9e9e9e;
       color: #616161;
       background-color: transparent;
       
       &:hover {
         background-color: rgba(158, 158, 158, 0.08);
-        border-color: #616161;
         box-shadow: 0 2px 8px rgba(158, 158, 158, 0.2);
       }
       
