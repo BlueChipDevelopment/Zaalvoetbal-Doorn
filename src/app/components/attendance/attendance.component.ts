@@ -65,6 +65,7 @@ export class AttendanceComponent implements OnInit {
   pushPermissionLoading = false;
   pushPermissionError: string | null = null;
 
+
   constructor(
     private attendanceService: AttendanceService,
     private playerService: PlayerService,
@@ -150,6 +151,7 @@ export class AttendanceComponent implements OnInit {
           if (this.selectedPlayer && details.playerStatus !== undefined) {
             this.attendanceStatus = details.playerStatus;
           }
+
         },
         error: (err) => {
           console.error('Error loading players or attendance:', err);
@@ -199,6 +201,7 @@ export class AttendanceComponent implements OnInit {
         if (this.selectedPlayer && details.playerStatus !== undefined) {
           this.attendanceStatus = details.playerStatus;
         }
+
       },
       error: (err: any) => {
         this.attendanceList = [];
@@ -457,4 +460,5 @@ export class AttendanceComponent implements OnInit {
     const day = date.getDate().toString().padStart(2, '0');
     return `${year}-${month}-${day}`;
   }
+
 }

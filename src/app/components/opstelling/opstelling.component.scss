@@ -185,6 +185,13 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 
+.results-details {
+  display: flex;
+  flex-direction: column;
+  gap: 1px; // Small gap between player cards
+  width: 100%;
+}
+
 .team-header {
   display: flex;
   flex-direction: column;
@@ -192,9 +199,15 @@
   margin-bottom: 12px;
 }
 
-.team-header h4,
+.team-header h4 {
+  text-align: center;
+}
+
 .team-header .team-rating {
   text-align: center;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #666;
 }
 
 .share-link-container {

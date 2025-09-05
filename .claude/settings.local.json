@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(/C:\\bluechip\\Futsal-Doorn\\src\\app\\components\\attendance/**)",
+      "Read(/C:\\bluechip\\Futsal-Doorn\\src\\app\\components\\attendance/**)",
+      "Read(/C:\\bluechip\\Futsal-Doorn\\src\\app\\components\\team-generator/**)",
+      "Read(/C:\\bluechip\\Futsal-Doorn\\src\\app\\components\\team-generator/**)",
+      "Read(/C:\\bluechip\\Futsal-Doorn\\src\\app\\interfaces/**)",
+      "Read(/C:\\bluechip\\Futsal-Doorn\\src\\app\\components\\opstelling/**)",
+      "Read(/C:\\bluechip\\Futsal-Doorn\\src\\app\\components\\opstelling/**)",
+      "Read(/C:\\bluechip\\Futsal-Doorn\\src\\app/**)",
+      "Read(/C:\\bluechip\\Futsal-Doorn\\.claude/**)",
+      "Read(/C:\\bluechip\\Futsal-Doorn\\src\\app\\components\\opstelling/**)",
+      "Read(/C:\\bluechip\\Futsal-Doorn\\src\\app\\services/**)",
+      "Read(/C:\\bluechip\\Futsal-Doorn\\src\\app\\services/**)",
+      "Read(/C:\\bluechip\\Futsal-Doorn\\src\\app\\services/**)",
+      "Read(/C:\\bluechip\\Futsal-Doorn\\src\\app\\services/**)",
+      "Read(/C:\\bluechip\\Futsal-Doorn/**)",
+      "Read(/C:\\bluechip\\Futsal-Doorn/**)",
+      "Read(/C:\\bluechip\\Futsal-Doorn\\src\\app\\components\\attendance/**)",
+      "Read(/C:\\bluechip\\Futsal-Doorn\\src\\app\\components\\player-card/**)",
+      "Read(/C:\\bluechip\\Futsal-Doorn\\src\\app\\components\\opstelling/**)",
+      "Read(/C:\\bluechip\\Futsal-Doorn\\src\\app\\components\\attendance/**)",
+      "Read(/C:\\bluechip\\Futsal-Doorn\\src\\app\\components\\attendance/**)",
+      "Read(/C:\\bluechip\\Futsal-Doorn\\src\\app\\components\\player-card/**)",
+      "Read(/C:\\bluechip\\Futsal-Doorn\\src\\app\\components\\player-card/**)",
+      "Read(/C:\\bluechip\\Futsal-Doorn\\src\\app\\components\\opstelling/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -72,7 +72,7 @@ export class GoogleSheetsService {
   /**
    * Get the latest teams from a dedicated sheet or range
    */
-  getLatestTeams(): Observable<any> {
+  getOpstelling(): Observable<any> {
     // Adjust the sheet/range as needed for your setup
     const url = `${this.firebaseBaseUrl}/getSheetData?spreadsheetId=${this.firebaseSpreadsheetId}&sheetName=LaatsteTeams`;
     return this.http.get<any[][]>(url).pipe(

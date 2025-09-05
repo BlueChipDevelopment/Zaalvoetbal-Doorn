@@ -6,7 +6,7 @@ import { TeamGeneratorComponent } from './components/team-generator/team-generat
 import { AttendanceComponent } from './components/attendance/attendance.component';
 import { KalenderComponent } from './components/kalender/kalender.component';
 import { WedstrijdenComponent } from './components/wedstrijden/wedstrijden.component';
-import { LatestTeamsComponent } from './components/latest-teams/latest-teams.component';
+import { OpstellingComponent } from './components/opstelling/opstelling.component';
 import { AboutComponent } from './components/about/about.component';
 
 const routes: Routes = [
@@ -16,7 +16,7 @@ const routes: Routes = [
   { path: 'aanwezigheid', component: AttendanceComponent },
   { path: 'kalender', component: KalenderComponent },
   { path: 'wedstrijden', component: WedstrijdenComponent },
-  { path: 'opstelling', component: LatestTeamsComponent },
+  { path: 'opstelling', component: OpstellingComponent },
   { path: 'about', component: AboutComponent },
   { path: '', redirectTo: '/klassement', pathMatch: 'full' },
   { path: '**', redirectTo: '/klassement' }
