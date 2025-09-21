@@ -1,6 +1,6 @@
 {
   "configVersion": 1,
-  "timestamp": 1758480779643,
+  "timestamp": 1758483140028,
   "index": "/index.html",
   "assetGroups": [
     {
@@ -61,7 +61,7 @@
     "/assets/images/football-shirt-red.png": "0df1723bfe98a67e423479be18fee4e7cde55834",
     "/assets/images/football-shirt-white.png": "b18ac6d8f00e6f5e00cb440b80a2a72b0e1658f3",
     "/favicon.ico": "43528d083572386b5f788141a0a2d6619d1409cd",
-    "/firebase-messaging-sw.js": "de80dde52885f99343dd2b30d597a63719a2dc01",
+    "/firebase-messaging-sw.js": "0b0cd23cd8ba0dc1f5bcfbea2bd5eaf50126c182",
     "/football-shirt-red.2fabd340d484d4cb.png": "0df1723bfe98a67e423479be18fee4e7cde55834",
     "/football-shirt-white.dfa9a8ea30f39956.png": "b18ac6d8f00e6f5e00cb440b80a2a72b0e1658f3",
     "/index.html": "af266e0cdd45071379e9581ed7b76f8035d13f52",
