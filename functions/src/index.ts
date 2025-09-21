@@ -219,8 +219,6 @@ export const sendPushToAll = onRequest(
         range: `${sheetName}!A1:Z`,
       });
       const rows = result.data.values || [];
-      const notifCol = 3; // D
-      const subCol = 4;   // E
       const actiefCol = 2; // C (actief)
       const nameCol = 0; // A (naam)
       let targetRows = rows;
@@ -253,31 +251,54 @@ export const sendPushToAll = onRequest(
         targetRows = rows.filter((row, i) =>
           i > 0 &&
           row[actiefCol] === 'TRUE' &&
-          row[notifCol] === 'TRUE' &&
-          row[subCol] &&
           !respondedNames.has(row[nameCol])
         );
       } else {
-        // Standaard: alle spelers met toestemming
+        // Standaard: alle actieve spelers
         targetRows = rows.filter((row, i) =>
-          i > 0 && row[notifCol] === 'TRUE' && row[subCol]
+          i > 0 && row[actiefCol] === 'TRUE'
         );
       }
+      // Nu notifications versturen vanuit Notificaties sheet
+      // Haal notificatie subscriptions op
+      const notificatiesResult = await sheets.spreadsheets.values.get({
+        spreadsheetId,
+        range: `Notificaties!A1:Z`,
+      });
+      const notificatiesRows = notificatiesResult.data.values || [];
+      
+      // Create map van target spelers
+      const targetPlayerNames = new Set(targetRows.map(row => row[nameCol]));
+      
       const notifications: Promise<any>[] = [];
-      for (const row of targetRows) {
-        try {
-          const subscription = JSON.parse(row[subCol]);
-          const payload = JSON.stringify({
-            title: req.body.title || 'Zaalvoetbal Doorn',
-            body: req.body.body || 'Er is nieuws van Zaalvoetbal Doorn!',
-            url: req.body.url || undefined
-          });
-          notifications.push(webpush.sendNotification(subscription, payload));
-        } catch (err) {
-          logger.error('Invalid subscription', err);
+      for (let i = 1; i < notificatiesRows.length; i++) {
+        const row = notificatiesRows[i];
+        if (row.length < 7) continue; // Skip incomplete rows
+        
+        const endpoint = row[0];
+        const p256dh = row[1];  
+        const auth = row[2];
+        const active = row[5] === 'true' || row[5] === true;
+        const playerName = row[6];
+        
+        // Alleen versturen naar target spelers met actieve subscriptions
+        if (active && playerName && targetPlayerNames.has(playerName)) {
+          try {
+            const subscription = { endpoint, keys: { p256dh, auth } };
+            const payload = JSON.stringify({
+              title: req.body.title || 'Zaalvoetbal Doorn',
+              body: req.body.body || 'Er is nieuws van Zaalvoetbal Doorn!',
+              url: req.body.url || undefined
+            });
+            notifications.push(webpush.sendNotification(subscription, payload));
+          } catch (err) {
+            logger.error('Invalid subscription for player', playerName, err);
+          }
         }
       }
+      
       await Promise.allSettled(notifications);
+      logger.info(`📧 Sent ${notifications.length} push notifications successfully`);
       res.json({ success: true, count: notifications.length });
     } catch (error) {
       logger.error(error);
@@ -347,15 +368,20 @@ export const scheduledAttendanceReminders = onSchedule(
         
         try {
           // Haal spelers op
-          const result = await sheets.spreadsheets.values.get({
+          const spelersResult = await sheets.spreadsheets.values.get({
             spreadsheetId,
             range: `Spelers!A1:Z`,
           });
-          const rows = result.data.values || [];
-          const notifCol = 3; // D
-          const subCol = 4;   // E
+          const spelersRows = spelersResult.data.values || [];
           const actiefCol = 2; // C (actief)
           const nameCol = 0; // A (naam)
+
+          // Haal notificatie subscriptions op
+          const notificatiesResult = await sheets.spreadsheets.values.get({
+            spreadsheetId,
+            range: `Notificaties!A1:Z`,
+          });
+          const notificatiesRows = notificatiesResult.data.values || [];
           
           // Filter voor reminders: alleen actieve spelers zonder aanwezigheid
           const aanwezigheidResult = await sheets.spreadsheets.values.get({
@@ -369,23 +395,40 @@ export const scheduledAttendanceReminders = onSchedule(
             aanwezigheidRows.filter(r => r[0] === nextMatchDateStr).map(r => r[1])
           );
           
-          // Filter alleen actieve spelers zonder reactie
-          const targetRows = rows.filter((row, i) =>
-            i > 0 &&
-            row[actiefCol] === 'TRUE' &&
-            row[notifCol] === 'TRUE' &&
-            row[subCol] &&
-            !respondedNames.has(row[nameCol])
-          );
-          
+          // Create map van actieve spelers die nog niet gereageerd hebben
+          const activeNotificationPlayers = new Map();
+          for (let i = 1; i < spelersRows.length; i++) {
+            const row = spelersRows[i];
+            const playerName = row[nameCol];
+            const isActive = row[actiefCol] === 'TRUE';
+            
+            if (isActive && !respondedNames.has(playerName)) {
+              activeNotificationPlayers.set(playerName, true);
+            }
+          }
+
+          // Filter notificatie subscriptions voor actieve spelers
           const notifications: Promise<any>[] = [];
-          for (const row of targetRows) {
-            try {
-              const subscription = JSON.parse(row[subCol]);
-              const payload = JSON.stringify({ title, body, url });
-              notifications.push(webpush.sendNotification(subscription, payload));
-            } catch (err) {
-              logger.error('Invalid subscription', err);
+          for (let i = 1; i < notificatiesRows.length; i++) {
+            const row = notificatiesRows[i];
+            if (row.length < 7) continue; // Skip incomplete rows
+            
+            const endpoint = row[0];
+            const p256dh = row[1];  
+            const auth = row[2];
+            // userAgent = row[3], timestamp = row[4] - niet gebruikt
+            const active = row[5] === 'true' || row[5] === true;
+            const playerName = row[6];
+            
+            // Alleen versturen naar actieve spelers die notifications willen
+            if (active && playerName && activeNotificationPlayers.has(playerName)) {
+              try {
+                const subscription = { endpoint, keys: { p256dh, auth } };
+                const payload = JSON.stringify({ title, body, url });
+                notifications.push(webpush.sendNotification(subscription, payload));
+              } catch (err) {
+                logger.error('Invalid subscription for player', playerName, err);
+              }
             }
           }
           await Promise.allSettled(notifications);

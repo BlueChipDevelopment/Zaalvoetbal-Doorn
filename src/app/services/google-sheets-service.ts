@@ -18,6 +18,10 @@ export class GoogleSheetsService {
     }
   }
 
+  get spreadsheetId(): string {
+    return this.firebaseSpreadsheetId;
+  }
+
   getSheetData(sheetName: string): Observable<any[][]> {
     const url = `${this.firebaseBaseUrl}/getSheetData?spreadsheetId=${this.firebaseSpreadsheetId}&sheetName=${encodeURIComponent(sheetName)}`;
     return this.http.get<any[][]>(url).pipe(

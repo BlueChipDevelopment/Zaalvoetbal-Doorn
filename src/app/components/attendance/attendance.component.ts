@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AttendanceService } from '../../services/attendance.service';
 import { PlayerService } from '../../services/player.service';
+import { NotificationService } from '../../services/notification.service';
 import { PlayerSheetData } from '../../interfaces/IPlayerSheet';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { CommonModule } from '@angular/common';
@@ -61,16 +62,20 @@ export class AttendanceComponent implements OnInit {
   public errorMessage: string | null = null; // Algemene foutmeldingen (API, etc)
   public playerSelectError: string | null = null; // Alleen voor veldvalidatie spelerselectie
 
-  pushPermissionGranted = false;
-  pushPermissionLoading = false;
-  pushPermissionError: string | null = null;
+  // Notification properties
+  notificationsSupported = false;
+  notificationsEnabled = false;
+  playerNotificationsEnabled = false; // Player-specific status
+  notificationLoading = false;
+  showNotificationPrompt = false;
 
 
   constructor(
     private attendanceService: AttendanceService,
     private playerService: PlayerService,
     private snackBar: MatSnackBar,
-    private nextMatchService: NextMatchService
+    private nextMatchService: NextMatchService,
+    private notificationService: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -93,6 +98,9 @@ export class AttendanceComponent implements OnInit {
         this.errorMessage = 'Fout bij het laden van wedstrijden.';
       }
     });
+
+    // Setup notification status
+    this.setupNotifications();
   }
 
   loadPlayersAndThenAttendance(): void {
@@ -234,10 +242,14 @@ export class AttendanceComponent implements OnInit {
     const lastPlayer = localStorage.getItem(this.LAST_PLAYER_KEY);
     if (lastPlayer && this.players.some(player => player.name === lastPlayer)) {
       this.selectedPlayer = lastPlayer;
+      // Check player-specific notification status
+      this.checkPlayerNotificationStatus();
       // De attendance status wordt nu gecontroleerd in loadAttendanceList() na het laden van de data
     } else {
       this.selectedPlayer = null;
       this.attendanceStatus = null;
+      this.playerNotificationsEnabled = false;
+      this.updateNotificationPrompt();
       localStorage.removeItem(this.LAST_PLAYER_KEY);
     }
   }
@@ -249,9 +261,13 @@ export class AttendanceComponent implements OnInit {
       localStorage.setItem(this.LAST_PLAYER_KEY, this.selectedPlayer);
       // Herlaad de attendance list met de nieuwe player status
       this.loadAttendanceList();
+      // Check player-specific notification status
+      this.checkPlayerNotificationStatus();
     } else {
       localStorage.removeItem(this.LAST_PLAYER_KEY);
       this.playerSelectError = 'Selecteer eerst een speler.';
+      this.playerNotificationsEnabled = false;
+      this.updateNotificationPrompt();
     }
   }
 
@@ -336,119 +352,97 @@ export class AttendanceComponent implements OnInit {
     });
   }
 
-  requestPushPermission(): void {
-    this.pushPermissionError = null;
-    this.pushPermissionLoading = true;
-    
-    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-      console.error('❌ Push notifications not supported');
-      this.showPushError('Push-notificaties worden niet ondersteund in deze browser.');
-      this.pushPermissionLoading = false;
-      return;
-    }
-    
-    if (Notification.permission === 'denied') {
-      console.error('❌ Push notifications denied by user');
-      this.showPushError('Push-notificaties zijn geblokkeerd. Reset de toestemming in je browser instellingen.');
-      this.pushPermissionLoading = false;
-      return;
-    }
-    
-    navigator.serviceWorker.ready.then(registration => {
-      // Voeg een timeout toe voor het geval de gebruiker niet reageert
-      let permissionHandled = false;
-      const timeout = setTimeout(() => {
-        if (!permissionHandled) {
-          this.pushPermissionLoading = false;
-          this.showPushError('Geen reactie op push-melding. Probeer het opnieuw.');
-        }
-      }, 15000); // 15 seconden
-      
-      Promise.resolve(Notification.requestPermission())
-        .then(permission => {
-          permissionHandled = true;
-          clearTimeout(timeout);
-          if (permission !== 'granted') {
-            this.showPushError('Toestemming geweigerd.');
-            this.pushPermissionLoading = false;
-            return;
-          }
-          // Haal VAPID public key uit environment
-          const vapidPublicKey = environment.vapidPublicKey;
-          if (!vapidPublicKey) {
-            this.showPushError('VAPID public key ontbreekt in de environment.');
-            this.pushPermissionLoading = false;
-            return;
-          }
-          const convertedVapidKey = this.urlBase64ToUint8Array(vapidPublicKey);
-          
-          registration.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: convertedVapidKey as BufferSource
-          }).then(subscription => {
-            // Subscription opslaan in Google Sheets
-            this.savePushSubscription(subscription);
-          }).catch(err => {
-            console.error('❌ Push subscription failed:', err);
-            this.showPushError('Kon geen push subscription aanmaken: ' + err);
-            this.pushPermissionLoading = false;
-          });
-        })
-        .catch(err => {
-          permissionHandled = true;
-          clearTimeout(timeout);
-          this.pushPermissionLoading = false;
-          this.showPushError('Fout bij aanvragen push-permissie: ' + err);
-        });
-    }).catch(err => {
-      this.pushPermissionLoading = false;
-      this.showPushError('Service worker niet gereed: ' + err);
+  private setupNotifications(): void {
+    this.notificationService.isSupported.subscribe(supported => {
+      console.log('🔔 Notifications supported:', supported);
+      this.notificationsSupported = supported;
+      this.updateNotificationPrompt();
+    });
+
+    this.notificationService.isEnabled.subscribe(enabled => {
+      console.log('🔔 Notifications enabled (browser):', enabled);
+      this.notificationsEnabled = enabled;
+      this.updateNotificationPrompt();
     });
   }
 
-  private savePushSubscription(subscription: PushSubscription) {
-    console.log('💾 Saving push subscription for player:', this.selectedPlayer);
+  private updateNotificationPrompt(): void {
+    // Show prompt if supported but player doesn't have notifications enabled
+    this.showNotificationPrompt = this.notificationsSupported && !this.playerNotificationsEnabled;
+    console.log('🔔 Show notification prompt:', this.showNotificationPrompt);
+  }
+
+  private async checkPlayerNotificationStatus(): Promise<void> {
     if (!this.selectedPlayer) {
-      this.showPushError('Geen speler geselecteerd.');
-      this.pushPermissionLoading = false;
+      this.playerNotificationsEnabled = false;
+      this.updateNotificationPrompt();
       return;
     }
 
-    this.playerService.updatePlayerPushSubscription(
-      this.selectedPlayer,
-      JSON.stringify(subscription),
-      true
-    ).subscribe({
-      next: () => {
-        this.pushPermissionGranted = true;
-        this.pushPermissionLoading = false;
-      },
-      error: (err) => {
-        console.error('❌ Failed to save push subscription:', err);
-        this.showPushError('Fout bij opslaan subscription: ' + err);
-        this.pushPermissionLoading = false;
-      }
-    });
-  }
-
-  private showPushError(message: string) {
-    this.pushPermissionError = message;
-    this.snackBar.open(message, 'Sluiten', { duration: 5000, panelClass: ['snackbar-error'] });
-    // Optioneel: direct resetten zodat de error niet in de UI blijft hangen
-    setTimeout(() => { this.pushPermissionError = null; }, 0);
-  }
-
-  private urlBase64ToUint8Array(base64String: string): Uint8Array {
-    const padding = '='.repeat((4 - base64String.length % 4) % 4);
-    const base64 = (base64String + padding)
-      .replace(/-/g, '+')
-      .replace(/_/g, '/');
-    const rawData = window.atob(base64);
-    const outputArray = new Uint8Array(rawData.length);
-    for (let i = 0; i < rawData.length; ++i) {
-      outputArray[i] = rawData.charCodeAt(i);
+    try {
+      this.playerNotificationsEnabled = await this.notificationService.checkPlayerNotificationStatus(this.selectedPlayer);
+      console.log(`🔔 Player ${this.selectedPlayer} notifications enabled:`, this.playerNotificationsEnabled);
+      this.updateNotificationPrompt();
+    } catch (error) {
+      console.error('Error checking player notification status:', error);
+      this.playerNotificationsEnabled = false;
+      this.updateNotificationPrompt();
     }
-    return new Uint8Array(outputArray.buffer);
+  }
+
+  async enableNotifications(): Promise<void> {
+    this.notificationLoading = true;
+    
+    try {
+      const success = await this.notificationService.requestPermission(this.selectedPlayer || undefined);
+      
+      if (success) {
+        this.snackBar.open('Notificaties succesvol ingeschakeld!', 'OK', {
+          duration: 3000,
+          panelClass: ['futsal-notification', 'futsal-notification-success']
+        });
+        // Check updated player notification status
+        this.checkPlayerNotificationStatus();
+      } else {
+        this.snackBar.open('Kon notificaties niet inschakelen', 'OK', {
+          duration: 5000,
+          panelClass: ['futsal-notification', 'futsal-notification-warning']
+        });
+      }
+    } catch (error) {
+      console.error('Error enabling notifications:', error);
+      this.snackBar.open('Fout bij inschakelen notificaties', 'OK', {
+        duration: 5000,
+        panelClass: ['futsal-notification', 'futsal-notification-warning']
+      });
+    } finally {
+      this.notificationLoading = false;
+    }
+  }
+
+  async disableNotifications(): Promise<void> {
+    this.notificationLoading = true;
+    
+    try {
+      const success = await this.notificationService.disableNotifications();
+      
+      if (success) {
+        this.snackBar.open('Notificaties uitgeschakeld', 'OK', {
+          duration: 3000,
+          panelClass: ['futsal-notification', 'futsal-notification-info']
+        });
+        // Check updated player notification status
+        this.checkPlayerNotificationStatus();
+      }
+    } catch (error) {
+      console.error('Error disabling notifications:', error);
+    } finally {
+      this.notificationLoading = false;
+    }
+  }
+
+  getNotificationStatus(): string[] {
+    return this.notificationService.getNotificationCapabilities();
   }
 
   private createDefaultPlayer(name: string, position?: string): Player {

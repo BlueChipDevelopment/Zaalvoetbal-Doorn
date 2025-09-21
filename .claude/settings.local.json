@@ -4,7 +4,14 @@
       "Read(/C:\\bluechip\\Futsal-Doorn/**)",
       "Bash(ng deploy:*)",
       "Bash(curl:*)",
-      "Bash(firebase functions:log:*)"
+      "Bash(firebase functions:log:*)",
+      "Bash(taskkill:*)",
+      "Bash(cmd /c:*)",
+      "Bash(tasklist:*)",
+      "Bash(ng serve:*)",
+      "Bash(npm install:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)"
     ],
     "deny": [],
     "ask": []

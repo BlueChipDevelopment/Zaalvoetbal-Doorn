@@ -8,6 +8,43 @@
     <div *ngIf="!isLoadingPlayers">
       <app-next-match-info [nextMatchInfo]="nextMatchInfo"></app-next-match-info>
 
+      <!-- Notification Prompt -->
+      <div *ngIf="false && showNotificationPrompt" class="notification-prompt mat-elevation-z2">
+        <div class="notification-content">
+          <mat-icon>notifications</mat-icon>
+          <div class="notification-text">
+            <h3>Wedstrijd herinneringen</h3>
+            <p>Ontvang automatisch herinneringen voor komende wedstrijden</p>
+            <ul class="capabilities-list">
+              <li *ngFor="let capability of getNotificationStatus()">{{ capability }}</li>
+            </ul>
+          </div>
+          <div class="notification-actions">
+            <button 
+              mat-button 
+              color="primary" 
+              (click)="enableNotifications()"
+              [disabled]="notificationLoading">
+              <mat-icon *ngIf="notificationLoading">hourglass_empty</mat-icon>
+              <mat-icon *ngIf="!notificationLoading">notifications_active</mat-icon>
+              {{ notificationLoading ? 'Bezig...' : 'Inschakelen' }}
+            </button>
+            <button mat-button (click)="showNotificationPrompt = false">
+              Later
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notification Status (when enabled) -->
+      <div *ngIf="false && playerNotificationsEnabled && !showNotificationPrompt" class="notification-status mat-elevation-z1">
+        <mat-icon>notifications_active</mat-icon>
+        <span>Notificaties ingeschakeld</span>
+        <button mat-icon-button (click)="disableNotifications()" [disabled]="notificationLoading">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
       <ng-container *ngIf="errorMessage">
         <div class="error-banner mat-elevation-z2">
           <mat-icon>error</mat-icon>
@@ -86,13 +123,5 @@
     </div>
 
 
-    <div *ngIf="false && selectedPlayer" class="push-permission-block">
-      <button mat-stroked-button color="accent" (click)="requestPushPermission()" [disabled]="pushPermissionLoading || pushPermissionGranted">
-        <mat-icon>notifications_active</mat-icon>
-        <span *ngIf="!pushPermissionGranted">Push-notificaties inschakelen</span>
-        <span *ngIf="pushPermissionGranted">Push-notificaties ingeschakeld</span>
-      </button>
-      <mat-progress-spinner *ngIf="pushPermissionLoading" diameter="24" mode="indeterminate"></mat-progress-spinner>
-    </div>
   </mat-card-content>
 </mat-card>

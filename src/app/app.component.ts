@@ -1,5 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
+import { PwaInstallService } from './services/pwa-install.service';
 
 @Component({
   selector: 'app-root',
@@ -8,8 +10,14 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 })
 export class AppComponent implements OnInit, OnDestroy {
   title = 'Zaalvoetbal-Doorn';
+  showInstallButton = false;
+  isInstalled = false;
 
-  constructor(private snackBar: MatSnackBar) {}
+  constructor(
+    private snackBar: MatSnackBar,
+    private dialog: MatDialog,
+    private pwaInstallService: PwaInstallService
+  ) {}
 
   ngOnInit() {
     // Listen for messages from the service worker
@@ -22,6 +30,16 @@ export class AppComponent implements OnInit, OnDestroy {
         }
       });
     }
+
+    // Setup PWA install functionality
+    this.pwaInstallService.canInstall.subscribe(canInstall => {
+      this.showInstallButton = canInstall && !this.isInstalled;
+    });
+
+    this.pwaInstallService.isInstalled.subscribe(installed => {
+      this.isInstalled = installed;
+      this.showInstallButton = !installed;
+    });
   }
 
   ngOnDestroy() {
@@ -68,5 +86,27 @@ export class AppComponent implements OnInit, OnDestroy {
     });
     
     console.log('✅ Elegant in-app notification displayed to user');
+  }
+
+  async installPWA() {
+    if (this.pwaInstallService.isIOS) {
+      this.showInstallInstructions();
+    } else {
+      const installed = await this.pwaInstallService.promptInstall();
+      if (installed) {
+        this.snackBar.open('App succesvol geïnstalleerd!', 'OK', { duration: 3000 });
+      }
+    }
+  }
+
+  private showInstallInstructions() {
+    const instructions = this.pwaInstallService.getInstallInstructions();
+    const message = `Installeer de app:\n${instructions.join('\n')}`;
+    
+    this.snackBar.open(message, 'Begrepen', {
+      duration: 10000,
+      panelClass: ['install-instructions'],
+      verticalPosition: 'top'
+    });
   }
 }

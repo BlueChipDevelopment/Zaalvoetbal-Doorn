@@ -8,7 +8,8 @@
 export const SHEET_NAMES = {
   WEDSTRIJDEN: 'Wedstrijden',
   SPELERS: 'Spelers',
-  AANWEZIGHEID: 'Aanwezigheid'
+  AANWEZIGHEID: 'Aanwezigheid',
+  NOTIFICATIES: 'Notificaties'
 } as const;
 
 // === WEDSTRIJDEN SHEET ===
@@ -109,4 +110,39 @@ export function createAanwezigheidRange(fromColumn: keyof typeof AANWEZIGHEID_CO
 export const AANWEZIGHEID_RANGES = {
   ATTENDANCE_RECORD: (row: number) => createAanwezigheidRange('DATE', 'TIMESTAMP', row),
   CORE_DATA: (row: number) => createAanwezigheidRange('DATE', 'STATUS', row)
+} as const;
+
+// === NOTIFICATIES SHEET ===
+
+// Kolom indices (0-based) voor array toegang
+export const NOTIFICATIES_COLUMNS = {
+  ENDPOINT: 0,      // Kolom A - Push notification endpoint
+  P256DH: 1,        // Kolom B - P256DH key voor encryption
+  AUTH: 2,          // Kolom C - Auth key voor encryption
+  USER_AGENT: 3,    // Kolom D - Browser user agent
+  TIMESTAMP: 4,     // Kolom E - Tijdstip van registratie
+  ACTIVE: 5,        // Kolom F - Of de subscription actief is
+  PLAYER_NAME: 6    // Kolom G - Naam van de speler
+} as const;
+
+// Kolom letters voor spreadsheet ranges
+export const NOTIFICATIES_COLUMN_LETTERS = {
+  ENDPOINT: 'A',
+  P256DH: 'B',
+  AUTH: 'C',
+  USER_AGENT: 'D',
+  TIMESTAMP: 'E',
+  ACTIVE: 'F',
+  PLAYER_NAME: 'G'
+} as const;
+
+// Helper functie om ranges te maken voor Notificaties sheet
+export function createNotificatiesRange(fromColumn: keyof typeof NOTIFICATIES_COLUMN_LETTERS, toColumn: keyof typeof NOTIFICATIES_COLUMN_LETTERS, row: number): string {
+  return `Notificaties!${NOTIFICATIES_COLUMN_LETTERS[fromColumn]}${row}:${NOTIFICATIES_COLUMN_LETTERS[toColumn]}${row}`;
+}
+
+// Veelgebruikte ranges voor Notificaties sheet
+export const NOTIFICATIES_RANGES = {
+  SUBSCRIPTION_DATA: (row: number) => createNotificatiesRange('ENDPOINT', 'PLAYER_NAME', row),
+  ENCRYPTION_KEYS: (row: number) => createNotificatiesRange('P256DH', 'AUTH', row)
 } as const;

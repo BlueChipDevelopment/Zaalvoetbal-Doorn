@@ -28,6 +28,14 @@
         <span class="toolbar-title">Zaalvoetbal Doorn</span>
       </div>
       <span class="spacer"></span>
+      <button 
+        mat-icon-button 
+        (click)="installPWA()" 
+        *ngIf="showInstallButton"
+        matTooltip="Installeer app"
+        class="install-button">
+        <mat-icon>get_app</mat-icon>
+      </button>
       <div class="desktop-navigation">
         <button mat-button routerLink="/leaderboard">Klassement</button>
         <button mat-button routerLink="/score">Score Invoeren</button>
