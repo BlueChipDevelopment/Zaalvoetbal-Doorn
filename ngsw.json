@@ -1,6 +1,6 @@
 {
   "configVersion": 1,
-  "timestamp": 1758479451051,
+  "timestamp": 1758480779643,
   "index": "/index.html",
   "assetGroups": [
     {
@@ -14,7 +14,7 @@
         "/favicon.ico",
         "/firebase-messaging-sw.js",
         "/index.html",
-        "/main.8f59e757d9f50515.js",
+        "/main.d362534f872934f9.js",
         "/manifest.webmanifest",
         "/polyfills.afb92f6083fc3452.js",
         "/runtime.0734210aa0b3bba3.js",
@@ -64,8 +64,8 @@
     "/firebase-messaging-sw.js": "de80dde52885f99343dd2b30d597a63719a2dc01",
     "/football-shirt-red.2fabd340d484d4cb.png": "0df1723bfe98a67e423479be18fee4e7cde55834",
     "/football-shirt-white.dfa9a8ea30f39956.png": "b18ac6d8f00e6f5e00cb440b80a2a72b0e1658f3",
-    "/index.html": "71c3de019986bddf54e86be20795b283be9a7b76",
-    "/main.8f59e757d9f50515.js": "21a0a0aad59bff60739af41abc874141a34d7e76",
+    "/index.html": "af266e0cdd45071379e9581ed7b76f8035d13f52",
+    "/main.d362534f872934f9.js": "02413b5e48b6a60fd868c7efe38ba09605cf751d",
     "/manifest.webmanifest": "f55078249defc81f0f13e2d5bb6e9e899577ec1c",
     "/polyfills.afb92f6083fc3452.js": "07619ae11433b3c78be8c082ab49a6c243bfd385",
     "/runtime.0734210aa0b3bba3.js": "25e15fd59f26293aedcb50e28f6e97adea7aa11d",
