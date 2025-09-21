@@ -158,10 +158,11 @@ export class WedstrijdenService {
           datumString: datumString, // Keep original string for reference
           teamWit: row[WEDSTRIJD_COLUMNS.TEAM_WIT] || '', // Kolom D
           teamRood: row[WEDSTRIJD_COLUMNS.TEAM_ROOD] || '', // Kolom E
-          scoreWit: this.parseScore(row[WEDSTRIJD_COLUMNS.SCORE_WIT]), // Kolom F
-          scoreRood: this.parseScore(row[WEDSTRIJD_COLUMNS.SCORE_ROOD]), // Kolom G
-          zlatan: row[WEDSTRIJD_COLUMNS.ZLATAN] || '', // Kolom H
-          ventiel: row[WEDSTRIJD_COLUMNS.VENTIEL] || '', // Kolom I
+          teamGeneratie: row[WEDSTRIJD_COLUMNS.TEAM_GENERATIE] || '', // Kolom F - Handmatig/Automatisch
+          scoreWit: this.parseScore(row[WEDSTRIJD_COLUMNS.SCORE_WIT]), // Kolom G (was F)
+          scoreRood: this.parseScore(row[WEDSTRIJD_COLUMNS.SCORE_ROOD]), // Kolom H (was G)
+          zlatan: row[WEDSTRIJD_COLUMNS.ZLATAN] || '', // Kolom I (was H)
+          ventiel: row[WEDSTRIJD_COLUMNS.VENTIEL] || '', // Kolom J (was I)
           locatie: 'Sporthal Steinheim' // Default locatie
         };
       });

@@ -52,7 +52,7 @@
                 }
               ],
               "outputHashing": "all",
-              "serviceWorker": "ngsw-config.json"
+              "serviceWorker": true
             },
             "development": {
               "optimization": false,
@@ -102,7 +102,7 @@
           "builder": "angular-cli-ghpages:deploy",
           "options": {
             "baseHref": "/",
-            "dir": "dist/browser"
+            "dir": "dist"
           }
         }
       }

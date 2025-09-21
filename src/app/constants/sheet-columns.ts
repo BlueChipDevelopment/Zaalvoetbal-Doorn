@@ -17,27 +17,29 @@ export const SHEET_NAMES = {
 // Kolom indices (0-based) voor array toegang
 export const WEDSTRIJD_COLUMNS = {
   ID: 0,           // Kolom A
-  SEIZOEN: 1,      // Kolom B  
+  SEIZOEN: 1,      // Kolom B
   DATUM: 2,        // Kolom C
   TEAM_WIT: 3,     // Kolom D
   TEAM_ROOD: 4,    // Kolom E
-  SCORE_WIT: 5,    // Kolom F
-  SCORE_ROOD: 6,   // Kolom G
-  ZLATAN: 7,       // Kolom H
-  VENTIEL: 8       // Kolom I
+  TEAM_GENERATIE: 5, // Kolom F - Handmatig/Automatisch
+  SCORE_WIT: 6,    // Kolom G (was F)
+  SCORE_ROOD: 7,   // Kolom H (was G)
+  ZLATAN: 8,       // Kolom I (was H)
+  VENTIEL: 9       // Kolom J (was I)
 } as const;
 
 // Kolom letters voor spreadsheet ranges
 export const WEDSTRIJD_COLUMN_LETTERS = {
   ID: 'A',
   SEIZOEN: 'B',
-  DATUM: 'C', 
+  DATUM: 'C',
   TEAM_WIT: 'D',
   TEAM_ROOD: 'E',
-  SCORE_WIT: 'F',
-  SCORE_ROOD: 'G',
-  ZLATAN: 'H',
-  VENTIEL: 'I'
+  TEAM_GENERATIE: 'F',
+  SCORE_WIT: 'G',
+  SCORE_ROOD: 'H',
+  ZLATAN: 'I',
+  VENTIEL: 'J'
 } as const;
 
 // Helper functie om ranges te maken
@@ -48,6 +50,7 @@ export function createWedstrijdRange(fromColumn: keyof typeof WEDSTRIJD_COLUMN_L
 // Veelgebruikte ranges
 export const WEDSTRIJD_RANGES = {
   TEAMS: (row: number) => createWedstrijdRange('TEAM_WIT', 'TEAM_ROOD', row),
+  TEAMS_WITH_GENERATIE: (row: number) => createWedstrijdRange('TEAM_WIT', 'TEAM_GENERATIE', row),
   SCORES_AND_ZLATAN: (row: number) => createWedstrijdRange('SCORE_WIT', 'ZLATAN', row),
   ALL_MATCH_DATA: (row: number) => createWedstrijdRange('ID', 'VENTIEL', row)
 } as const;

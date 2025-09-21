@@ -29,7 +29,14 @@
       </div>
       <div class="wedstrijd-locatie">Locatie: {{ wedstrijd.locatie }}</div>
       <div class="wedstrijd-specials">
-        <span *ngIf="wedstrijd.zlatan">Zlatan: <b>{{ wedstrijd.zlatan }}</b></span>
+        <span *ngIf="wedstrijd.teamGeneratie" class="team-generatie"
+              [class.automatisch]="wedstrijd.teamGeneratie === 'Automatisch'"
+              [class.handmatig]="wedstrijd.teamGeneratie === 'Handmatig'">
+          Teams: <b>{{ wedstrijd.teamGeneratie }}</b>
+          <mat-icon *ngIf="wedstrijd.teamGeneratie === 'Automatisch'" class="auto-icon">smart_toy</mat-icon>
+          <mat-icon *ngIf="wedstrijd.teamGeneratie === 'Handmatig'" class="manual-icon">person</mat-icon>
+        </span>
+        <span *ngIf="wedstrijd.zlatan" [style.margin-left]="wedstrijd.teamGeneratie ? '1rem' : '0'">Zlatan: <b>{{ wedstrijd.zlatan }}</b></span>
         <span *ngIf="wedstrijd.ventiel" style="margin-left:1rem;">Ventiel: <b>{{ wedstrijd.ventiel }}</b></span>
       </div>
     </div>

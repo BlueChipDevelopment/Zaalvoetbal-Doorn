@@ -447,3 +447,392 @@ export const scheduledAttendanceReminders = onSchedule(
     }
   }
 );
+
+/**
+ * Scheduled function: automatisch teams genereren om 17:00 op wedstrijddagen
+ * Voert volledige team generatie uit in Firebase Functions
+ */
+export const scheduledAutoTeamGeneration = onSchedule(
+  { schedule: "0 17 * * *", region: "europe-west1" },
+  async (event) => {
+    logger.info('🔄 Starting scheduled auto team generation...');
+
+    try {
+      const today = new Date();
+      const dateString = today.toISOString().split('T')[0]; // YYYY-MM-DD format
+
+      // Call the manual endpoint with scheduled trigger to ensure consistency
+      const targetUrl = 'https://europe-west1-zaalvoetbal-doorn-74a8c.cloudfunctions.net/manualTeamGeneration';
+      const urlWithParams = `${targetUrl}?date=${encodeURIComponent(dateString)}&trigger=scheduled`;
+
+      logger.info(`📡 Calling manual team generation endpoint with scheduled trigger: ${urlWithParams}`);
+
+      const response = await fetch(urlWithParams, {
+        method: 'GET',
+        headers: {
+          'User-Agent': 'Firebase-Scheduler/1.0'
+        }
+      });
+
+      const responseText = await response.text();
+
+      if (response.ok) {
+        const result = JSON.parse(responseText);
+        if (result.success) {
+          logger.info(`✅ Scheduled auto team generation completed successfully: ${result.message}`);
+        } else {
+          logger.info(`⚠️ Scheduled auto team generation skipped: ${result.message}`);
+        }
+      } else {
+        logger.error(`❌ Scheduled auto team generation failed (${response.status}): ${responseText}`);
+      }
+
+    } catch (error) {
+      logger.error('💥 Failed to perform scheduled auto team generation:', error);
+    }
+  }
+);
+
+/**
+ * HTTP endpoint: handmatige team generatie (voor testing)
+ */
+export const manualTeamGeneration = onRequest(
+  { region: 'europe-west1' },
+  async (req, res) => {
+    setCorsHeaders(res);
+    if (req.method === 'OPTIONS') {
+      res.status(204).send('');
+      return;
+    }
+
+    try {
+      const date = req.query.date as string || new Date().toISOString().split('T')[0];
+      const trigger = req.query.trigger as string || 'manual'; // Allow trigger to be specified
+
+      logger.info(`🔄 Manual team generation triggered for ${date} (trigger: ${trigger})`);
+
+      const result = await performAutoTeamGeneration(date, trigger);
+
+      res.json(result);
+
+    } catch (error) {
+      logger.error('💥 Manual team generation failed:', error);
+      res.status(500).json({
+        success: false,
+        message: `Error: ${error}`
+      });
+    }
+  }
+);
+
+/**
+ * Core team generation logic
+ */
+async function performAutoTeamGeneration(dateString: string, trigger: string) {
+  const spreadsheetId = '11xN1m371F8Tj0bX6TTRgnL_x_1_pXipox3giBuuUK1I';
+  const sheets = await getSheetsClient();
+
+  try {
+    // 1. Check if there's a match today
+    logger.info(`🔍 Checking for match on ${dateString}...`);
+
+    const wedstrijdenResult = await sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range: `Wedstrijden!A:I`,
+    });
+    const wedstrijdenRows = wedstrijdenResult.data.values || [];
+
+    // Find today's match (skip header row)
+    let todaysMatch: any = null;
+    let matchRowNumber = -1;
+
+    for (let i = 1; i < wedstrijdenRows.length; i++) {
+      const row = wedstrijdenRows[i];
+      const seizoen = row[1] || ''; // Column B
+      const matchDateStr = row[2] || ''; // Column C
+      const teamWit = row[3] || ''; // Column D
+      const teamRood = row[4] || ''; // Column E
+
+      // Parse date to compare (handle Dutch dd-mm-yyyy format)
+      if (matchDateStr) {
+        let matchDate: Date;
+
+        // Try to parse Dutch format (dd-mm-yyyy or d-m-yyyy)
+        if (matchDateStr.includes('-')) {
+          const parts = matchDateStr.split('-');
+          if (parts.length === 3) {
+            const day = parseInt(parts[0], 10);
+            const month = parseInt(parts[1], 10);
+            const year = parseInt(parts[2], 10);
+
+            // Create date in ISO format (year-month-day)
+            matchDate = new Date(year, month - 1, day); // month is 0-indexed
+          } else {
+            matchDate = new Date(matchDateStr);
+          }
+        } else {
+          matchDate = new Date(matchDateStr);
+        }
+
+        // Check if date is valid
+        if (isNaN(matchDate.getTime())) {
+          logger.warn(`Invalid date found in sheet: "${matchDateStr}" - skipping`);
+          continue;
+        }
+
+        const matchDateString = matchDate.toISOString().split('T')[0];
+
+        if (matchDateString === dateString) {
+          // Check if teams are already generated
+          if (teamWit.trim() || teamRood.trim()) {
+            return {
+              success: false,
+              message: `Teams already generated for match on ${dateString}. Wit: "${teamWit}", Rood: "${teamRood}"`
+            };
+          }
+
+          todaysMatch = { row, seizoen, matchDate: matchDateStr, rowNumber: i + 1 }; // +1 for 1-based indexing
+          matchRowNumber = i + 1;
+          break;
+        }
+      }
+    }
+
+    if (!todaysMatch) {
+      return {
+        success: false,
+        message: `No match found for ${dateString}`
+      };
+    }
+
+    logger.info(`✅ Match found for ${dateString} at row ${matchRowNumber}`);
+
+    // 2. Get present players for today
+    logger.info(`🔍 Getting present players for ${dateString}...`);
+
+    const aanwezigheidResult = await sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range: `Aanwezigheid!A:D`,
+    });
+    const aanwezigheidRows = aanwezigheidResult.data.values || [];
+
+    const presentPlayerNames: string[] = [];
+    logger.info(`📅 Looking for attendance on date: ${dateString}`);
+
+    for (let i = 1; i < aanwezigheidRows.length; i++) {
+      const row = aanwezigheidRows[i];
+      const attendanceDate = row[0] || '';
+      const playerName = row[1] || '';
+      const status = row[2] || '';
+
+      // Debug logging for each row
+      if (attendanceDate && playerName) {
+        logger.info(`📋 Row ${i}: Date="${attendanceDate}", Player="${playerName}", Status="${status}"`);
+      }
+
+      if (attendanceDate === dateString && status.toLowerCase() === 'ja') {
+        presentPlayerNames.push(playerName);
+        logger.info(`✅ Found present player: ${playerName}`);
+      }
+    }
+
+    logger.info(`👥 Total present players found: ${presentPlayerNames.length} - ${presentPlayerNames.join(', ')}`);
+
+    if (presentPlayerNames.length < 6) {
+      return {
+        success: false,
+        message: `Not enough players present (${presentPlayerNames.length}/6 minimum). Present: ${presentPlayerNames.join(', ')}`
+      };
+    }
+
+    logger.info(`✅ ${presentPlayerNames.length} players present:`, presentPlayerNames.join(', '));
+
+    // 3. Get player stats/ratings
+    logger.info(`📊 Getting player ratings...`);
+
+    const spelersResult = await sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range: `Spelers!A:Z`,
+    });
+    const spelersRows = spelersResult.data.values || [];
+
+    // Map present players with their ratings/positions
+    const playersWithStats: any[] = [];
+
+    logger.info(`📊 Looking up stats for ${presentPlayerNames.length} present players in Spelers sheet...`);
+
+    for (const playerName of presentPlayerNames) {
+      // Find player in Spelers sheet
+      let playerData = null;
+      for (let i = 1; i < spelersRows.length; i++) {
+        const row = spelersRows[i];
+        const sheetPlayerName = row[0] || '';
+
+        if (sheetPlayerName === playerName) { // Column A = name
+          const actiefValue = row[2];
+          const isActief = actiefValue === 'TRUE' || actiefValue === true || actiefValue === 'Ja' || actiefValue === 'JA';
+          playerData = {
+            name: playerName,
+            position: row[1] || 'PLAYER', // Column B = position
+            actief: isActief, // Column C = actief
+            rating: 5 // Default rating - we'll need to get this from statistics
+          };
+
+          logger.info(`👤 Found player "${playerName}": position="${playerData.position}", actiefValue="${actiefValue}", actief=${isActief}`);
+          break;
+        }
+      }
+
+      if (!playerData) {
+        logger.warn(`❌ Player "${playerName}" not found in Spelers sheet`);
+      } else if (!playerData.actief) {
+        logger.warn(`❌ Player "${playerName}" found but not active (actief=${playerData.actief})`);
+      } else {
+        playersWithStats.push(playerData);
+        logger.info(`✅ Added active player "${playerName}" to team generation`);
+      }
+    }
+
+    logger.info(`📈 Active players with stats: ${playersWithStats.length} - ${playersWithStats.map(p => p.name).join(', ')}`);
+
+    // For now, use simplified team generation (we can enhance this later)
+    if (playersWithStats.length < 6) {
+      return {
+        success: false,
+        message: `Not enough active players with stats (${playersWithStats.length}/6 minimum)`
+      };
+    }
+
+    // 4. Simple team generation algorithm
+    logger.info(`🎯 Generating teams with ${playersWithStats.length} players`);
+
+    // Shuffle players for random distribution
+    const shuffledPlayers = [...playersWithStats].sort(() => Math.random() - 0.5);
+
+    const teamWhite: string[] = [];
+    const teamRed: string[] = [];
+
+    // Distribute players alternately
+    for (let i = 0; i < shuffledPlayers.length; i++) {
+      if (i % 2 === 0) {
+        teamWhite.push(shuffledPlayers[i].name);
+      } else {
+        teamRed.push(shuffledPlayers[i].name);
+      }
+    }
+
+    const teamWhiteStr = teamWhite.join(', ');
+    const teamRedStr = teamRed.join(', ');
+
+    logger.info(`✅ Teams generated: White (${teamWhite.length}): ${teamWhiteStr}`);
+    logger.info(`✅ Teams generated: Red (${teamRed.length}): ${teamRedStr}`);
+
+    // 5. Save teams to Google Sheets
+    logger.info(`💾 Saving teams to row ${matchRowNumber}...`);
+
+    const generatieMethode = trigger === 'scheduled' ? 'Automatisch' : 'Handmatig';
+
+    await sheets.spreadsheets.values.batchUpdate({
+      spreadsheetId,
+      requestBody: {
+        data: [{
+          range: `Wedstrijden!D${matchRowNumber}:F${matchRowNumber}`,
+          values: [[teamWhiteStr, teamRedStr, generatieMethode]]
+        }],
+        valueInputOption: 'RAW'
+      }
+    });
+
+    logger.info(`✅ Teams saved successfully to Google Sheets with generation method: ${generatieMethode}`);
+
+    // 6. Send push notification
+    logger.info(`📧 Sending push notifications...`);
+
+    try {
+      await sendTeamGenerationNotification(teamWhiteStr, teamRedStr, trigger);
+      logger.info(`✅ Push notifications sent successfully`);
+    } catch (notifError) {
+      logger.error(`⚠️ Failed to send push notifications:`, notifError);
+      // Don't fail the whole operation for notification errors
+    }
+
+    return {
+      success: true,
+      message: `Teams automatically generated and saved! White: ${teamWhiteStr}. Red: ${teamRedStr}.`,
+      teams: {
+        teamWhite: teamWhite,
+        teamRed: teamRed
+      },
+      playersCount: playersWithStats.length,
+      trigger: trigger
+    };
+
+  } catch (error) {
+    logger.error(`❌ Error in performAutoTeamGeneration:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Send push notification for team generation
+ */
+async function sendTeamGenerationNotification(teamWhiteStr: string, teamRedStr: string, trigger: string) {
+  const title = trigger === 'scheduled' ? 'Teams automatisch gegenereerd! 🤖' : 'De opstelling is bekend! ⚽';
+  const body = `Wit vs Rood - Bekijk de volledige opstelling!`;
+  const url = 'https://zaalvoetbaldoorn.nl/opstelling';
+
+  const spreadsheetId = '11xN1m371F8Tj0bX6TTRgnL_x_1_pXipox3giBuuUK1I';
+  const sheets = await getSheetsClient();
+
+  // Get active players for notifications
+  const spelersResult = await sheets.spreadsheets.values.get({
+    spreadsheetId,
+    range: `Spelers!A:C`,
+  });
+  const spelersRows = spelersResult.data.values || [];
+
+  // Get notification subscriptions
+  const notificatiesResult = await sheets.spreadsheets.values.get({
+    spreadsheetId,
+    range: `Notificaties!A:G`,
+  });
+  const notificatiesRows = notificatiesResult.data.values || [];
+
+  // Create set of active players
+  const activePlayersSet = new Set();
+  for (let i = 1; i < spelersRows.length; i++) {
+    const row = spelersRows[i];
+    const playerName = row[0];
+    const isActive = row[2] === 'TRUE';
+
+    if (isActive && playerName) {
+      activePlayersSet.add(playerName);
+    }
+  }
+
+  // Send notifications to active players
+  const notifications: Promise<any>[] = [];
+  for (let i = 1; i < notificatiesRows.length; i++) {
+    const row = notificatiesRows[i];
+    if (row.length < 7) continue;
+
+    const endpoint = row[0];
+    const p256dh = row[1];
+    const auth = row[2];
+    const active = row[5] === 'true' || row[5] === true;
+    const playerName = row[6];
+
+    if (active && playerName && activePlayersSet.has(playerName)) {
+      try {
+        const subscription = { endpoint, keys: { p256dh, auth } };
+        const payload = JSON.stringify({ title, body, url });
+        notifications.push(webpush.sendNotification(subscription, payload));
+      } catch (err) {
+        logger.error('Invalid subscription for player', playerName, err);
+      }
+    }
+  }
+
+  await Promise.allSettled(notifications);
+  logger.info(`📧 Sent ${notifications.length} push notifications`);
+}

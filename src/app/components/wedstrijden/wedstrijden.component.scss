@@ -71,6 +71,32 @@ $score: #333;
   color: $secondary-color;
 }
 
+.team-generatie {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+
+  &.automatisch {
+    color: #2e7d32;
+    .auto-icon {
+      color: #2e7d32;
+      font-size: 1rem;
+      width: 1rem;
+      height: 1rem;
+    }
+  }
+
+  &.handmatig {
+    color: #1976d2;
+    .manual-icon {
+      color: #1976d2;
+      font-size: 1rem;
+      width: 1rem;
+      height: 1rem;
+    }
+  }
+}
+
 // Responsive verbeteringen
 @media (max-width: 500px) {
   .wedstrijden-container {

@@ -552,8 +552,8 @@ export class TeamGeneratorComponent implements OnInit {
 
     const updateData = [
       {
-        range: WEDSTRIJD_RANGES.TEAMS(sheetRowIndex),
-        values: [[teamWhiteNames, teamRedNames]]
+        range: WEDSTRIJD_RANGES.TEAMS_WITH_GENERATIE(sheetRowIndex),
+        values: [[teamWhiteNames, teamRedNames, 'Handmatig']]
       }
     ];
 

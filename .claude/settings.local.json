@@ -11,7 +11,10 @@
       "Bash(ng serve:*)",
       "Bash(npm install:*)",
       "Bash(netstat:*)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(npm run ng:*)",
+      "Bash(npm run build:*)",
+      "Bash(firebase deploy:*)"
     ],
     "deny": [],
     "ask": []

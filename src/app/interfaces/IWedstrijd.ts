@@ -6,6 +6,7 @@ export interface WedstrijdData {
   datumString?: string; // Original string for reference/debugging
   teamWit: string;
   teamRood: string;
+  teamGeneratie?: string; // "Handmatig" of "Automatisch"
   scoreWit: number | null;
   scoreRood: number | null;
   zlatan: string;
