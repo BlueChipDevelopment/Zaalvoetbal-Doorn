@@ -1,6 +1,6 @@
 {
   "configVersion": 1,
-  "timestamp": 1757071732130,
+  "timestamp": 1758479451051,
   "index": "/index.html",
   "assetGroups": [
     {
@@ -14,10 +14,11 @@
         "/favicon.ico",
         "/firebase-messaging-sw.js",
         "/index.html",
-        "/main-QT3FYGHW.js",
+        "/main.8f59e757d9f50515.js",
         "/manifest.webmanifest",
-        "/polyfills-FFHMD2TL.js",
-        "/styles-NJK5IFUV.css"
+        "/polyfills.afb92f6083fc3452.js",
+        "/runtime.0734210aa0b3bba3.js",
+        "/styles.02f38236760347e5.css"
       ],
       "patterns": []
     },
@@ -40,8 +41,8 @@
         "/assets/icons/whatsapp.svg",
         "/assets/images/football-shirt-red.png",
         "/assets/images/football-shirt-white.png",
-        "/media/football-shirt-red-F6V5GQGU.png",
-        "/media/football-shirt-white-36U2R2RQ.png"
+        "/football-shirt-red.2fabd340d484d4cb.png",
+        "/football-shirt-white.dfa9a8ea30f39956.png"
       ],
       "patterns": []
     }
@@ -60,14 +61,15 @@
     "/assets/images/football-shirt-red.png": "0df1723bfe98a67e423479be18fee4e7cde55834",
     "/assets/images/football-shirt-white.png": "b18ac6d8f00e6f5e00cb440b80a2a72b0e1658f3",
     "/favicon.ico": "43528d083572386b5f788141a0a2d6619d1409cd",
-    "/firebase-messaging-sw.js": "09ae43f826c182db7016a4f2096ea4c685609d71",
-    "/index.html": "05a627bf0a4690874f7ec0fae68ebaea55545c6b",
-    "/main-QT3FYGHW.js": "c52de73d3fac41a027b8e5dac5afd4e1221bb8b0",
+    "/firebase-messaging-sw.js": "de80dde52885f99343dd2b30d597a63719a2dc01",
+    "/football-shirt-red.2fabd340d484d4cb.png": "0df1723bfe98a67e423479be18fee4e7cde55834",
+    "/football-shirt-white.dfa9a8ea30f39956.png": "b18ac6d8f00e6f5e00cb440b80a2a72b0e1658f3",
+    "/index.html": "71c3de019986bddf54e86be20795b283be9a7b76",
+    "/main.8f59e757d9f50515.js": "21a0a0aad59bff60739af41abc874141a34d7e76",
     "/manifest.webmanifest": "f55078249defc81f0f13e2d5bb6e9e899577ec1c",
-    "/media/football-shirt-red-F6V5GQGU.png": "0df1723bfe98a67e423479be18fee4e7cde55834",
-    "/media/football-shirt-white-36U2R2RQ.png": "b18ac6d8f00e6f5e00cb440b80a2a72b0e1658f3",
-    "/polyfills-FFHMD2TL.js": "f49b49a155bc7d192db62a4c15d0a612b460a667",
-    "/styles-NJK5IFUV.css": "f6c05808a862970604086495b736d529a5b08141"
+    "/polyfills.afb92f6083fc3452.js": "07619ae11433b3c78be8c082ab49a6c243bfd385",
+    "/runtime.0734210aa0b3bba3.js": "25e15fd59f26293aedcb50e28f6e97adea7aa11d",
+    "/styles.02f38236760347e5.css": "f6c05808a862970604086495b736d529a5b08141"
   },
   "navigationUrls": [
     {
