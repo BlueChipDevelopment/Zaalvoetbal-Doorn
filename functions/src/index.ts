@@ -12,6 +12,9 @@ import { onSchedule } from "firebase-functions/v2/scheduler";
 import * as logger from "firebase-functions/logger";
 import * as webpush from 'web-push';
 
+// Constants
+const SPREADSHEET_ID = '11xN1m371F8Tj0bX6TTRgnL_x_1_pXipox3giBuuUK1I';
+
 // Helper: Authorize Google Sheets API
 async function getSheetsClient() {
   const { google } = await import("googleapis");
@@ -210,7 +213,7 @@ export const sendPushToAll = onRequest(
       // Log request body for debugging
       logger.info('Request body:', JSON.stringify(req.body));
       
-      const spreadsheetId = '11xN1m371F8Tj0bX6TTRgnL_x_1_pXipox3giBuuUK1I';
+      const spreadsheetId = SPREADSHEET_ID;
       const sheetName = 'Spelers';
       const sheets = await getSheetsClient();
       logger.info('✅ Google Sheets client created');
@@ -322,7 +325,7 @@ export const sendPushToAll = onRequest(
 export const scheduledAttendanceReminders = onSchedule(
   { schedule: "every 60 minutes", region: "europe-west1" },
   async (event) => {
-    const spreadsheetId = '11xN1m371F8Tj0bX6TTRgnL_x_1_pXipox3giBuuUK1I';
+    const spreadsheetId = SPREADSHEET_ID;
     const sheets = await getSheetsClient();
     const reminderSheet = 'ReminderLog';
     const aanwezigheidSheet = 'Aanwezigheid';
@@ -369,9 +372,9 @@ export const scheduledAttendanceReminders = onSchedule(
       const msUntilMatch = nextMatchDate.getTime() - now.getTime();
       if (msUntilMatch < msBefore && msUntilMatch > msBefore - 60 * 60 * 1000) { // binnen het uur van het moment
         // 4. Stuur reminder direct (zonder circulaire HTTP call)
-        const title = `Reminder: geef je aanwezigheid door! (${hoursBefore}u voor de wedstrijd)`;
+        const title = 'Aanwezigheidsreminder';
         const body = 'Laat even weten of je er bent bij de volgende wedstrijd.';
-        const url = 'https://zaalvoetbaldoorn.nl/aanwezigheid';
+        const url = 'https://zaalvoetbal-doorn.nl/aanwezigheid';
         
         try {
           // Haal spelers op
@@ -460,7 +463,7 @@ export const scheduledAttendanceReminders = onSchedule(
  * Voert volledige team generatie uit in Firebase Functions
  */
 export const scheduledAutoTeamGeneration = onSchedule(
-  { schedule: "0 17 * * *", region: "europe-west1" },
+  { schedule: "0 17 * * *", region: "europe-west1", timeZone: "Europe/Amsterdam" },
   async (event) => {
     logger.info('🔄 Starting scheduled auto team generation...');
 
@@ -468,11 +471,11 @@ export const scheduledAutoTeamGeneration = onSchedule(
       const today = new Date();
       const dateString = today.toISOString().split('T')[0]; // YYYY-MM-DD format
 
-      // Call the manual endpoint with scheduled trigger to ensure consistency
-      const targetUrl = 'https://europe-west1-zaalvoetbal-doorn-74a8c.cloudfunctions.net/manualTeamGeneration';
+      // Call the team generation endpoint with scheduled trigger to ensure consistency
+      const targetUrl = 'https://europe-west1-zaalvoetbal-doorn-74a8c.cloudfunctions.net/teamGeneration';
       const urlWithParams = `${targetUrl}?date=${encodeURIComponent(dateString)}&trigger=scheduled`;
 
-      logger.info(`📡 Calling manual team generation endpoint with scheduled trigger: ${urlWithParams}`);
+      logger.info(`📡 Calling team generation endpoint with scheduled trigger: ${urlWithParams}`);
 
       const response = await fetch(urlWithParams, {
         method: 'GET',
@@ -501,9 +504,9 @@ export const scheduledAutoTeamGeneration = onSchedule(
 );
 
 /**
- * HTTP endpoint: handmatige team generatie (voor testing)
+ * HTTP endpoint: team generatie (handmatig of automatisch via scheduler)
  */
-export const manualTeamGeneration = onRequest(
+export const teamGeneration = onRequest(
   { region: 'europe-west1' },
   async (req, res) => {
     setCorsHeaders(res);
@@ -516,14 +519,14 @@ export const manualTeamGeneration = onRequest(
       const date = req.query.date as string || new Date().toISOString().split('T')[0];
       const trigger = req.query.trigger as string || 'manual'; // Allow trigger to be specified
 
-      logger.info(`🔄 Manual team generation triggered for ${date} (trigger: ${trigger})`);
+      logger.info(`🔄 Team generation triggered for ${date} (trigger: ${trigger})`);
 
       const result = await performAutoTeamGeneration(date, trigger);
 
       res.json(result);
 
     } catch (error) {
-      logger.error('💥 Manual team generation failed:', error);
+      logger.error('💥 Team generation failed:', error);
       res.status(500).json({
         success: false,
         message: `Error: ${error}`
@@ -536,7 +539,7 @@ export const manualTeamGeneration = onRequest(
  * Core team generation logic
  */
 async function performAutoTeamGeneration(dateString: string, trigger: string) {
-  const spreadsheetId = '11xN1m371F8Tj0bX6TTRgnL_x_1_pXipox3giBuuUK1I';
+  const spreadsheetId = SPREADSHEET_ID;
   const sheets = await getSheetsClient();
 
   try {
@@ -784,11 +787,11 @@ async function performAutoTeamGeneration(dateString: string, trigger: string) {
  * Send push notification for team generation
  */
 async function sendTeamGenerationNotification(teamWhiteStr: string, teamRedStr: string, trigger: string) {
-  const title = trigger === 'scheduled' ? 'Teams automatisch gegenereerd! 🤖' : 'De opstelling is bekend! ⚽';
-  const body = `Wit vs Rood - Bekijk de volledige opstelling!`;
-  const url = 'https://zaalvoetbaldoorn.nl/opstelling';
+  const title = trigger === 'scheduled' ? 'Opstelling bekend! 🤖' : 'Opstelling bekend! ⚽';
+  const body = `Bekijk de volledige opstelling!`;
+  const url = 'https://zaalvoetbal-doorn.nl/opstelling';
 
-  const spreadsheetId = '11xN1m371F8Tj0bX6TTRgnL_x_1_pXipox3giBuuUK1I';
+  const spreadsheetId = SPREADSHEET_ID;
   const sheets = await getSheetsClient();
 
   // Get active players for notifications
