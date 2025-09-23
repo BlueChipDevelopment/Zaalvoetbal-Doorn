@@ -30,8 +30,9 @@ self.addEventListener('push', function(event) {
   const title = data.title || 'Zaalvoetbal Doorn';
   const options = {
     body: data.body || 'Je hebt een nieuwe melding!',
-    icon: 'icons/icon-192x192.png',
-    badge: 'icons/icon-72x72.png',
+    // Remove icon for now to avoid 404 errors
+    // icon: 'icons/icon-192x192.png',
+    // badge: 'icons/icon-72x72.png',
     data: data.url ? { url: data.url } : {},
     requireInteraction: false, // Don't require user interaction
     silent: false, // Make sure it's not silent
@@ -61,21 +62,9 @@ self.addEventListener('push', function(event) {
       
       console.log('👀 Has visible/focused client:', hasVisibleClient);
       
-      if (hasVisibleClient) {
-        console.log('📱 Page is visible - sending message to client instead of showing notification');
-        // Send message to the focused client instead of showing notification
-        clients.forEach(client => {
-          if (client.focused || client.visibilityState === 'visible') {
-            client.postMessage({
-              type: 'PUSH_NOTIFICATION',
-              title,
-              body: options.body,
-              data: data
-            });
-          }
-        });
-        return Promise.resolve('Message sent to focused client');
-      } else {
+      // Always show browser notification regardless of page visibility
+      console.log('📢 Showing browser notification (ignoring page visibility)');
+      {
         console.log('📢 Page not visible - showing browser notification');
         // Show notification when page is not visible
         return self.registration.showNotification(title, options)

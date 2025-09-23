@@ -9,7 +9,7 @@
       <app-next-match-info [nextMatchInfo]="nextMatchInfo"></app-next-match-info>
 
       <!-- Notification Prompt -->
-      <div *ngIf="false && showNotificationPrompt" class="notification-prompt mat-elevation-z2">
+      <div *ngIf="showNotificationPrompt" class="notification-prompt mat-elevation-z2">
         <div class="notification-content">
           <mat-icon>notifications</mat-icon>
           <div class="notification-text">
@@ -37,7 +37,7 @@
       </div>
 
       <!-- Notification Status (when enabled) -->
-      <div *ngIf="false && playerNotificationsEnabled && !showNotificationPrompt" class="notification-status mat-elevation-z1">
+      <div *ngIf="playerNotificationsEnabled && !showNotificationPrompt && selectedPlayer === 'Chris'" class="notification-status mat-elevation-z1">
         <mat-icon>notifications_active</mat-icon>
         <span>Notificaties ingeschakeld</span>
         <button mat-icon-button (click)="disableNotifications()" [disabled]="notificationLoading">

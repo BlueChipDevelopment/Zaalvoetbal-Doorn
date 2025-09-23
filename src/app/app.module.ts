@@ -24,7 +24,7 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 import { TitleCasePipe } from '@angular/common';
 import { registerLocaleData } from '@angular/common';
 import localeNl from '@angular/common/locales/nl';
-import { LOCALE_ID, isDevMode } from '@angular/core';
+import { LOCALE_ID } from '@angular/core';
 
 registerLocaleData(localeNl);
 
@@ -32,7 +32,6 @@ import { AppRoutingModule } from './app-routing.module';
 
 import { AppComponent } from './app.component';
 import { AboutComponent } from './components/about/about.component';
-import { ServiceWorkerModule } from '@angular/service-worker';
 
 @NgModule({
   declarations: [
@@ -62,13 +61,7 @@ import { ServiceWorkerModule } from '@angular/service-worker';
     MatToolbarModule, 
     MatSidenavModule, 
     AppRoutingModule,
-    AboutComponent,
-    ServiceWorkerModule.register('ngsw-worker.js', {
-      enabled: !isDevMode(),
-      // Register the ServiceWorker as soon as the application is stable
-      // or after 30 seconds (whichever comes first).
-      registrationStrategy: 'registerWhenStable:30000'
-    })
+    AboutComponent
   ],
   providers: [provideHttpClient(withInterceptorsFromDi()), TitleCasePipe, { provide: LOCALE_ID, useValue: 'nl' }]
 })

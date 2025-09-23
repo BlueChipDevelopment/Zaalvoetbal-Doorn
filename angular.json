@@ -52,7 +52,7 @@
                 }
               ],
               "outputHashing": "all",
-              "serviceWorker": true
+              "serviceWorker": false
             },
             "development": {
               "optimization": false,

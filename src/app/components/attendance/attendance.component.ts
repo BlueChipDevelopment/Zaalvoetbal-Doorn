@@ -367,9 +367,9 @@ export class AttendanceComponent implements OnInit {
   }
 
   private updateNotificationPrompt(): void {
-    // Show prompt if supported but player doesn't have notifications enabled
-    this.showNotificationPrompt = this.notificationsSupported && !this.playerNotificationsEnabled;
-    console.log('🔔 Show notification prompt:', this.showNotificationPrompt);
+    // Show prompt only for player 'Chris' if supported but player doesn't have notifications enabled
+    this.showNotificationPrompt = this.selectedPlayer === 'Chris' && this.notificationsSupported && !this.playerNotificationsEnabled;
+    console.log('🔔 Show notification prompt:', this.showNotificationPrompt, 'for player:', this.selectedPlayer);
   }
 
   private async checkPlayerNotificationStatus(): Promise<void> {

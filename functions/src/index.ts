@@ -250,13 +250,13 @@ export const sendPushToAll = onRequest(
         // Filter alleen actieve spelers zonder reactie
         targetRows = rows.filter((row, i) =>
           i > 0 &&
-          row[actiefCol] === 'TRUE' &&
+          (row[actiefCol] === 'TRUE' || row[actiefCol] === 'Ja') &&
           !respondedNames.has(row[nameCol])
         );
       } else {
         // Standaard: alle actieve spelers
         targetRows = rows.filter((row, i) =>
-          i > 0 && row[actiefCol] === 'TRUE'
+          i > 0 && (row[actiefCol] === 'TRUE' || row[actiefCol] === 'Ja')
         );
       }
       // Nu notifications versturen vanuit Notificaties sheet
@@ -269,20 +269,27 @@ export const sendPushToAll = onRequest(
       
       // Create map van target spelers
       const targetPlayerNames = new Set(targetRows.map(row => row[nameCol]));
-      
+
       const notifications: Promise<any>[] = [];
       for (let i = 1; i < notificatiesRows.length; i++) {
         const row = notificatiesRows[i];
         if (row.length < 7) continue; // Skip incomplete rows
-        
+
         const endpoint = row[0];
-        const p256dh = row[1];  
+        const p256dh = row[1];
         const auth = row[2];
-        const active = row[5] === 'true' || row[5] === true;
+        const active = row[5] === 'true' || row[5] === true || row[5] === 'TRUE';
         const playerName = row[6];
-        
-        // Alleen versturen naar target spelers met actieve subscriptions
-        if (active && playerName && targetPlayerNames.has(playerName)) {
+
+        // Voor test berichten: verstuur naar alle actieve subscriptions
+        // Voor andere berichten: alleen naar target spelers
+        const isTestMessage = req.body.type === 'test' || !req.body.type;
+        const shouldSend = active && playerName && (isTestMessage || targetPlayerNames.has(playerName));
+
+        // Debug logging
+        logger.info(`📧 Processing notification row ${i}: player=${playerName}, active=${row[5]} (${active}), isTest=${isTestMessage}, shouldSend=${shouldSend}`);
+
+        if (shouldSend) {
           try {
             const subscription = { endpoint, keys: { p256dh, auth } };
             const payload = JSON.stringify({

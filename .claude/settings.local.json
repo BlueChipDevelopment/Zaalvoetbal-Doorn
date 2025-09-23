@@ -2,7 +2,6 @@
   "permissions": {
     "allow": [
       "Read(/C:\\bluechip\\Futsal-Doorn/**)",
-      "Bash(ng deploy:*)",
       "Bash(curl:*)",
       "Bash(firebase functions:log:*)",
       "Bash(taskkill:*)",
@@ -13,8 +12,7 @@
       "Bash(netstat:*)",
       "Bash(findstr:*)",
       "Bash(npm run ng:*)",
-      "Bash(npm run build:*)",
-      "Bash(firebase deploy:*)"
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []
