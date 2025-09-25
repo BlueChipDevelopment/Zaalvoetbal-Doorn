@@ -78,7 +78,7 @@
           <mat-icon>cancel</mat-icon> Ik kan niet
         </button>
 
-        <div class="status-confirmation" *ngIf="attendanceStatus && !isLoadingStatus">
+        <div class="status-confirmation" *ngIf="(attendanceStatus === 'Ja' || attendanceStatus === 'Nee') && !isLoadingStatus">
           <ng-container [ngSwitch]="attendanceStatus">
             <div *ngSwitchCase="'Ja'" class="status-row status-yes">
               <span>Je hebt aangegeven aanwezig te zijn.</span>
