@@ -40,18 +40,20 @@ This is an Angular 18 application for managing futsal team generation, player st
 
 - **GoogleSheetsService** - Handles all Google Sheets API integration via Firebase Functions
 - **PlayerService** - Manages player data and statistics
-- **TeamGenerateService** - Core team balancing algorithms  
+- **TeamGenerateService** - Core team balancing algorithms
 - **AttendanceService** - Player attendance management
 - **WedstrijdenService** - Match data operations
 - **GameStatisticsService** - Player performance analytics
+- **NotificationService** - Manages Web Push notifications and browser subscription handling
 
 ### Data Architecture
 
 The app uses Google Sheets as the primary data store with these main sheets:
 - **Spelers** - Player information, ratings, and statistics
-- **Wedstrijden** - Match data and results  
+- **Wedstrijden** - Match data and results
 - **Aanwezigheid** - Player attendance records
 - **LaatsteTeams** - Latest generated team compositions
+- **Notificaties** - Push notification subscription data and player preferences
 
 ### Key Interfaces
 
