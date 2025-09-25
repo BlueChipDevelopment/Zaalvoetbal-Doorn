@@ -67,6 +67,7 @@ export class AttendanceComponent implements OnInit {
   notificationsEnabled = false;
   playerNotificationsEnabled = false; // Player-specific status
   notificationLoading = false;
+  notificationStatusLoading = false;
   showNotificationPrompt = false;
 
 
@@ -367,25 +368,30 @@ export class AttendanceComponent implements OnInit {
   }
 
   private updateNotificationPrompt(): void {
-    // Show prompt only for player 'Chris' if supported but player doesn't have notifications enabled
-    this.showNotificationPrompt = this.selectedPlayer === 'Chris' && this.notificationsSupported && !this.playerNotificationsEnabled;
-    console.log('🔔 Show notification prompt:', this.showNotificationPrompt, 'for player:', this.selectedPlayer);
+    // Show prompt only for player 'Chris' if supported but player doesn't have notifications enabled and not loading
+    this.showNotificationPrompt = this.selectedPlayer === 'Chris' && this.notificationsSupported && !this.playerNotificationsEnabled && !this.notificationStatusLoading;
+    console.log('🔔 Show notification prompt:', this.showNotificationPrompt, 'for player:', this.selectedPlayer, 'loading:', this.notificationStatusLoading);
   }
 
   private async checkPlayerNotificationStatus(): Promise<void> {
     if (!this.selectedPlayer) {
       this.playerNotificationsEnabled = false;
+      this.notificationStatusLoading = false;
       this.updateNotificationPrompt();
       return;
     }
 
+    this.notificationStatusLoading = true;
+    this.updateNotificationPrompt(); // Update to hide prompt while loading
+
     try {
       this.playerNotificationsEnabled = await this.notificationService.checkPlayerNotificationStatus(this.selectedPlayer);
       console.log(`🔔 Player ${this.selectedPlayer} notifications enabled:`, this.playerNotificationsEnabled);
-      this.updateNotificationPrompt();
     } catch (error) {
       console.error('Error checking player notification status:', error);
       this.playerNotificationsEnabled = false;
+    } finally {
+      this.notificationStatusLoading = false;
       this.updateNotificationPrompt();
     }
   }
