@@ -24,11 +24,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { WEDSTRIJD_RANGES } from '../../constants/sheet-columns';
+import { environment } from '../../../environments/environment';
 import { PlayerCardComponent } from '../player-card/player-card.component';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CdkDragDrop, transferArrayItem } from '@angular/cdk/drag-drop';
-import { DomSanitizer } from '@angular/platform-browser';
-import { MatIconRegistry } from '@angular/material/icon';
 
 @Component({
   selector: 'app-team-generator',
@@ -86,14 +85,7 @@ export class TeamGeneratorComponent implements OnInit {
     private attendanceService: AttendanceService,
     private playerService: PlayerService,
     private snackBar: MatSnackBar,
-    private iconRegistry: MatIconRegistry,
-    private sanitizer: DomSanitizer
   ) {
-    // Register WhatsApp SVG icon
-    this.iconRegistry.addSvgIcon(
-      'whatsapp',
-      this.sanitizer.bypassSecurityTrustResourceUrl('assets/icons/whatsapp.svg')
-    );
   }
 
   ngOnInit(): void {
@@ -605,38 +597,12 @@ export class TeamGeneratorComponent implements OnInit {
     return this.getTeams().map(t => t + '-drop');
   }
 
-  /**
-   * Share the team composition via WhatsApp
-   */
-  shareTeamOnWhatsApp(teamKey: string): void {
-    const team = this.getTeam(teamKey);
-    if (!team) return;
-    const playerNames = team.squad.map(p => p.name).join(', ');
-    const message = `Team ${team.name} (${team.sumOfRatings.toFixed(2)} punten): %0A${playerNames}`;
-    const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
-    window.open(url, '_blank');
-  }
-
-  /**
-   * Deel beide teams tegelijk via WhatsApp met visuele weergave (tekst)
-   */
-  shareAllTeamsOnWhatsApp(): void {
-    if (!this.teams.teamWhite || !this.teams.teamRed) return;
-    const teamToText = (team: Team) => {
-      const players = team.squad.map((p, i) => `${i + 1}. ${p.name}`).join('%0A');
-      return `*${team.name}* (Totaal: ${team.sumOfRatings.toFixed(2)})%0A${players}`;
-    };
-    const message =
-      `${teamToText(this.teams.teamWhite)}%0A%0A${teamToText(this.teams.teamRed)}`;
-    const url = `https://wa.me/?text=${message}`;
-    window.open(url, '_blank');
-  }
 
   /**
    * Stuur een push notificatie naar alle spelers met toestemming (via backend)
    */
   sendPushNotificationToAll(title: string, body: string, url: string) {
-    fetch('https://europe-west1-zaalvoetbal-doorn-74a8c.cloudfunctions.net/sendPushToAll', {
+    fetch(`${environment.firebaseBaseUrl}/sendPushToAll`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ title, body, url })
