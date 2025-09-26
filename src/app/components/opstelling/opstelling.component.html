@@ -1,12 +1,13 @@
-<div *ngIf="loading" class="loading-spinner">
-  <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
-  <p>Opstelling laden...</p>
-</div>
-<div *ngIf="error" class="error-banner">
-  <mat-icon>error</mat-icon>
-  <span>{{ error }}</span>
-</div>
-<div *ngIf="teams && !loading">
+<div class="opstelling-container">
+  <div *ngIf="loading" class="loading-spinner">
+    <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+    <p>Opstelling laden...</p>
+  </div>
+  <div *ngIf="error" class="error-banner">
+    <mat-icon>error</mat-icon>
+    <span>{{ error }}</span>
+  </div>
+  <div *ngIf="teams && !loading">
   <!-- Team Analysis - clickable quote that shows detailed analysis -->
   <div class="team-analysis-quote" *ngIf="teams && teams.teamWhite && teams.teamRed">
     <p class="balance-description clickable" 
@@ -68,22 +69,23 @@
       </div>
     </div>
   </div>
-  <div class="share-link-container">
-    <button mat-fab (click)="copyOpstellingLink()" title="Kopieer link naar opstelling">
-      <mat-icon>link</mat-icon>
-    </button>    
+    <div class="share-link-container">
+      <button mat-fab (click)="copyOpstellingLink()" title="Kopieer link naar opstelling">
+        <mat-icon>link</mat-icon>
+      </button>
+    </div>
   </div>
-</div>
-<div *ngIf="!loading && !teams && countdown">
-  <div class="countdown-container">
-    <mat-icon>hourglass_empty</mat-icon>
-    <div class="countdown-timer">
-      {{ countdown }}
+  <div *ngIf="!loading && !teams && countdown">
+    <div class="countdown-container">
+      <mat-icon>hourglass_empty</mat-icon>
+      <div class="countdown-timer">
+        {{ countdown }}
+      </div>
+      <div class="countdown-date">
+        De opstelling wordt automatisch getoond op
+        <strong>{{ revealTime | date:'EEEE d MMMM yyyy HH:mm' }}</strong>
+      </div>
+      <div class="countdown-note">Refresh deze pagina na het verstrijken van de tijd.</div>
     </div>
-    <div class="countdown-date">
-      De opstelling wordt automatisch getoond op
-      <strong>{{ revealTime | date:'EEEE d MMMM yyyy HH:mm' }}</strong>
-    </div>
-    <div class="countdown-note">Refresh deze pagina na het verstrijken van de tijd.</div>
   </div>
 </div>

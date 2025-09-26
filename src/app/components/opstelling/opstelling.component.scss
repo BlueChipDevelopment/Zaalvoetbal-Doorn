@@ -1,5 +1,16 @@
 @import '../../../styles_variables';
 
+// Main container for mobile margins
+.opstelling-container {
+  padding: 0 16px;
+}
+
+@media (max-width: 768px) {
+  .opstelling-container {
+    padding: 0 16px;
+  }
+}
+
 // Team analysis quote - styled as blockquote
 .team-analysis-quote {
   max-width: 600px;
