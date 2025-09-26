@@ -65,9 +65,16 @@ All TypeScript interfaces are centralized in `src/app/interfaces/`:
 
 ### Styling
 
-- Uses Angular Material with the `deeppurple-amber` theme
-- SCSS variables are defined in `src/styles_variables.scss`
+- Uses Angular Material with custom color scheme (not standard theme)
+- **IMPORTANT: Always check `src/styles_variables.scss` for color definitions before adding new styles**
+- Custom color palette defined in `src/styles_variables.scss`:
+  - Primary color: `#1976d2` (blue)
+  - Secondary color: `#616161` (grey)
+  - Success color: `#43a047` (green)
+  - Error color: `#f44336` (red)
+- Global styles and imports are in `src/styles.scss`
 - Component-specific styles follow Angular's encapsulated styling approach
+- **When creating new components or styling, always use the variables from `styles_variables.scss` instead of hardcoding colors**
 
 ### Google Sheets Integration
 

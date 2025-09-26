@@ -21,7 +21,6 @@ body {
   flex-direction: row;
 }
 
-router-outlet + app-about,
 router-outlet + app-team-generator,
 router-outlet + app-wedstrijden,
 router-outlet + app-score {
@@ -88,11 +87,6 @@ app-top-bar {
 
 .tooltip-multiline {
   white-space: pre-line;
-}
-
-.snackbar-success {
-  background: $success-color;
-  color: $light-bg;
 }
 
 .mat-snack-bar-container {

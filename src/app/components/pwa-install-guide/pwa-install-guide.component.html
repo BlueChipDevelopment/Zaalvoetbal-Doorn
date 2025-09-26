@@ -1,0 +1,98 @@
+<div class="pwa-guide-overlay" (click)="closeModal()">
+  <div class="pwa-guide-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>App Installeren</h2>
+      <button mat-icon-button (click)="closeModal()" class="close-btn">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="modal-content">
+      <p class="intro">Voor de beste ervaring van notificaties, installeer de app op je apparaat:</p>
+
+      <div [ngSwitch]="platform" class="platform-instructions">
+        <!-- iOS Instructions -->
+        <div *ngSwitchCase="'ios'" class="instruction-set">
+          <h3><mat-icon>phone_iphone</mat-icon> iPhone/iPad</h3>
+          <ol class="steps">
+            <li>
+              <span class="step-text">Tik op het deel-icoon</span>
+              <mat-icon class="step-icon">ios_share</mat-icon>
+              <span class="step-detail">onderaan je scherm</span>
+            </li>
+            <li>
+              <span class="step-text">Scroll naar beneden en tik op</span>
+              <strong>"Voeg toe aan beginscherm"</strong>
+            </li>
+            <li>
+              <span class="step-text">Tik op</span>
+              <strong>"Voeg toe"</strong>
+              <span class="step-detail">rechtsboven</span>
+            </li>
+          </ol>
+        </div>
+
+        <!-- Android Instructions -->
+        <div *ngSwitchCase="'android'" class="instruction-set">
+          <h3><mat-icon>phone_android</mat-icon> Android</h3>
+          <ol class="steps">
+            <li>
+              <span class="step-text">Tik op het menu</span>
+              <mat-icon class="step-icon">more_vert</mat-icon>
+              <span class="step-detail">rechtsboven</span>
+            </li>
+            <li>
+              <span class="step-text">Kies</span>
+              <strong>"App installeren"</strong>
+              <span class="step-detail">of "Toevoegen aan startscherm"</span>
+            </li>
+            <li>
+              <span class="step-text">Tik op</span>
+              <strong>"Installeren"</strong>
+            </li>
+          </ol>
+        </div>
+
+        <!-- Desktop Instructions -->
+        <div *ngSwitchCase="'desktop'" class="instruction-set">
+          <h3><mat-icon>computer</mat-icon> Computer</h3>
+          <ol class="steps">
+            <li>
+              <span class="step-text">Kijk naar het installatie-icoon</span>
+              <mat-icon class="step-icon">get_app</mat-icon>
+              <span class="step-detail">in de adresbalk</span>
+            </li>
+            <li>
+              <span class="step-text">Klik op</span>
+              <strong>"Installeren"</strong>
+            </li>
+          </ol>
+        </div>
+
+        <!-- Default/Unknown -->
+        <div *ngSwitchDefault class="instruction-set">
+          <h3><mat-icon>devices</mat-icon> App Installeren</h3>
+          <p>Zoek naar de installatie optie in je browser menu of adresbalk.</p>
+        </div>
+      </div>
+
+      <div class="notification-info">
+        <h4>Welke notificaties ontvang je?</h4>
+        <ul class="notification-list">
+          <li><mat-icon>sports_soccer</mat-icon> Notificaties voor komende wedstrijden</li>
+          <li><mat-icon>how_to_reg</mat-icon> Verzoeken om aanwezigheid door te geven</li>
+          <li><mat-icon>group</mat-icon> Updates over teamindelingen</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button mat-button (click)="markAsInstalled()" color="primary">
+        App geïnstalleerd
+      </button>
+      <button mat-button (click)="closeModal()">
+        Later doen
+      </button>
+    </div>
+  </div>
+</div>

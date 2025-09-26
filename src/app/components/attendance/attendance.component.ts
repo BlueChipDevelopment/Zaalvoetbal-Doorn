@@ -17,6 +17,7 @@ import { finalize, Observable, switchMap, of } from 'rxjs';
 import { NextMatchService, NextMatchInfo } from '../../services/next-match.service';
 import { NextMatchInfoComponent } from '../next-match-info/next-match-info.component';
 import { PlayerCardComponent } from '../player-card/player-card.component';
+import { PwaInstallGuideComponent } from '../pwa-install-guide/pwa-install-guide.component';
 import { Player } from '../../interfaces/IPlayer';
 import { MatchAttendanceDetailsWithPlayerStatus, AttendanceStatus } from '../../interfaces/IAttendance';
 import { environment } from '../../../environments/environment';
@@ -36,6 +37,7 @@ import { environment } from '../../../environments/environment';
     RouterModule,
     NextMatchInfoComponent,
     PlayerCardComponent,
+    PwaInstallGuideComponent,
   ],
   templateUrl: './attendance.component.html',
   styleUrls: ['./attendance.component.scss']
@@ -69,6 +71,7 @@ export class AttendanceComponent implements OnInit {
   notificationLoading = false;
   notificationStatusLoading = false;
   showNotificationPrompt = false;
+  showPwaInstallGuide = false;
 
 
   constructor(
@@ -368,8 +371,18 @@ export class AttendanceComponent implements OnInit {
   }
 
   private updateNotificationPrompt(): void {
-    // Show prompt only for player 'Chris' if supported but player doesn't have notifications enabled and not loading
-    this.showNotificationPrompt = this.selectedPlayer === 'Chris' && this.notificationsSupported && !this.playerNotificationsEnabled && !this.notificationStatusLoading;
+    // Check if prompt was dismissed for this session
+    const dismissedForSession = sessionStorage.getItem('notification-prompt-dismissed');
+
+    // Show prompt for any selected player if supported but player doesn't have notifications enabled and not loading and not dismissed for this player
+    const playerSpecificKey = `notification-prompt-dismissed-${this.selectedPlayer}`;
+    const dismissedForThisPlayer = sessionStorage.getItem(playerSpecificKey);
+
+    this.showNotificationPrompt = !!this.selectedPlayer &&
+                                  this.notificationsSupported &&
+                                  !this.playerNotificationsEnabled &&
+                                  !this.notificationStatusLoading &&
+                                  !dismissedForThisPlayer;
     console.log('🔔 Show notification prompt:', this.showNotificationPrompt, 'for player:', this.selectedPlayer, 'loading:', this.notificationStatusLoading);
   }
 
@@ -398,17 +411,24 @@ export class AttendanceComponent implements OnInit {
 
   async enableNotifications(): Promise<void> {
     this.notificationLoading = true;
-    
+
     try {
       const success = await this.notificationService.requestPermission(this.selectedPlayer || undefined);
-      
+
       if (success) {
         this.snackBar.open('Notificaties succesvol ingeschakeld!', 'OK', {
           duration: 3000,
           panelClass: ['futsal-notification', 'futsal-notification-success']
         });
+
         // Check updated player notification status
-        this.checkPlayerNotificationStatus();
+        await this.checkPlayerNotificationStatus();
+
+        // Show PWA installation guide if not already acknowledged
+        const pwaAcknowledged = localStorage.getItem('pwa-install-acknowledged');
+        if (!pwaAcknowledged) {
+          this.showPwaInstallGuide = true;
+        }
       } else {
         this.snackBar.open('Kon notificaties niet inschakelen', 'OK', {
           duration: 5000,
@@ -426,26 +446,6 @@ export class AttendanceComponent implements OnInit {
     }
   }
 
-  async disableNotifications(): Promise<void> {
-    this.notificationLoading = true;
-    
-    try {
-      const success = await this.notificationService.disableNotifications();
-      
-      if (success) {
-        this.snackBar.open('Notificaties uitgeschakeld', 'OK', {
-          duration: 3000,
-          panelClass: ['futsal-notification', 'futsal-notification-info']
-        });
-        // Check updated player notification status
-        this.checkPlayerNotificationStatus();
-      }
-    } catch (error) {
-      console.error('Error disabling notifications:', error);
-    } finally {
-      this.notificationLoading = false;
-    }
-  }
 
   getNotificationStatus(): string[] {
     return this.notificationService.getNotificationCapabilities();
@@ -467,6 +467,26 @@ export class AttendanceComponent implements OnInit {
       ventielPoints: 0,
       actief: true
     };
+  }
+
+  public dismissNotificationPrompt(): void {
+    this.showNotificationPrompt = false;
+    // Store that user dismissed it for this specific player
+    if (this.selectedPlayer) {
+      const playerSpecificKey = `notification-prompt-dismissed-${this.selectedPlayer}`;
+      sessionStorage.setItem(playerSpecificKey, 'true');
+    }
+  }
+
+  public closePwaGuide(): void {
+    this.showPwaInstallGuide = false;
+  }
+
+  public onPwaInstalled(): void {
+    this.snackBar.open('Perfect! Je ontvangt nu betrouwbare notificaties.', 'OK', {
+      duration: 4000,
+      panelClass: ['futsal-notification', 'futsal-notification-success']
+    });
   }
 
   private formatDate(date: Date): string {

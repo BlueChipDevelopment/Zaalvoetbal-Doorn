@@ -418,7 +418,7 @@ export class TeamGeneratorComponent implements OnInit {
         this.nextMatchService.getNextMatchInfo().subscribe({
           next: (matchInfo) => {
             if (!matchInfo) {
-              this.snackBar.open('Geen aankomende wedstrijd gevonden.', 'Sluiten', { duration: 5000, panelClass: ['snackbar-error'] });
+              this.snackBar.open('Geen aankomende wedstrijd gevonden.', 'Sluiten', { duration: 5000, panelClass: ['futsal-notification', 'futsal-notification-error'] });
               return;
             }
             
@@ -430,7 +430,7 @@ export class TeamGeneratorComponent implements OnInit {
             this.attendanceService.getPresentPlayers(dateString).subscribe({
               next: (presentPlayers) => {
                 if (presentPlayers.length === 0) {
-                  this.snackBar.open('Geen aanwezige spelers gevonden voor de volgende wedstrijd.', 'Sluiten', { duration: 5000, panelClass: ['snackbar-error'] });
+                  this.snackBar.open('Geen aanwezige spelers gevonden voor de volgende wedstrijd.', 'Sluiten', { duration: 5000, panelClass: ['futsal-notification', 'futsal-notification-error'] });
                   return;
                 }
                 
@@ -452,17 +452,17 @@ export class TeamGeneratorComponent implements OnInit {
                 this.errorMessage = null;
               },
               error: (err) => {
-                this.snackBar.open('Fout bij ophalen aanwezigheid: ' + (err.message || err), 'Sluiten', { duration: 5000, panelClass: ['snackbar-error'] });
+                this.snackBar.open('Fout bij ophalen aanwezigheid: ' + (err.message || err), 'Sluiten', { duration: 5000, panelClass: ['futsal-notification', 'futsal-notification-error'] });
               }
             });
           },
           error: (err) => {
-            this.snackBar.open('Fout bij ophalen wedstrijden: ' + (err.message || err), 'Sluiten', { duration: 5000, panelClass: ['snackbar-error'] });
+            this.snackBar.open('Fout bij ophalen wedstrijden: ' + (err.message || err), 'Sluiten', { duration: 5000, panelClass: ['futsal-notification', 'futsal-notification-error'] });
           }
         });
       },
       error: (err) => {
-        this.snackBar.open('Fout bij ophalen spelersstatistieken: ' + (err.message || err), 'Sluiten', { duration: 5000, panelClass: ['snackbar-error'] });
+        this.snackBar.open('Fout bij ophalen spelersstatistieken: ' + (err.message || err), 'Sluiten', { duration: 5000, panelClass: ['futsal-notification', 'futsal-notification-error'] });
       }
     });
   }
@@ -488,7 +488,7 @@ export class TeamGeneratorComponent implements OnInit {
         error: (error) => {
           this.snackBar.open(error.message || 'Fout bij ophalen spelers.', 'Sluiten', { 
             duration: 5000, 
-            panelClass: ['snackbar-error'] 
+            panelClass: ['futsal-notification', 'futsal-notification-error'] 
           });
         }
       });
@@ -521,7 +521,7 @@ export class TeamGeneratorComponent implements OnInit {
 
   saveTeamsToSheet(): void {
     if (!this.nextMatchInfo || !this.teams.teamWhite || !this.teams.teamRed) {
-      this.snackBar.open('Kan teams niet opslaan: ontbrekende gegevens.', 'Sluiten', { duration: 5000, panelClass: ['snackbar-error'] });
+      this.snackBar.open('Kan teams niet opslaan: ontbrekende gegevens.', 'Sluiten', { duration: 5000, panelClass: ['futsal-notification', 'futsal-notification-error'] });
       return;
     }
     // Spinner niet tonen bij opslaan
@@ -540,7 +540,7 @@ export class TeamGeneratorComponent implements OnInit {
     }
     
     if (!sheetRowIndex) {
-      this.snackBar.open('Kan rijnummer van de wedstrijd niet bepalen.', 'Sluiten', { duration: 5000, panelClass: ['snackbar-error'] });
+      this.snackBar.open('Kan rijnummer van de wedstrijd niet bepalen.', 'Sluiten', { duration: 5000, panelClass: ['futsal-notification', 'futsal-notification-error'] });
       return;
     }
 
@@ -562,7 +562,7 @@ export class TeamGeneratorComponent implements OnInit {
         next: () => {
           console.log(`✅ Teams succesvol opgeslagen voor ${seizoen || 'onbekend'} wedstrijd ${matchNumber}`);
           this.isTeamsSaved = true;
-          this.snackBar.open('Teams opgeslagen!', 'Sluiten', { duration: 3000, panelClass: ['snackbar-success'] });
+          this.snackBar.open('Teams opgeslagen!', 'Sluiten', { duration: 3000, panelClass: ['futsal-notification', 'futsal-notification-success'] });
           // Push notificatie sturen naar alle spelers met toestemming
           this.sendPushNotificationToAll(
             'De opstelling is bekend!',
@@ -572,7 +572,7 @@ export class TeamGeneratorComponent implements OnInit {
         },
         error: (err) => {
           console.error(`❌ Fout bij opslaan teams voor ${seizoen || 'onbekend'} wedstrijd ${matchNumber}:`, err);
-          this.snackBar.open('Fout bij opslaan teams: ' + (err.message || err), 'Sluiten', { duration: 5000, panelClass: ['snackbar-error'] });
+          this.snackBar.open('Fout bij opslaan teams: ' + (err.message || err), 'Sluiten', { duration: 5000, panelClass: ['futsal-notification', 'futsal-notification-error'] });
         }
       });
   }
@@ -643,10 +643,10 @@ export class TeamGeneratorComponent implements OnInit {
     })
       .then(async res => {
         if (!res.ok) throw new Error(await res.text());
-        this.snackBar.open('Push notificatie verstuurd!', 'Sluiten', { duration: 3000, panelClass: ['snackbar-success'] });
+        this.snackBar.open('Push notificatie verstuurd!', 'Sluiten', { duration: 3000, panelClass: ['futsal-notification', 'futsal-notification-success'] });
       })
       .catch(err => {
-        this.snackBar.open('Fout bij versturen push notificatie: ' + err, 'Sluiten', { duration: 5000, panelClass: ['snackbar-error'] });
+        this.snackBar.open('Fout bij versturen push notificatie: ' + err, 'Sluiten', { duration: 5000, panelClass: ['futsal-notification', 'futsal-notification-error'] });
       });
   }
 

@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { PwaInstallService } from './services/pwa-install.service';
+import { PwaInstallGuideComponent } from './components/pwa-install-guide/pwa-install-guide.component';
 
 @Component({
   selector: 'app-root',
@@ -88,25 +89,26 @@ export class AppComponent implements OnInit, OnDestroy {
     console.log('✅ Elegant in-app notification displayed to user');
   }
 
-  async installPWA() {
-    if (this.pwaInstallService.isIOS) {
-      this.showInstallInstructions();
-    } else {
-      const installed = await this.pwaInstallService.promptInstall();
-      if (installed) {
-        this.snackBar.open('App succesvol geïnstalleerd!', 'OK', { duration: 3000 });
-      }
-    }
+  showInstallGuide() {
+    const dialogRef = this.dialog.open(PwaInstallGuideComponent, {
+      width: '400px',
+      maxWidth: '90vw',
+      disableClose: false,
+      hasBackdrop: true,
+      panelClass: 'pwa-install-dialog'
+    });
+
+    dialogRef.componentInstance.installed.subscribe(() => {
+      this.snackBar.open('App gemarkeerd als geïnstalleerd!', 'OK', { duration: 3000, panelClass: ['futsal-notification', 'futsal-notification-success'] });
+      dialogRef.close();
+    });
+
+    dialogRef.componentInstance.close.subscribe(() => {
+      dialogRef.close();
+    });
   }
 
-  private showInstallInstructions() {
-    const instructions = this.pwaInstallService.getInstallInstructions();
-    const message = `Installeer de app:\n${instructions.join('\n')}`;
-    
-    this.snackBar.open(message, 'Begrepen', {
-      duration: 10000,
-      panelClass: ['install-instructions'],
-      verticalPosition: 'top'
-    });
+  async installPWA() {
+    this.showInstallGuide();
   }
 }

@@ -223,7 +223,7 @@ export class KalenderComponent implements OnInit {
           this.matchPresenceCounts = [];
           this.snackBar.open('Fout bij ophalen aanwezigheid aantallen.', 'Sluiten', { 
             duration: 5000, 
-            panelClass: ['snackbar-error'] 
+            panelClass: ['futsal-notification', 'futsal-notification-error'] 
           });
         }
       });
@@ -335,7 +335,7 @@ export class KalenderComponent implements OnInit {
             this.playerAttendanceStatus = [];
             this.snackBar.open('Fout bij ophalen aanwezigheid status.', 'Sluiten', { 
               duration: 5000, 
-              panelClass: ['snackbar-error'] 
+              panelClass: ['futsal-notification', 'futsal-notification-error'] 
             });
           }
         }
@@ -461,7 +461,7 @@ export class KalenderComponent implements OnInit {
         const message = (err instanceof Error) ? err.message : 'Fout bij opslaan aanwezigheid.';
         this.snackBar.open(message, 'Sluiten', { 
           duration: 5000, 
-          panelClass: ['snackbar-error'] 
+          panelClass: ['futsal-notification', 'futsal-notification-error'] 
         });
       }
     });

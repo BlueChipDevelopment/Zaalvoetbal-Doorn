@@ -156,7 +156,8 @@ export class ScoreComponent implements OnInit {
 
       if (!rowIndexToUpdate) {
         this._snackBar.open('Kan wedstrijd niet identificeren voor het opslaan van scores.', 'OK', {
-          duration: 5000
+          duration: 5000,
+          panelClass: ['futsal-notification', 'futsal-notification-error']
         });
         return;
       }
@@ -177,7 +178,8 @@ export class ScoreComponent implements OnInit {
               this.performScoreUpdate(rowIndexToUpdate);
             } else {
               this._snackBar.open('Wedstrijdgegevens zijn veranderd. Herlaad de pagina.', 'OK', {
-                duration: 5000
+                duration: 5000,
+                panelClass: ['futsal-notification', 'futsal-notification-warning']
               });
             }
           },
@@ -192,7 +194,8 @@ export class ScoreComponent implements OnInit {
       }
     } else {
       this._snackBar.open('Vul eerst beide scores in.', 'OK', {
-        duration: 3000
+        duration: 3000,
+        panelClass: ['futsal-notification', 'futsal-notification-warning']
       });
     }
   }
@@ -216,7 +219,8 @@ export class ScoreComponent implements OnInit {
       next: () => {
         console.log(`✅ Scores succesvol opgeslagen voor ${seizoen || 'onbekend'} wedstrijd ${matchNumber}`);
         this._snackBar.open('Scores en Zlatan succesvol opgeslagen!', 'OK', {
-          duration: 3000
+          duration: 3000,
+          panelClass: ['futsal-notification', 'futsal-notification-success']
         }).afterDismissed().subscribe(() => {
           this.router.navigate(['/klassement']);
         });
@@ -224,7 +228,8 @@ export class ScoreComponent implements OnInit {
       error: error => {
         console.error(`❌ Fout bij opslaan scores voor ${seizoen || 'onbekend'} wedstrijd ${matchNumber}:`, error);
         this._snackBar.open('Fout bij opslaan. Probeer het opnieuw.', 'Sluiten', {
-          duration: 5000
+          duration: 5000,
+          panelClass: ['futsal-notification', 'futsal-notification-error']
         });
       }
     });

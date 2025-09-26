@@ -8,42 +8,28 @@
     <div *ngIf="!isLoadingPlayers">
       <app-next-match-info [nextMatchInfo]="nextMatchInfo"></app-next-match-info>
 
-      <!-- Notification Prompt -->
-      <div *ngIf="showNotificationPrompt" class="notification-prompt mat-elevation-z2">
-        <div class="notification-content">
-          <mat-icon>notifications</mat-icon>
-          <div class="notification-text">
-            <h3>Wedstrijd herinneringen</h3>
-            <p>Ontvang automatisch herinneringen voor komende wedstrijden</p>
-            <ul class="capabilities-list">
-              <li *ngFor="let capability of getNotificationStatus()">{{ capability }}</li>
-            </ul>
-          </div>
-          <div class="notification-actions">
-            <button 
-              mat-button 
-              color="primary" 
+      <!-- Subtle Notification Banner -->
+      <div *ngIf="showNotificationPrompt" class="notification-banner">
+        <div class="banner-content">
+          <mat-icon class="banner-icon">notifications_none</mat-icon>
+          <span class="banner-text">Notificaties ontvangen?</span>
+          <div class="banner-actions">
+            <button
+              mat-button
+              color="primary"
+              size="small"
               (click)="enableNotifications()"
               [disabled]="notificationLoading">
               <mat-icon *ngIf="notificationLoading">hourglass_empty</mat-icon>
-              <mat-icon *ngIf="!notificationLoading">notifications_active</mat-icon>
-              {{ notificationLoading ? 'Bezig...' : 'Inschakelen' }}
+              {{ notificationLoading ? 'Bezig...' : 'Ja' }}
             </button>
-            <button mat-button (click)="showNotificationPrompt = false">
+            <button mat-button size="small" (click)="dismissNotificationPrompt()">
               Later
             </button>
           </div>
         </div>
       </div>
 
-      <!-- Notification Status (when enabled) -->
-      <div *ngIf="playerNotificationsEnabled && !showNotificationPrompt && selectedPlayer === 'Chris'" class="notification-status mat-elevation-z1">
-        <mat-icon>notifications_active</mat-icon>
-        <span>Notificaties ingeschakeld</span>
-        <button mat-icon-button (click)="disableNotifications()" [disabled]="notificationLoading">
-          <mat-icon>close</mat-icon>
-        </button>
-      </div>
 
       <ng-container *ngIf="errorMessage">
         <div class="error-banner mat-elevation-z2">
@@ -125,3 +111,10 @@
 
   </mat-card-content>
 </mat-card>
+
+<!-- PWA Installation Guide Modal -->
+<app-pwa-install-guide
+  *ngIf="showPwaInstallGuide"
+  (close)="closePwaGuide()"
+  (installed)="onPwaInstalled()">
+</app-pwa-install-guide>

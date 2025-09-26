@@ -125,15 +125,25 @@ export class OpstellingComponent implements OnInit {
       this.countdown = 'De opstelling wordt elk moment bekend gemaakt!';
       return;
     }
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-    this.countdown = `${hours}u ${minutes}m ${seconds}s tot de opstelling bekend wordt.`;
+
+    const totalHours = diff / (1000 * 60 * 60);
+
+    // Show days if more than 24 hours until reveal
+    if (totalHours > 24) {
+      const days = Math.floor(totalHours / 24);
+      this.countdown = `${days} dag${days === 1 ? '' : 'en'} tot de opstelling bekend wordt.`;
+    } else {
+      // Show detailed countdown (hours, minutes, seconds) within 24 hours
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+      this.countdown = `${hours}u ${minutes}m ${seconds}s tot de opstelling bekend wordt.`;
+    }
   }
 
   copyOpstellingLink() {
     navigator.clipboard.writeText(this.opstellingUrl);
-    this.snackBar.open('Link naar de opstelling gekopieerd!', 'Sluiten', { duration: 2500, panelClass: ['snackbar-success'] });
+    this.snackBar.open('Link naar de opstelling gekopieerd!', 'Sluiten', { duration: 2500, panelClass: ['futsal-notification', 'futsal-notification-success'] });
   }
 
   getTeamRating(team: any[]): number {

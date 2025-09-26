@@ -65,15 +65,24 @@
   font-weight: 500;
   border-radius: 8px !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-  
+
   .mat-mdc-snack-bar-container {
     border-radius: 8px;
     max-width: 400px;
     margin: 16px;
+    display: flex !important;
+    align-items: center !important;
   }
-  
+
   .mdc-snackbar__surface {
     border-radius: 8px !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  .mat-mdc-snack-bar-label {
+    display: flex !important;
+    align-items: center !important;
   }
   
   .mat-mdc-snack-bar-action {
@@ -81,13 +90,19 @@
     font-weight: 600 !important;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 48px !important;
   }
 }
+
+@import '../styles_variables.scss';
 
 /* Info notification styling (default) */
 ::ng-deep .futsal-notification-info {
   .mdc-snackbar__surface {
-    background-color: #673ab7 !important; /* Deep purple primary */
+    background-color: $primary-color !important;
     color: white !important;
   }
   
@@ -122,7 +137,19 @@
     background-color: #ff9800 !important; /* Orange */
     color: white !important;
   }
-  
+
+  .mat-mdc-snack-bar-label {
+    color: white !important;
+  }
+}
+
+/* Error notification styling */
+::ng-deep .futsal-notification-error {
+  .mdc-snackbar__surface {
+    background-color: $error-color !important;
+    color: white !important;
+  }
+
   .mat-mdc-snack-bar-label {
     color: white !important;
   }
