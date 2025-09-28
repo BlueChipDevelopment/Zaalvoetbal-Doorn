@@ -30,9 +30,8 @@ self.addEventListener('push', function(event) {
   const title = data.title || 'Zaalvoetbal Doorn';
   const options = {
     body: data.body || 'Je hebt een nieuwe melding!',
-    // Remove icon for now to avoid 404 errors
-    // icon: 'icons/icon-192x192.png',
-    // badge: 'icons/icon-72x72.png',
+    icon: 'assets/icons/icon-192x192.png',
+    badge: 'assets/icons/icon-72x72.png',
     data: data.url ? { url: data.url } : {},
     requireInteraction: false, // Don't require user interaction
     silent: false, // Make sure it's not silent
