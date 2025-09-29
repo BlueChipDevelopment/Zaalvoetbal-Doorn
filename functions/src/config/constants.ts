@@ -61,5 +61,19 @@ export const COLUMN_INDICES = {
   // Aanwezigheid sheet
   AANWEZIGHEID_DATUM: 0,   // A column
   AANWEZIGHEID_NAAM: 1,    // B column
-  AANWEZIGHEID_STATUS: 2   // C column
+  AANWEZIGHEID_STATUS: 2,  // C column
+
+  // Notificaties sheet
+  NOTIFICATIES_ENDPOINT: 0,    // A column
+  NOTIFICATIES_P256DH: 1,      // B column
+  NOTIFICATIES_AUTH: 2,        // C column
+  NOTIFICATIES_USER_AGENT: 3,  // D column
+  NOTIFICATIES_TIMESTAMP: 4,   // E column
+  NOTIFICATIES_ACTIVE: 5,      // F column
+  NOTIFICATIES_PLAYER_NAME: 6, // G column
+
+  // ReminderLog sheet
+  REMINDER_LOG_DATUM: 0,     // A column
+  REMINDER_LOG_TYPE: 1,      // B column
+  REMINDER_LOG_TIMESTAMP: 2  // C column
 } as const;

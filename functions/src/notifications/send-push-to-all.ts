@@ -89,11 +89,11 @@ export const sendPushToAll = onRequest(
         const row = notificatiesRows[i];
         if (row.length < 7) continue; // Skip incomplete rows
 
-        const endpoint = row[0];
-        const p256dh = row[1];
-        const auth = row[2];
-        const active = row[5] === 'true' || row[5] === true || row[5] === 'TRUE';
-        const playerName = row[6];
+        const endpoint = row[COLUMN_INDICES.NOTIFICATIES_ENDPOINT];
+        const p256dh = row[COLUMN_INDICES.NOTIFICATIES_P256DH];
+        const auth = row[COLUMN_INDICES.NOTIFICATIES_AUTH];
+        const active = row[COLUMN_INDICES.NOTIFICATIES_ACTIVE] === 'true' || row[COLUMN_INDICES.NOTIFICATIES_ACTIVE] === true || row[COLUMN_INDICES.NOTIFICATIES_ACTIVE] === 'TRUE';
+        const playerName = row[COLUMN_INDICES.NOTIFICATIES_PLAYER_NAME];
 
         // Voor test berichten: verstuur naar alle actieve subscriptions
         // Voor andere berichten: alleen naar target spelers
@@ -101,7 +101,7 @@ export const sendPushToAll = onRequest(
         const shouldSend = active && playerName && (isTestMessage || targetPlayerNames.has(playerName));
 
         // Debug logging
-        logger.info(`📧 Processing notification row ${i}: player=${playerName}, active=${row[5]} (${active}), isTest=${isTestMessage}, shouldSend=${shouldSend}`);
+        logger.info(`📧 Processing notification row ${i}: player=${playerName}, active=${row[COLUMN_INDICES.NOTIFICATIES_ACTIVE]} (${active}), isTest=${isTestMessage}, shouldSend=${shouldSend}`);
 
         if (shouldSend) {
           try {

@@ -23,7 +23,7 @@ export const scheduledAttendanceReminders = onSchedule(
       spreadsheetId,
       range: `${aanwezigheidSheet}!A2:A`, // A = datum
     });
-    const dates = (aanwezigheidResult.data.values || []).map(r => r[0]).filter(Boolean);
+    const dates = (aanwezigheidResult.data.values || []).map(r => r[COLUMN_INDICES.AANWEZIGHEID_DATUM]).filter(Boolean);
 
     // 2. Haal wedstrijden sheet op om te checken welke al teams hebben
     const wedstrijdenResult = await sheets.spreadsheets.values.get({
@@ -99,7 +99,7 @@ export const scheduledAttendanceReminders = onSchedule(
     for (const hoursBefore of REMINDER_HOURS) {
       const msBefore = hoursBefore * 60 * 60 * 1000;
       const reminderType = `${hoursBefore}u`;
-      const alreadySent = reminderLogRows.some(row => row[0] === nextMatchDateStr && row[1] === reminderType);
+      const alreadySent = reminderLogRows.some(row => row[COLUMN_INDICES.REMINDER_LOG_DATUM] === nextMatchDateStr && row[COLUMN_INDICES.REMINDER_LOG_TYPE] === reminderType);
       const msUntilMatch = nextMatchDate.getTime() - now.getTime();
       const hoursUntilMatch = msUntilMatch / (60 * 60 * 1000);
 
@@ -123,9 +123,6 @@ export const scheduledAttendanceReminders = onSchedule(
             range: `${SHEET_NAMES.SPELERS}!${SHEET_RANGES.FIRST_COLUMNS}`,
           });
           const spelersRows = spelersResult.data.values || [];
-          const actiefCol = COLUMN_INDICES.ACTIEF; // C (actief)
-          const nameCol = COLUMN_INDICES.NAME; // A (naam)
-
           // Haal notificatie subscriptions op
           const notificatiesResult = await sheets.spreadsheets.values.get({
             spreadsheetId,
@@ -142,35 +139,50 @@ export const scheduledAttendanceReminders = onSchedule(
 
           // Verzamel namen die al gereageerd hebben voor deze datum
           const respondedNames = new Set(
-            aanwezigheidRows.filter(r => r[0] === nextMatchDateStr).map(r => r[1])
+            aanwezigheidRows.filter(r => r[COLUMN_INDICES.AANWEZIGHEID_DATUM] === nextMatchDateStr).map(r => r[COLUMN_INDICES.AANWEZIGHEID_NAAM])
           );
 
           // Create map van actieve spelers die nog niet gereageerd hebben
           const activeNotificationPlayers = new Map();
           for (let i = 1; i < spelersRows.length; i++) {
             const row = spelersRows[i];
-            const playerName = row[nameCol];
-            const isActive = row[actiefCol] === 'TRUE' || row[actiefCol] === 'Ja';
+            const playerName = row[COLUMN_INDICES.NAME];
+            const isActive = row[COLUMN_INDICES.ACTIEF] === 'TRUE' || row[COLUMN_INDICES.ACTIEF] === 'Ja';
 
             if (isActive && !respondedNames.has(playerName)) {
               activeNotificationPlayers.set(playerName, true);
             }
           }
           logger.info(`📧 Debug: ${activeNotificationPlayers.size} active players need reminders, ${respondedNames.size} already responded, ${spelersRows.length-1} total players`);
+          logger.info(`📧 Debug: Responded names: [${Array.from(respondedNames).map(n => `"${n}"`).join(', ')}]`);
 
           // Filter notificatie subscriptions voor actieve spelers
           const notifications: Promise<any>[] = [];
           logger.info(`📧 Debug: ${notificatiesRows.length-1} notification subscriptions found`);
+          logger.info(`📧 Debug: Active players needing reminders: ${Array.from(activeNotificationPlayers.keys()).join(', ')}`);
+          
           for (let i = 1; i < notificatiesRows.length; i++) {
             const row = notificatiesRows[i];
             if (row.length < 7) continue; // Skip incomplete rows
 
-            const endpoint = row[0];
-            const p256dh = row[1];
-            const auth = row[2];
-            // userAgent = row[3], timestamp = row[4] - niet gebruikt
-            const active = row[5]?.toString().toLowerCase() === 'true';
-            const playerName = row[6];
+            const endpoint = row[COLUMN_INDICES.NOTIFICATIES_ENDPOINT];
+            const p256dh = row[COLUMN_INDICES.NOTIFICATIES_P256DH];
+            const auth = row[COLUMN_INDICES.NOTIFICATIES_AUTH];
+            // userAgent = row[COLUMN_INDICES.NOTIFICATIES_USER_AGENT], timestamp = row[COLUMN_INDICES.NOTIFICATIES_TIMESTAMP] - niet gebruikt
+            const active = row[COLUMN_INDICES.NOTIFICATIES_ACTIVE]?.toString().toLowerCase() === 'true';
+            const playerName = row[COLUMN_INDICES.NOTIFICATIES_PLAYER_NAME];
+
+            logger.info(`📧 Debug: Checking subscription for player: "${playerName}" (length: ${playerName?.length || 0}), active: ${active}, needsReminder: ${activeNotificationPlayers.has(playerName)}`);
+            
+            // Als de naam niet matcht, laten we kijken naar mogelijke alternatieven
+            if (active && playerName && !activeNotificationPlayers.has(playerName)) {
+              const possibleMatches = Array.from(activeNotificationPlayers.keys()).filter(name => 
+                name.toLowerCase().includes(playerName.toLowerCase()) || playerName.toLowerCase().includes(name.toLowerCase())
+              );
+              if (possibleMatches.length > 0) {
+                logger.info(`📧 Debug: Possible name matches for "${playerName}": [${possibleMatches.map(n => `"${n}"`).join(', ')}]`);
+              }
+            }
 
             // Alleen versturen naar actieve spelers die notifications willen
             if (active && playerName && activeNotificationPlayers.has(playerName)) {
