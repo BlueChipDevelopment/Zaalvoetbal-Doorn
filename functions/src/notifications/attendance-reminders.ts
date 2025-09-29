@@ -9,13 +9,13 @@ import { SPREADSHEET_ID, APP_URLS, FIREBASE_CONFIG, SCHEDULE_PATTERNS, SHEET_NAM
  * Houdt bij in een 'ReminderLog' sheet of een reminder al is verstuurd voor een bepaalde wedstrijd en tijdstip
  */
 export const scheduledAttendanceReminders = onSchedule(
-  { schedule: SCHEDULE_PATTERNS.HOURLY, region: FIREBASE_CONFIG.region },
+  { schedule: SCHEDULE_PATTERNS.HOURLY, region: FIREBASE_CONFIG.region, timeZone: FIREBASE_CONFIG.timeZone },
   async (event) => {
     const spreadsheetId = SPREADSHEET_ID;
     const sheets = await getSheetsClient();
     const reminderSheet = SHEET_NAMES.REMINDER_LOG;
     const aanwezigheidSheet = SHEET_NAMES.AANWEZIGHEID;
-    const REMINDER_HOURS = [24, 12]; // 24u en 12u voor de wedstrijd
+    const REMINDER_HOURS = [24, 12, 4]; // 24u, 12u en 4u voor de wedstrijd
 
     // 1. Haal alle wedstrijden op
     const aanwezigheidResult = await sheets.spreadsheets.values.get({
@@ -27,14 +27,24 @@ export const scheduledAttendanceReminders = onSchedule(
     let nextMatchDate: Date | null = null;
     let nextMatchDateStr: string | null = null;
     for (const dateStr of dates) {
-      const d = new Date(dateStr);
+      // Als alleen datum opgegeven, voeg standaard tijd 20:30 toe
+      const dateTimeStr = dateStr.includes('T') || dateStr.includes(' ')
+        ? dateStr
+        : `${dateStr}T20:30:00`;
+
+      const d = new Date(dateTimeStr);
       if (d > now) {
         nextMatchDate = d;
-        nextMatchDateStr = dateStr;
+        nextMatchDateStr = dateStr; // Bewaar originele datum string voor logging
         break;
       }
     }
-    if (!nextMatchDate || !nextMatchDateStr) return;
+    if (!nextMatchDate || !nextMatchDateStr) {
+      logger.info('No upcoming matches found');
+      return;
+    }
+
+    logger.info(`📧 Found next match: ${nextMatchDateStr} at ${nextMatchDate.toISOString()}`);
 
     // 2. Haal ReminderLog op
     let reminderLogRows: any[][] = [];
@@ -54,9 +64,17 @@ export const scheduledAttendanceReminders = onSchedule(
       const msBefore = hoursBefore * 60 * 60 * 1000;
       const reminderType = `${hoursBefore}u`;
       const alreadySent = reminderLogRows.some(row => row[0] === nextMatchDateStr && row[1] === reminderType);
-      if (alreadySent) continue;
       const msUntilMatch = nextMatchDate.getTime() - now.getTime();
-      if (msUntilMatch < msBefore && msUntilMatch > msBefore - 60 * 60 * 1000) { // binnen het uur van het moment
+      const hoursUntilMatch = msUntilMatch / (60 * 60 * 1000);
+
+      logger.info(`📧 Checking ${reminderType} reminder: alreadySent=${alreadySent}, hoursUntilMatch=${hoursUntilMatch.toFixed(2)}, targetHours=${hoursBefore}`);
+
+      if (alreadySent) {
+        logger.info(`📧 ${reminderType} reminder already sent for ${nextMatchDateStr}`);
+        continue;
+      }
+      // Verstuur reminder als we binnen de target uren zitten (minder dan bijv. 24u of 12u)
+      if (msUntilMatch <= msBefore) { // minder dan of gelijk aan target uren voor de wedstrijd
         // 4. Stuur reminder direct (zonder circulaire HTTP call)
         const title = 'Aanwezigheidsreminder';
         const body = 'Laat even weten of je er bent bij de volgende wedstrijd.';
@@ -96,15 +114,17 @@ export const scheduledAttendanceReminders = onSchedule(
           for (let i = 1; i < spelersRows.length; i++) {
             const row = spelersRows[i];
             const playerName = row[nameCol];
-            const isActive = row[actiefCol] === 'TRUE';
+            const isActive = row[actiefCol] === 'TRUE' || row[actiefCol] === 'Ja';
 
             if (isActive && !respondedNames.has(playerName)) {
               activeNotificationPlayers.set(playerName, true);
             }
           }
+          logger.info(`📧 Debug: ${activeNotificationPlayers.size} active players need reminders, ${respondedNames.size} already responded, ${spelersRows.length-1} total players`);
 
           // Filter notificatie subscriptions voor actieve spelers
           const notifications: Promise<any>[] = [];
+          logger.info(`📧 Debug: ${notificatiesRows.length-1} notification subscriptions found`);
           for (let i = 1; i < notificatiesRows.length; i++) {
             const row = notificatiesRows[i];
             if (row.length < 7) continue; // Skip incomplete rows
@@ -113,7 +133,7 @@ export const scheduledAttendanceReminders = onSchedule(
             const p256dh = row[1];
             const auth = row[2];
             // userAgent = row[3], timestamp = row[4] - niet gebruikt
-            const active = row[5] === 'true' || row[5] === true;
+            const active = row[5]?.toString().toLowerCase() === 'true';
             const playerName = row[6];
 
             // Alleen versturen naar actieve spelers die notifications willen
@@ -122,6 +142,7 @@ export const scheduledAttendanceReminders = onSchedule(
                 const subscription = { endpoint, keys: { p256dh, auth } };
                 const payload = JSON.stringify({ title, body, url });
                 notifications.push(webpush.sendNotification(subscription, payload));
+                logger.info(`📧 Debug: Added notification for player ${playerName}`);
               } catch (err) {
                 logger.error('Invalid subscription for player', playerName, err);
               }
