@@ -6,6 +6,7 @@ import { GoogleSheetsService } from './google-sheets-service';
 import { GameStatisticsService } from './game.statistics.service';
 import { Observable } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
+import { parseDate } from '../utils/date-utils';
 
 @Injectable({
   providedIn: 'root'
@@ -158,7 +159,12 @@ export class TeamGenerateService {
     
     // Get last 5 games, sorted by date (most recent first)
     const recentGames = player.gameHistory
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .sort((a, b) => {
+        const dateA = parseDate(a.date);
+        const dateB = parseDate(b.date);
+        if (!dateA || !dateB) return 0;
+        return dateB.getTime() - dateA.getTime();
+      })
       .slice(0, 5);
     
     if (recentGames.length === 0) return 1.0;

@@ -3,6 +3,7 @@ import { AttendanceService } from '../../services/attendance.service';
 import { PlayerService } from '../../services/player.service';
 import { NotificationService } from '../../services/notification.service';
 import { PlayerSheetData } from '../../interfaces/IPlayerSheet';
+import { formatDateISO } from '../../utils/date-utils';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -490,10 +491,7 @@ export class AttendanceComponent implements OnInit {
   }
 
   private formatDate(date: Date): string {
-    const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const day = date.getDate().toString().padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    return formatDateISO(date);
   }
 
 }

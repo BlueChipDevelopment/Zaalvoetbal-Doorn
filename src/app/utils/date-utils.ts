@@ -82,7 +82,91 @@ export function sortWedstrijdenByDate(a: { datum: Date | null }, b: { datum: Dat
 export function sortWedstrijdenByDateString(a: { datum: string }, b: { datum: string }): number {
   const dateA = parseWedstrijdDate(a.datum);
   const dateB = parseWedstrijdDate(b.datum);
-  
+
   if (!dateA || !dateB) return 0;
   return dateA.getTime() - dateB.getTime();
+}
+
+// === NIEUWE STANDAARD FORMATTING FUNCTIES ===
+
+/**
+ * Formatteert een Date naar ISO string formaat (YYYY-MM-DD)
+ * @param date Date object
+ * @returns ISO datum string (YYYY-MM-DD)
+ */
+export function formatDateISO(date: Date): string {
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+/**
+ * Formatteert een Date voor Nederlandse weergave (dd MMMM yyyy)
+ * @param date Date object
+ * @returns Nederlandse datum string
+ */
+export function formatDateForDisplay(date: Date | null): string {
+  if (!date) return '';
+  return date.toLocaleDateString('nl-NL', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  });
+}
+
+/**
+ * Formatteert een Date voor korte Nederlandse weergave (dd-mm-yyyy)
+ * @param date Date object
+ * @returns Nederlandse datum string (dd-mm-yyyy)
+ */
+export function formatDateShort(date: Date | null): string {
+  if (!date) return '';
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}-${month}-${year}`;
+}
+
+/**
+ * Geeft de huidige datum als ISO string (YYYY-MM-DD)
+ * @returns ISO datum string van vandaag
+ */
+export function getCurrentDateISO(): string {
+  return formatDateISO(new Date());
+}
+
+/**
+ * Geeft de huidige datum en tijd als ISO string
+ * @returns ISO datetime string
+ */
+export function getCurrentDateTimeISO(): string {
+  return new Date().toISOString();
+}
+
+/**
+ * Parse datum met fallback en error handling
+ * @param dateInput String, Date object, of null/undefined
+ * @returns Date object of null als parsing faalt
+ */
+export function parseDate(dateInput: string | Date | null | undefined): Date | null {
+  if (!dateInput) return null;
+
+  if (dateInput instanceof Date) {
+    return isNaN(dateInput.getTime()) ? null : dateInput;
+  }
+
+  // Probeer eerst wedstrijd datum parsing (voor Nederlandse formaten)
+  const wedstrijdDate = parseWedstrijdDate(dateInput);
+  if (wedstrijdDate) return wedstrijdDate;
+
+  // Fallback naar standaard Date parsing
+  try {
+    const date = new Date(dateInput);
+    return isNaN(date.getTime()) ? null : date;
+  } catch (error) {
+    console.warn('Error parsing date:', dateInput, error);
+    return null;
+  }
 }

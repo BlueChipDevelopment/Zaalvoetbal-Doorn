@@ -3,6 +3,7 @@ import * as logger from "firebase-functions/logger";
 import * as webpush from 'web-push';
 import { getSheetsClient } from "../shared/sheets-client";
 import { SPREADSHEET_ID, APP_URLS, FIREBASE_CONFIG, SCHEDULE_PATTERNS, SHEET_NAMES, SHEET_RANGES, COLUMN_INDICES } from "../config/constants";
+import { parseMatchDateToISO, toISODateString } from "../shared/date-utils";
 
 /**
  * Scheduled function: stuur automatisch reminders 24u en 12u voor de eerstvolgende wedstrijd
@@ -23,9 +24,37 @@ export const scheduledAttendanceReminders = onSchedule(
       range: `${aanwezigheidSheet}!A2:A`, // A = datum
     });
     const dates = (aanwezigheidResult.data.values || []).map(r => r[0]).filter(Boolean);
+
+    // 2. Haal wedstrijden sheet op om te checken welke al teams hebben
+    const wedstrijdenResult = await sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range: `${SHEET_NAMES.WEDSTRIJDEN}!A:F`, // A-F: alle relevante kolommen
+    });
+    const wedstrijdenRows = wedstrijdenResult.data.values || [];
+
+    // Create map van wedstrijddatums die al teams hebben (kolom D en E zijn niet leeg)
+    const matchesWithTeams = new Set<string>();
+    for (let i = 1; i < wedstrijdenRows.length; i++) {
+      const row = wedstrijdenRows[i];
+      const matchDateStr = row[COLUMN_INDICES.WEDSTRIJD_DATUM] || '';
+      const teamWit = row[COLUMN_INDICES.TEAM_WIT] || '';
+      const teamRood = row[COLUMN_INDICES.TEAM_ROOD] || '';
+
+      if (matchDateStr && (teamWit.trim() || teamRood.trim())) {
+        // Parse Nederlandse datum formaat voor vergelijking
+        const isoDateStr = parseMatchDateToISO(matchDateStr);
+        if (isoDateStr) {
+          matchesWithTeams.add(isoDateStr);
+        }
+        matchesWithTeams.add(matchDateStr); // Ook originele formaat toevoegen
+      }
+    }
+
     const now = new Date();
     let nextMatchDate: Date | null = null;
     let nextMatchDateStr: string | null = null;
+
+    // 3. Zoek eerste toekomstige wedstrijd ZONDER teams
     for (const dateStr of dates) {
       // Als alleen datum opgegeven, voeg standaard tijd 20:30 toe
       const dateTimeStr = dateStr.includes('T') || dateStr.includes(' ')
@@ -34,13 +63,20 @@ export const scheduledAttendanceReminders = onSchedule(
 
       const d = new Date(dateTimeStr);
       if (d > now) {
-        nextMatchDate = d;
-        nextMatchDateStr = dateStr; // Bewaar originele datum string voor logging
-        break;
+        // Check of deze wedstrijd al teams heeft
+        const isoDateStr = toISODateString(d);
+        if (!matchesWithTeams.has(dateStr) && !matchesWithTeams.has(isoDateStr)) {
+          nextMatchDate = d;
+          nextMatchDateStr = dateStr; // Bewaar originele datum string voor logging
+          logger.info(`📧 Found next match without teams: ${nextMatchDateStr}`);
+          break;
+        } else {
+          logger.info(`⏭️ Skipping match ${dateStr} - teams already generated`);
+        }
       }
     }
     if (!nextMatchDate || !nextMatchDateStr) {
-      logger.info('No upcoming matches found');
+      logger.info('No upcoming matches without teams found - all matches either have teams or are in the past');
       return;
     }
 

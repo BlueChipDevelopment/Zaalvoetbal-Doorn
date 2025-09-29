@@ -1,7 +1,8 @@
 import * as logger from "firebase-functions/logger";
 import { getSheetsClient } from "../shared/sheets-client";
-import { SPREADSHEET_ID, SHEET_NAMES, SHEET_RANGES } from "../config/constants";
+import { SPREADSHEET_ID, SHEET_NAMES, SHEET_RANGES, COLUMN_INDICES } from "../config/constants";
 import { sendTeamGenerationNotification } from "./team-notification";
+import { parseMatchDate, toISODateString } from "../shared/date-utils";
 
 /**
  * Core team generation logic
@@ -26,39 +27,20 @@ export async function performAutoTeamGeneration(dateString: string, trigger: str
 
     for (let i = 1; i < wedstrijdenRows.length; i++) {
       const row = wedstrijdenRows[i];
-      const seizoen = row[1] || ''; // Column B
-      const matchDateStr = row[2] || ''; // Column C
-      const teamWit = row[3] || ''; // Column D
-      const teamRood = row[4] || ''; // Column E
+      const seizoen = row[COLUMN_INDICES.SEIZOEN] || '';
+      const matchDateStr = row[COLUMN_INDICES.WEDSTRIJD_DATUM] || '';
+      const teamWit = row[COLUMN_INDICES.TEAM_WIT] || '';
+      const teamRood = row[COLUMN_INDICES.TEAM_ROOD] || '';
 
       // Parse date to compare (handle Dutch dd-mm-yyyy format)
       if (matchDateStr) {
-        let matchDate: Date;
-
-        // Try to parse Dutch format (dd-mm-yyyy or d-m-yyyy)
-        if (matchDateStr.includes('-')) {
-          const parts = matchDateStr.split('-');
-          if (parts.length === 3) {
-            const day = parseInt(parts[0], 10);
-            const month = parseInt(parts[1], 10);
-            const year = parseInt(parts[2], 10);
-
-            // Create date in ISO format (year-month-day)
-            matchDate = new Date(year, month - 1, day); // month is 0-indexed
-          } else {
-            matchDate = new Date(matchDateStr);
-          }
-        } else {
-          matchDate = new Date(matchDateStr);
-        }
-
-        // Check if date is valid
-        if (isNaN(matchDate.getTime())) {
+        const matchDate = parseMatchDate(matchDateStr);
+        if (!matchDate) {
           logger.warn(`Invalid date found in sheet: "${matchDateStr}" - skipping`);
           continue;
         }
 
-        const matchDateString = matchDate.toISOString().split('T')[0];
+        const matchDateString = toISODateString(matchDate);
 
         if (matchDateString === dateString) {
           // Check if teams are already generated
@@ -214,7 +196,7 @@ export async function performAutoTeamGeneration(dateString: string, trigger: str
       spreadsheetId,
       requestBody: {
         data: [{
-          range: `Wedstrijden!D${matchRowNumber}:F${matchRowNumber}`,
+          range: SHEET_RANGES.WEDSTRIJDEN_TEAMS_ROW(matchRowNumber),
           values: [[teamWhiteStr, teamRedStr, generatieMethode]]
         }],
         valueInputOption: 'RAW'

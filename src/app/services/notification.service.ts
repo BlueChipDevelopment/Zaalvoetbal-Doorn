@@ -3,6 +3,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { GoogleSheetsService } from './google-sheets-service';
 import { NOTIFICATIES_COLUMNS, SHEET_NAMES } from '../constants/sheet-columns';
+import { getCurrentDateTimeISO } from '../utils/date-utils';
 
 @Injectable({
   providedIn: 'root'
@@ -153,7 +154,7 @@ export class NotificationService {
           auth: this.arrayBufferToBase64(subscription.getKey('auth'))
         },
         userAgent: navigator.userAgent,
-        timestamp: new Date().toISOString(),
+        timestamp: getCurrentDateTimeISO(),
         active: true,
         playerName: playerName || ''
       };
@@ -261,7 +262,7 @@ export class NotificationService {
           auth: this.arrayBufferToBase64(subscription.getKey('auth'))
         },
         userAgent: navigator.userAgent,
-        timestamp: new Date().toISOString(),
+        timestamp: getCurrentDateTimeISO(),
         active: true
       };
 

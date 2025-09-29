@@ -3,6 +3,7 @@ import * as logger from "firebase-functions/logger";
 import { setCorsHeaders } from "../shared/cors";
 import { FIREBASE_CONFIG } from "../config/constants";
 import { performAutoTeamGeneration } from "./team-logic";
+import { toISODateString } from "../shared/date-utils";
 
 /**
  * HTTP endpoint: team generatie (handmatig of automatisch via scheduler)
@@ -17,7 +18,7 @@ export const teamGeneration = onRequest(
     }
 
     try {
-      const date = req.query.date as string || new Date().toISOString().split('T')[0];
+      const date = req.query.date as string || toISODateString(new Date());
       const trigger = req.query.trigger as string || 'manual'; // Allow trigger to be specified
 
       logger.info(`🔄 Team generation triggered for ${date} (trigger: ${trigger})`);

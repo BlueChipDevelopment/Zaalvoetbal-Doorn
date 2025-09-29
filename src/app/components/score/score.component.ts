@@ -3,6 +3,7 @@ import { GoogleSheetsService } from '../../services/google-sheets-service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { NextMatchService, NextMatchInfo } from '../../services/next-match.service';
+import { getCurrentDateTimeISO } from '../../utils/date-utils';
 import { NextMatchInfoComponent } from '../next-match-info/next-match-info.component';
 import { CommonModule } from '@angular/common';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -91,7 +92,7 @@ export class ScoreComponent implements OnInit {
               const wedstrijd = info.wedstrijd;
               this.nextMatch = {
                 matchNumber: wedstrijd.id ?? 0,
-                date: info.parsedDate ? info.parsedDate.toISOString() : info.date,
+                date: info.parsedDate ? getCurrentDateTimeISO() : info.date,
                 teamWhitePlayers: wedstrijd.teamWit ?? '',
                 teamRedPlayers: wedstrijd.teamRood ?? '',
                 teamWhiteGoals: wedstrijd.scoreWit ?? undefined,

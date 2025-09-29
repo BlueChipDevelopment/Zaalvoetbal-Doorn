@@ -33,7 +33,10 @@ export const SHEET_NAMES = {
 export const SHEET_RANGES = {
   ALL_COLUMNS: 'A:Z',
   EXTENDED_COLUMNS: 'A:AD',
-  FIRST_COLUMNS: 'A1:Z'
+  FIRST_COLUMNS: 'A1:Z',
+
+  // Helper functions for dynamic ranges
+  WEDSTRIJDEN_TEAMS_ROW: (rowNumber: number) => `${SHEET_NAMES.WEDSTRIJDEN}!D${rowNumber}:F${rowNumber}`
 } as const;
 
 export const SCHEDULE_PATTERNS = {
@@ -43,6 +46,20 @@ export const SCHEDULE_PATTERNS = {
 
 // Column indices for consistency
 export const COLUMN_INDICES = {
+  // Spelers sheet
   NAME: 0,      // A column
-  ACTIEF: 2     // C column
+  POSITION: 1,  // B column
+  ACTIEF: 2,    // C column
+
+  // Wedstrijden sheet
+  SEIZOEN: 1,           // B column
+  WEDSTRIJD_DATUM: 2,   // C column
+  TEAM_WIT: 3,          // D column
+  TEAM_ROOD: 4,         // E column
+  GENERATIE_METHODE: 5, // F column
+
+  // Aanwezigheid sheet
+  AANWEZIGHEID_DATUM: 0,   // A column
+  AANWEZIGHEID_NAAM: 1,    // B column
+  AANWEZIGHEID_STATUS: 2   // C column
 } as const;

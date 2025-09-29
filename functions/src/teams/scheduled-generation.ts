@@ -1,6 +1,7 @@
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import * as logger from "firebase-functions/logger";
 import { FIREBASE_CONFIG, SCHEDULE_PATTERNS } from "../config/constants";
+import { toISODateString } from "../shared/date-utils";
 
 /**
  * Scheduled function: automatisch teams genereren om 17:00 op wedstrijddagen
@@ -13,7 +14,7 @@ export const scheduledAutoTeamGeneration = onSchedule(
 
     try {
       const today = new Date();
-      const dateString = today.toISOString().split('T')[0]; // YYYY-MM-DD format
+      const dateString = toISODateString(today);
 
       // Call the team generation endpoint with scheduled trigger to ensure consistency
       const targetUrl = `${FIREBASE_CONFIG.baseUrl}/teamGeneration`;

@@ -155,7 +155,7 @@
         </div>
       </div>
       <div class="save-teams-container">
-        <button mat-fab (click)="saveTeamsToSheet()" title="Teams opslaan" [disabled]="loading$ | async">
+        <button mat-fab (click)="saveTeamsToSheet()" title="Teams opslaan" [disabled]="(loading$ | async) || isSavingTeams">
           <mat-icon>save</mat-icon>
         </button>
       </div>

@@ -3,6 +3,7 @@ import { Observable, of, BehaviorSubject, combineLatest } from 'rxjs';
 import { map, tap, catchError, shareReplay, switchMap, finalize } from 'rxjs/operators';
 import { GoogleSheetsService } from './google-sheets-service';
 import { PlayerService } from './player.service';
+import { formatDateISO, getCurrentDateISO } from '../utils/date-utils';
 import { 
   AttendanceRecord, 
   AttendanceStatus, 
@@ -322,7 +323,7 @@ export class AttendanceService {
       }
 
       if (filter.futureOnly) {
-        const today = new Date().toISOString().split('T')[0];
+        const today = getCurrentDateISO();
         if (record.date <= today) {
           return false;
         }
@@ -357,9 +358,6 @@ export class AttendanceService {
    * Format date to YYYY-MM-DD format
    */
   formatDate(date: Date): string {
-    const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const day = date.getDate().toString().padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    return formatDateISO(date);
   }
 }

@@ -4,6 +4,7 @@ import * as webpush from 'web-push';
 import { getSheetsClient } from "../shared/sheets-client";
 import { setCorsHeaders } from "../shared/cors";
 import { SPREADSHEET_ID, FIREBASE_CONFIG, SHEET_NAMES, SHEET_RANGES, COLUMN_INDICES } from "../config/constants";
+import { parseMatchDate } from "../shared/date-utils";
 
 /**
  * Push notification functie: stuurt een bericht naar alle spelers met toestemming
@@ -47,17 +48,18 @@ export const sendPushToAll = onRequest(
         let nextDate: string | null = null;
         for (let i = 1; i < aanwezigheidRows.length; i++) {
           const row = aanwezigheidRows[i];
-          if (row[0]) {
-            const rowDate = new Date(row[0]);
-            if (rowDate >= today) {
-              nextDate = row[0];
+          const dateStr = row[COLUMN_INDICES.AANWEZIGHEID_DATUM];
+          if (dateStr) {
+            const rowDate = parseMatchDate(dateStr);
+            if (rowDate && rowDate >= today) {
+              nextDate = dateStr;
               break;
             }
           }
         }
         // Verzamel namen die al gereageerd hebben voor deze datum
         const respondedNames = new Set(
-          aanwezigheidRows.filter(r => r[0] === nextDate).map(r => r[1])
+          aanwezigheidRows.filter(r => r[COLUMN_INDICES.AANWEZIGHEID_DATUM] === nextDate).map(r => r[COLUMN_INDICES.AANWEZIGHEID_NAAM])
         );
         // Filter alleen actieve spelers zonder reactie
         targetRows = rows.filter((row, i) =>

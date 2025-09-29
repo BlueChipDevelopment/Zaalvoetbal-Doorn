@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { NextMatchService, NextMatchInfo } from '../../services/next-match.service';
 import { GameStatisticsService } from '../../services/game.statistics.service';
 import { TeamGenerateService } from '../../services/team-generate.service';
+import { parseDate } from '../../utils/date-utils';
 import { PlayerCardComponent } from '../player-card/player-card.component';
 import { CommonModule } from '@angular/common';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';

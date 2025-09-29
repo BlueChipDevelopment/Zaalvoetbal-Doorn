@@ -61,6 +61,7 @@ export class TeamGeneratorComponent implements OnInit {
   public isGenerated = false;
   public isGenerating = false;
   public isTeamsSaved = false;
+  public isSavingTeams = false;
 
   public algorithmExplanation = '';
   public showFullExplanation = false;
@@ -516,7 +517,15 @@ export class TeamGeneratorComponent implements OnInit {
       this.snackBar.open('Kan teams niet opslaan: ontbrekende gegevens.', 'Sluiten', { duration: 5000, panelClass: ['futsal-notification', 'futsal-notification-error'] });
       return;
     }
-    // Spinner niet tonen bij opslaan
+
+    // Prevent double-click/double-save
+    if (this.isSavingTeams) {
+      console.log('⚠️ Save already in progress, ignoring duplicate call');
+      return;
+    }
+
+    this.isSavingTeams = true;
+    this.loadingSubject.next(true);
     this.errorMessage = null;
 
     // Save to Wedstrijden sheet as before
@@ -554,6 +563,8 @@ export class TeamGeneratorComponent implements OnInit {
         next: () => {
           console.log(`✅ Teams succesvol opgeslagen voor ${seizoen || 'onbekend'} wedstrijd ${matchNumber}`);
           this.isTeamsSaved = true;
+          this.isSavingTeams = false;
+          this.loadingSubject.next(false);
           this.snackBar.open('Teams opgeslagen!', 'Sluiten', { duration: 3000, panelClass: ['futsal-notification', 'futsal-notification-success'] });
           // Push notificatie sturen naar alle spelers met toestemming
           this.sendPushNotificationToAll(
@@ -564,6 +575,8 @@ export class TeamGeneratorComponent implements OnInit {
         },
         error: (err) => {
           console.error(`❌ Fout bij opslaan teams voor ${seizoen || 'onbekend'} wedstrijd ${matchNumber}:`, err);
+          this.isSavingTeams = false;
+          this.loadingSubject.next(false);
           this.snackBar.open('Fout bij opslaan teams: ' + (err.message || err), 'Sluiten', { duration: 5000, panelClass: ['futsal-notification', 'futsal-notification-error'] });
         }
       });
