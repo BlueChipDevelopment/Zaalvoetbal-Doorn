@@ -159,12 +159,6 @@ export class LeaderboardComponent implements OnInit {
       };
     }
     
-
-    
-
-    
-
-    
     const chemistry: { [teammate: string]: { gamesPlayed: number; gamesWon: number; gamesTied: number; gamesLost: number } } = {};
     // Loop door alle games van deze speler
     player.gameHistory.forEach((game: any) => {
@@ -172,16 +166,16 @@ export class LeaderboardComponent implements OnInit {
       
       // Alleen echte teammates tellen (spelers in hetzelfde team)
       game.teammates.forEach((teammateId: string) => {
+
         // Zichzelf overslaan - vergelijk met verschillende mogelijke identifiers
         if (teammateId === player.player || 
             teammateId === player.name?.toLowerCase() || 
             teammateId.toLowerCase() === player.name?.toLowerCase()) return;
-        
-
             
         if (!chemistry[teammateId]) {
           chemistry[teammateId] = { gamesPlayed: 0, gamesWon: 0, gamesTied: 0, gamesLost: 0 };
         }
+        
         chemistry[teammateId].gamesPlayed++;
         if (game.result === 3) chemistry[teammateId].gamesWon++;
         else if (game.result === 2) chemistry[teammateId].gamesTied++;
