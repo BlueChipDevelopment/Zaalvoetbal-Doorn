@@ -144,26 +144,41 @@ export class LeaderboardComponent implements OnInit {
       panelClass: 'chemistry-modal-panel',
       data: {
         player: { ...player, name: player.name },
-        bestTeammates: this.getBestAndWorstTeammates(player)
+        chemistryData: this.getBestAndWorstTeammates(player)
       }
     });
   }
 
-  private getBestAndWorstTeammates(player: any): { best: any; worst: any } {
+  private getBestAndWorstTeammates(player: any): { bestGroup: any[]; worstGroup: any[]; allTeammates: any[] } {
     // Verzamel chemistry-data per teammate
     if (!player || !player.gameHistory) {
       return {
-        best: { name: 'No data', gamesPlayed: 0, gamesWon: 0, gamesTied: 0, gamesLost: 0, chemistryScore: 0 },
-        worst: { name: 'No data', gamesPlayed: 0, gamesWon: 0, gamesTied: 0, gamesLost: 0, chemistryScore: 0 }
+        bestGroup: [],
+        worstGroup: [],
+        allTeammates: []
       };
     }
+    
+
+    
+
+    
+
+    
     const chemistry: { [teammate: string]: { gamesPlayed: number; gamesWon: number; gamesTied: number; gamesLost: number } } = {};
     // Loop door alle games van deze speler
     player.gameHistory.forEach((game: any) => {
-      if (!game.playerIds) return;
-      // game.playerIds bevat alle spelers in deze wedstrijd
-      game.playerIds.forEach((teammateId: string) => {
-        if (teammateId === player.player) return; // Zichzelf overslaan
+      if (!game.teammates) return; // Skip als er geen team informatie is
+      
+      // Alleen echte teammates tellen (spelers in hetzelfde team)
+      game.teammates.forEach((teammateId: string) => {
+        // Zichzelf overslaan - vergelijk met verschillende mogelijke identifiers
+        if (teammateId === player.player || 
+            teammateId === player.name?.toLowerCase() || 
+            teammateId.toLowerCase() === player.name?.toLowerCase()) return;
+        
+
+            
         if (!chemistry[teammateId]) {
           chemistry[teammateId] = { gamesPlayed: 0, gamesWon: 0, gamesTied: 0, gamesLost: 0 };
         }
@@ -173,6 +188,8 @@ export class LeaderboardComponent implements OnInit {
         else chemistry[teammateId].gamesLost++;
       });
     });
+    
+
     // Maak teammate objects
     const teammates = Object.entries(chemistry)
       .map(([name, stats]) => ({
@@ -184,10 +201,22 @@ export class LeaderboardComponent implements OnInit {
         chemistryScore: stats.gamesPlayed > 0 ? stats.gamesWon / stats.gamesPlayed : 0
       }))
       .filter(t => t.gamesPlayed >= 3); // Alleen teammates met minimaal 3 gezamenlijke wedstrijden
+    
     const sorted = teammates.sort((a, b) => b.chemistryScore - a.chemistryScore);
+    
+    // Groepeer teammates op chemie score
+    const bestScore = sorted.length > 0 ? sorted[0].chemistryScore : 0;
+    const worstScore = sorted.length > 0 ? sorted[sorted.length - 1].chemistryScore : 0;
+    
+    const bestGroup = sorted.filter(t => t.chemistryScore === bestScore);
+    const worstGroup = sorted.filter(t => t.chemistryScore === worstScore);
+    
+
+    
     return {
-      best: sorted.length > 0 ? sorted[0] : { name: 'No data', gamesPlayed: 0, gamesWon: 0, gamesTied: 0, gamesLost: 0, chemistryScore: 0 },
-      worst: sorted.length > 0 ? sorted[sorted.length - 1] : { name: 'No data', gamesPlayed: 0, gamesWon: 0, gamesTied: 0, gamesLost: 0, chemistryScore: 0 }
+      bestGroup,
+      worstGroup: bestScore === worstScore ? [] : worstGroup, // Als alle scores gelijk zijn, geen worst group
+      allTeammates: sorted
     };
   }
 

@@ -107,7 +107,9 @@ export class GameStatisticsService {
             playerStats[player].gameHistory.push({
               result: teamWhiteGoals > teamRedGoals ? 3 : teamWhiteGoals === teamRedGoals ? 2 : 1,
               date: match.datum,
-              playerIds: allPlayers
+              playerIds: allPlayers,
+              teammates: teamWhitePlayers,
+              opponents: teamRedPlayers
             });
             if (match.zlatan && match.zlatan.trim().toLowerCase() === player) {
               playerStats[player].zlatanPoints = (playerStats[player].zlatanPoints || 0) + 1;
@@ -127,7 +129,9 @@ export class GameStatisticsService {
             playerStats[player].gameHistory.push({
               result: teamRedGoals > teamWhiteGoals ? 3 : teamRedGoals === teamWhiteGoals ? 2 : 1,
               date: match.datum,
-              playerIds: allPlayers
+              playerIds: allPlayers,
+              teammates: teamRedPlayers,
+              opponents: teamWhitePlayers
             });
             if (match.zlatan && match.zlatan.trim().toLowerCase() === player) {
               playerStats[player].zlatanPoints = (playerStats[player].zlatanPoints || 0) + 1;
