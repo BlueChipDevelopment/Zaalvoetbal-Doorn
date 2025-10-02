@@ -6,6 +6,7 @@ dist
 # Environment files with sensitive data
 /src/environments/environment.ts
 /src/environments/environment.prod.ts
+/src/environments/environment.dev-sw.ts
 # Keep example environment files
 !/src/environments/environment.example.ts
 !/src/environments/environment.prod.example.ts
