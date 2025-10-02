@@ -37,6 +37,18 @@ export class UpdateService implements OnDestroy {
         this.promptUser();
       });
 
+    // Listen for version installation failures (e.g., hash mismatches)
+    this.swUpdate.versionUpdates.subscribe((evt) => {
+      if (evt.type === 'VERSION_INSTALLATION_FAILED') {
+        console.error('Version installation failed:', evt);
+        // On hash mismatch, force reload to clear cache
+        if (evt.error?.includes('Hash mismatch')) {
+          console.warn('🔄 Hash mismatch detected - clearing cache and reloading...');
+          this.clearCacheAndReload();
+        }
+      }
+    });
+
     // Smart update checking - network and visibility aware
     this.setupSmartUpdateChecking();
   }
@@ -98,15 +110,24 @@ export class UpdateService implements OnDestroy {
       this.updateCheckInProgress = true;
       console.log('🔍 Starting update check...');
       
-      this.swUpdate.checkForUpdate().then((hasUpdate) => {
+      // Create a timeout promise (30 seconds max)
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('Update check timeout after 30 seconds')), 30000);
+      });
+
+      // Race between update check and timeout
+      Promise.race([
+        this.swUpdate.checkForUpdate(),
+        timeoutPromise
+      ]).then((hasUpdate) => {
         if (hasUpdate) {
           console.log('Update check: New version found');
         } else {
           console.log('Update check: No new version available');
         }
       }).catch((error) => {
+        // Log error but don't show to user - they can't do anything about it
         console.error('Error checking for updates:', error);
-        this.handleUpdateError('Failed to check for updates', error);
       }).finally(() => {
         this.updateCheckInProgress = false;
         console.log('✅ Update check completed');
@@ -295,6 +316,43 @@ export class UpdateService implements OnDestroy {
     if (!environment.production) {
       console.log('🧪 Simulating update error...');
       this.handleUpdateError('Simulated error for testing', new Error('Test error'));
+    }
+  }
+
+  /**
+   * Clear all caches and reload - used when hash mismatch is detected
+   */
+  private async clearCacheAndReload(): Promise<void> {
+    try {
+      // Unregister all service workers
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      for (const registration of registrations) {
+        await registration.unregister();
+        console.log('✅ Unregistered service worker');
+      }
+
+      // Clear all caches
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames.map(name => caches.delete(name)));
+        console.log('✅ Cleared all caches');
+      }
+
+      // Show message to user
+      this.snackBar.open('Cache gewist - pagina wordt vernieuwd...', '', {
+        duration: 2000,
+        verticalPosition: 'top',
+        horizontalPosition: 'center'
+      });
+
+      // Reload after short delay
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+    } catch (error) {
+      console.error('Error clearing cache:', error);
+      // Force reload anyway
+      window.location.reload();
     }
   }
 

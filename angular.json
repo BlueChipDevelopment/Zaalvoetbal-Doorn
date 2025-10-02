@@ -115,7 +115,8 @@
           "builder": "angular-cli-ghpages:deploy",
           "options": {
             "baseHref": "/",
-            "dir": "dist"
+            "dir": "dist",
+            "noBuild": true
           }
         }
       }
