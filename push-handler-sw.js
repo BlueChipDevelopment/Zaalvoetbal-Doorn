@@ -52,10 +52,13 @@ self.addEventListener('push', function(event) {
   // Flexibel schema: ondersteun zowel {url: '...'} als {data: {url: '...'}}
   const notificationData = data.data ? data.data : (data.url ? { url: data.url } : {});
   
+  // Use absolute URLs for icons to ensure they work on production
+  const baseUrl = self.location.origin;
+  
   const options = {
     body: data.body || 'Je hebt een nieuwe melding!',
-    icon: '/assets/icons/icon-192x192.png',
-    badge: '/assets/icons/icon-72x72.png',
+    icon: `${baseUrl}/assets/icons/icon-192x192.png`,
+    badge: `${baseUrl}/assets/icons/icon-72x72.png`,
     data: notificationData,
     requireInteraction: false,
     silent: false,
@@ -65,6 +68,12 @@ self.addEventListener('push', function(event) {
   console.log('📢 About to show notification:', title, options);
   console.log('🔍 Registration state:', self.registration);
   console.log('🔍 Notification permission:', Notification ? Notification.permission : 'Notification API not available');
+  
+  // Extra check: verify permission before showing notification
+  if (Notification.permission !== 'granted') {
+    console.error('❌ Cannot show notification - permission not granted:', Notification.permission);
+    return; // Don't try to show notification if permission not granted
+  }
   
   const notificationPromise = self.clients.matchAll({ type: 'window', includeUncontrolled: true })
     .then(clients => {
@@ -77,6 +86,7 @@ self.addEventListener('push', function(event) {
         }
       });
 
+      console.log('🚀 Calling showNotification with:', title, options);
       return self.registration.showNotification(title, options)
         .then(() => self.registration.getNotifications())
         .then(notifications => {

@@ -1,12 +1,3 @@
-// CUSTOM_PUSH_HANDLER_START
-try {
-  importScripts('/push-handler-sw.js');
-} catch (e) {
-  console.error('Failed to import custom push handler:', e);
-}
-// CUSTOM_PUSH_HANDLER_END
-
-
 (() => {
   var __defProp = Object.defineProperty;
   var __defProps = Object.defineProperties;
