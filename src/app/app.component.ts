@@ -3,6 +3,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { PwaInstallService } from './services/pwa-install.service';
 import { PwaInstallGuideComponent } from './components/pwa-install-guide/pwa-install-guide.component';
+import { UpdateService } from './services/update.service';
 
 @Component({
   selector: 'app-root',
@@ -17,10 +18,17 @@ export class AppComponent implements OnInit, OnDestroy {
   constructor(
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
-    private pwaInstallService: PwaInstallService
+    private pwaInstallService: PwaInstallService,
+    private updateService: UpdateService
   ) {}
 
   ngOnInit() {
+    // Clean up old service workers from previous versions
+    this.cleanupOldServiceWorkers();
+
+    // Initialize update service for automatic updates
+    this.updateService.initializeUpdateService();
+
     // Listen for messages from the service worker
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.addEventListener('message', (event) => {
@@ -45,6 +53,49 @@ export class AppComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     // Clean up if needed
+  }
+
+  /**
+   * Clean up old service workers from previous versions
+   * This prevents conflicts with the new ngsw-worker.js + push-handler-sw.js setup
+   */
+  private async cleanupOldServiceWorkers(): Promise<void> {
+    if (!('serviceWorker' in navigator)) {
+      return;
+    }
+
+    try {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      console.log(`🔍 Found ${registrations.length} service worker registration(s)`);
+
+      for (const registration of registrations) {
+        const scriptURL = registration.active?.scriptURL || '';
+        
+        // Check for old Firebase Messaging service worker
+        if (scriptURL.includes('firebase-messaging-sw.js')) {
+          console.log('🗑️ Found old firebase-messaging-sw.js, unregistering...');
+          const success = await registration.unregister();
+          
+          if (success) {
+            console.log('✅ Successfully unregistered old firebase-messaging-sw.js');
+            this.snackBar.open(
+              'Oude notificatie service verwijderd. Pagina wordt vernieuwd...', 
+              'OK',
+              { duration: 3000 }
+            );
+            
+            // Reload to register new service worker
+            setTimeout(() => window.location.reload(), 3000);
+          } else {
+            console.warn('⚠️ Failed to unregister old service worker');
+          }
+        } else {
+          console.log(`✅ Service worker OK: ${scriptURL}`);
+        }
+      }
+    } catch (error) {
+      console.error('❌ Error during service worker cleanup:', error);
+    }
   }
 
   private handleInAppNotification(data: any) {

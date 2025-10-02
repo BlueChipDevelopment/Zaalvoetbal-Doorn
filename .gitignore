@@ -12,3 +12,9 @@ dist
 
 # Google service account key (nooit committen!)
 functions/assets/service-account-key.json
+
+# Generated Firebase config (contains sensitive data)
+scripts/firebase-config.json
+
+# Service worker backup files
+dist/ngsw-worker.js.backup

@@ -12,9 +12,8 @@ export class NotificationService {
   private isSupported$ = new BehaviorSubject<boolean>(false);
   private isEnabled$ = new BehaviorSubject<boolean>(false);
   private subscription$ = new BehaviorSubject<PushSubscription | null>(null);
-
-  // VAPID public key from Firebase Functions
-  private readonly vapidPublicKey = 'BJPF_ap7zo3m8LviC3mOKVEW-ks2BgudLf6ZQxkoECTxcR5f6KBwCavpd2X7bcIjwTaDn8fZio1Pm5lmNtCWmhU';
+  // VAPID public key (from environment)
+  private readonly vapidPublicKey = environment.vapidPublicKey;
 
   constructor(private googleSheetsService: GoogleSheetsService) {
     this.checkSupport();
@@ -76,23 +75,38 @@ export class NotificationService {
     }
 
     try {
-      // Request notification permission
-      const permission = await Notification.requestPermission();
-      
-      if (permission !== 'granted') {
-        console.log('❌ Notification permission denied');
+      // Check current permission state first - critical safety check
+      if (Notification.permission === 'denied') {
+        console.log('❌ Notification permission was previously denied by user');
+        console.log('💡 User must manually enable notifications in browser settings');
+        this.isEnabled$.next(false);
         return false;
       }
 
-      console.log('✅ Notification permission granted');
+      // Request notification permission (skip prompt if already granted)
+      let permission: NotificationPermission = Notification.permission;
+      if (permission !== 'granted') {
+        console.log('📱 Requesting notification permission from user...');
+        permission = await Notification.requestPermission();
+      } else {
+        console.log('✅ Notification permission already granted');
+      }
+      
+      if (permission !== 'granted') {
+        console.log('❌ Notification permission not granted:', permission);
+        return false;
+      }
+      
+      console.log('✅ Notification permission confirmed, proceeding with subscription...');
 
       // Get service worker registration
       const registration = await navigator.serviceWorker.ready;
       
       // Subscribe to push notifications
+      const applicationServerKey = this.urlBase64ToUint8Array(this.vapidPublicKey) as unknown as ArrayBuffer;
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: this.urlBase64ToUint8Array(this.vapidPublicKey)
+        applicationServerKey
       });
 
       console.log('✅ Push subscription created:', subscription);
@@ -177,7 +191,7 @@ export class NotificationService {
     } catch (error) {
       console.error('❌ Error saving subscription to server:', error);
       if (error instanceof TypeError) {
-        console.error('Network error - check if Firebase Functions are accessible');
+        console.error('Network error - check if backend is accessible');
       }
       throw error; // Re-throw so calling code can handle it
     }

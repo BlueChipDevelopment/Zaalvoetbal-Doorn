@@ -63,6 +63,19 @@ export async function sendTeamGenerationNotification(teamWhiteStr: string, teamR
     }
   }
 
-  await Promise.allSettled(notifications);
-  logger.info(`📧 Sent ${notifications.length} push notifications`);
+  const results = await Promise.allSettled(notifications);
+  const succeeded = results.filter(r => r.status === 'fulfilled').length;
+  const failed = results.filter(r => r.status === 'rejected').length;
+  
+  // Log failures for debugging
+  if (failed > 0) {
+    logger.warn(`⚠️ ${failed} team notification(s) failed to send`);
+    results.forEach((result, index) => {
+      if (result.status === 'rejected') {
+        logger.error(`Failed team notification ${index}:`, result.reason);
+      }
+    });
+  }
+  
+  logger.info(`📧 Sent ${succeeded}/${notifications.length} push notifications (${failed} failed)`);
 }

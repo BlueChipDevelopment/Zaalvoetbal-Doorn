@@ -25,6 +25,8 @@ import { TitleCasePipe } from '@angular/common';
 import { registerLocaleData } from '@angular/common';
 import localeNl from '@angular/common/locales/nl';
 import { LOCALE_ID } from '@angular/core';
+import { ServiceWorkerModule } from '@angular/service-worker';
+import { environment } from '../environments/environment';
 
 registerLocaleData(localeNl);
 
@@ -61,7 +63,11 @@ import { AboutComponent } from './components/about/about.component';
     MatToolbarModule, 
     MatSidenavModule, 
     AppRoutingModule,
-    AboutComponent
+    AboutComponent,
+    ServiceWorkerModule.register('ngsw-worker.js', {
+      enabled: environment.production || environment.enableServiceWorker,
+      registrationStrategy: 'registerImmediately'
+    })
   ],
   providers: [provideHttpClient(withInterceptorsFromDi()), TitleCasePipe, { provide: LOCALE_ID, useValue: 'nl' }]
 })

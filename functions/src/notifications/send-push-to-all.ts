@@ -118,9 +118,22 @@ export const sendPushToAll = onRequest(
         }
       }
 
-      await Promise.allSettled(notifications);
-      logger.info(`📧 Sent ${notifications.length} push notifications successfully`);
-      res.json({ success: true, count: notifications.length });
+      const results = await Promise.allSettled(notifications);
+      const succeeded = results.filter(r => r.status === 'fulfilled').length;
+      const failed = results.filter(r => r.status === 'rejected').length;
+      
+      // Log failures for debugging
+      if (failed > 0) {
+        logger.warn(`⚠️ ${failed} notification(s) failed to send`);
+        results.forEach((result, index) => {
+          if (result.status === 'rejected') {
+            logger.error(`Failed notification ${index}:`, result.reason);
+          }
+        });
+      }
+      
+      logger.info(`📧 Sent ${succeeded}/${notifications.length} push notifications (${failed} failed)`);
+      res.json({ success: true, sent: succeeded, failed: failed, total: notifications.length });
     } catch (error) {
       logger.error(error);
       res.status(500).send('Error sending push notifications');
