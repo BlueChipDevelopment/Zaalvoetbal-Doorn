@@ -163,27 +163,31 @@ export class GameStatisticsService {
         });
         const maxTotalPoints = Math.max(...Object.values(playerStats).map((stats: any) => stats.totalPoints || 0), 1);
         // Maak array met alle info
-        return Object.entries(playerStats).map(([player, stats]) => {
-          // Zoek de speler op in de PlayerService data
-          const spelerData = spelers.find((p) => p.name && p.name.trim().toLowerCase() === player);
-          let rating = Math.round((stats.totalPoints / (maxTotalPoints / 10)));
-          rating = Math.max(1, Math.min(10, rating));
-          return {
-            name: spelerData ? spelerData.name : player,
-            position: spelerData ? spelerData.position : null,
-            rating: rating,
-            gamesPlayed: stats.gamesPlayed,
-            totalPoints: stats.totalPoints,
-            wins: stats.wins,
-            losses: stats.losses,
-            ties: stats.ties,
-            winRatio: stats.gamesPlayed > 0 ? (stats.wins / stats.gamesPlayed) * 100 : 0,
-            gameHistory: stats.gameHistory || [],
-            zlatanPoints: stats.zlatanPoints || 0,
-            ventielPoints: stats.ventielPoints || 0,
-            actief: spelerData ? spelerData.actief : false
-          } as Player;
-        }).sort((a, b) => b.totalPoints - a.totalPoints);
+        return Object.entries(playerStats)
+          .map(([player, stats]) => {
+            // Zoek de speler op in de PlayerService data
+            const spelerData = spelers.find((p) => p.name && p.name.trim().toLowerCase() === player);
+            let rating = Math.round((stats.totalPoints / (maxTotalPoints / 10)));
+            rating = Math.max(1, Math.min(10, rating));
+            return {
+              name: spelerData ? spelerData.name : player,
+              position: spelerData ? spelerData.position : null,
+              rating: rating,
+              gamesPlayed: stats.gamesPlayed,
+              totalPoints: stats.totalPoints,
+              wins: stats.wins,
+              losses: stats.losses,
+              ties: stats.ties,
+              winRatio: stats.gamesPlayed > 0 ? (stats.wins / stats.gamesPlayed) * 100 : 0,
+              gameHistory: stats.gameHistory || [],
+              zlatanPoints: stats.zlatanPoints || 0,
+              ventielPoints: stats.ventielPoints || 0,
+              actief: spelerData ? spelerData.actief : false
+            } as Player;
+          })
+          // Filter: verwijder spelers die niet actief zijn EN geen wedstrijden hebben in dit seizoen
+          .filter(player => player.actief || player.gamesPlayed > 0)
+          .sort((a, b) => b.totalPoints - a.totalPoints);
       })
     );
   }
