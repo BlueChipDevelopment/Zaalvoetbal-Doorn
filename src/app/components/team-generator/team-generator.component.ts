@@ -568,7 +568,7 @@ export class TeamGeneratorComponent implements OnInit {
           this.snackBar.open('Teams opgeslagen!', 'Sluiten', { duration: 3000, panelClass: ['futsal-notification', 'futsal-notification-success'] });
           // Push notificatie sturen naar alle spelers met toestemming
           this.sendPushNotificationToAll(
-            'De opstelling is bekend!',
+            'Opstelling bekend ⚽',
             'Bekijk de teams voor de volgende wedstrijd.',
             window.location.origin + '/opstelling'
           );

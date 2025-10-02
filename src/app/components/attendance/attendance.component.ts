@@ -417,7 +417,7 @@ export class AttendanceComponent implements OnInit {
       const success = await this.notificationService.requestPermission(this.selectedPlayer || undefined);
 
       if (success) {
-        this.snackBar.open('Notificaties succesvol ingeschakeld!', 'OK', {
+        this.snackBar.open('Notificaties succesvol ingeschakeld.', 'OK', {
           duration: 3000,
           panelClass: ['futsal-notification', 'futsal-notification-success']
         });
@@ -484,7 +484,7 @@ export class AttendanceComponent implements OnInit {
   }
 
   public onPwaInstalled(): void {
-    this.snackBar.open('Perfect! Je ontvangt nu betrouwbare notificaties.', 'OK', {
+    this.snackBar.open('App geïnstalleerd. Notificaties zijn nu actief.', 'OK', {
       duration: 4000,
       panelClass: ['futsal-notification', 'futsal-notification-success']
     });

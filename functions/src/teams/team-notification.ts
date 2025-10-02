@@ -7,7 +7,7 @@ import { SPREADSHEET_ID, APP_URLS, SHEET_NAMES, COLUMN_INDICES } from "../config
  * Send push notification for team generation
  */
 export async function sendTeamGenerationNotification(teamWhiteStr: string, teamRedStr: string, trigger: string) {
-  const title = trigger === 'scheduled' ? 'Opstelling bekend! 🤖' : 'Opstelling bekend! ⚽';
+  const title = 'Opstelling bekend ⚽';
   const body = `Bekijk de volledige opstelling!`;
   const url = APP_URLS.OPSTELLING;
 
