@@ -3,7 +3,7 @@ import * as logger from "firebase-functions/logger";
 import * as webpush from 'web-push';
 import { getSheetsClient } from "../shared/sheets-client";
 import { SPREADSHEET_ID, APP_URLS, FIREBASE_CONFIG, SCHEDULE_PATTERNS, SHEET_NAMES, SHEET_RANGES, COLUMN_INDICES } from "../config/constants";
-import { parseMatchDateToISO, toISODateString } from "../shared/date-utils";
+import { parseMatchDateToISO, parseMatchDateWithTime, toISODateString } from "../shared/date-utils";
 
 /**
  * Scheduled function: stuur automatisch reminders 24u en 12u voor de eerstvolgende wedstrijd
@@ -56,12 +56,13 @@ export const scheduledAttendanceReminders = onSchedule(
 
     // 3. Zoek eerste toekomstige wedstrijd ZONDER teams
     for (const dateStr of dates) {
-      // Als alleen datum opgegeven, voeg standaard tijd 20:30 toe
-      const dateTimeStr = dateStr.includes('T') || dateStr.includes(' ')
-        ? dateStr
-        : `${dateStr}T20:30:00`;
+      // Parse datum met standaard tijd 20:30 in Europe/Amsterdam timezone
+      const d = parseMatchDateWithTime(dateStr, '20:30:00');
+      if (!d) {
+        logger.warn(`Could not parse date: ${dateStr}`);
+        continue;
+      }
 
-      const d = new Date(dateTimeStr);
       if (d > now) {
         // Check of deze wedstrijd al teams heeft
         const isoDateStr = toISODateString(d);
