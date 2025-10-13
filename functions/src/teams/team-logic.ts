@@ -85,14 +85,8 @@ export async function performAutoTeamGeneration(dateString: string, trigger: str
       const playerName = row[1] || '';
       const status = row[2] || '';
 
-      // Debug logging for each row
-      if (attendanceDate && playerName) {
-        logger.info(`📋 Row ${i}: Date="${attendanceDate}", Player="${playerName}", Status="${status}"`);
-      }
-
       if (attendanceDate === dateString && status.toLowerCase() === 'ja') {
         presentPlayerNames.push(playerName);
-        logger.info(`✅ Found present player: ${playerName}`);
       }
     }
 
