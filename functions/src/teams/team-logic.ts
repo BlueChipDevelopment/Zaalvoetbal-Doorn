@@ -81,9 +81,9 @@ export async function performAutoTeamGeneration(dateString: string, trigger: str
 
     for (let i = 1; i < aanwezigheidRows.length; i++) {
       const row = aanwezigheidRows[i];
-      const attendanceDate = row[0] || '';
-      const playerName = row[1] || '';
-      const status = row[2] || '';
+      const attendanceDate = row[COLUMN_INDICES.AANWEZIGHEID_DATUM] || '';
+      const playerName = row[COLUMN_INDICES.AANWEZIGHEID_NAAM] || '';
+      const status = row[COLUMN_INDICES.AANWEZIGHEID_STATUS] || '';
 
       if (attendanceDate === dateString && status.toLowerCase() === 'ja') {
         presentPlayerNames.push(playerName);
@@ -120,13 +120,13 @@ export async function performAutoTeamGeneration(dateString: string, trigger: str
       let playerData = null;
       for (let i = 1; i < spelersRows.length; i++) {
         const row = spelersRows[i];
-        const sheetPlayerName = row[0] || '';
+        const sheetPlayerName = row[COLUMN_INDICES.NAME] || '';
 
         // Trim both names to handle extra spaces
-        if (sheetPlayerName.trim() === playerName.trim()) { // Column A = name
+        if (sheetPlayerName.trim() === playerName.trim()) {
           playerData = {
             name: playerName.trim(),
-            position: row[1] || 'PLAYER', // Column B = position
+            position: row[COLUMN_INDICES.POSITION] || 'PLAYER',
             rating: 5 // Default rating - we'll need to get this from statistics
           };
 

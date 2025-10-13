@@ -3,6 +3,7 @@ import { Observable, of, BehaviorSubject } from 'rxjs';
 import { map, tap, catchError, shareReplay, switchMap } from 'rxjs/operators';
 import { GoogleSheetsService } from './google-sheets-service';
 import { PlayerSheetData, PlayerFilter } from '../interfaces/IPlayerSheet';
+import { SPELER_COLUMNS, SHEET_NAMES } from '../constants/sheet-columns';
 
 @Injectable({
   providedIn: 'root'
@@ -65,13 +66,36 @@ export class PlayerService {
     pushSubscription: string, 
     pushPermission: boolean
   ): Observable<any> {
-    return this.googleSheetsService.updatePlayerPushSubscription(
-      playerName, 
-      pushSubscription, 
-      pushPermission
-    ).pipe(
+    return this.googleSheetsService.getSheetData(SHEET_NAMES.SPELERS).pipe(
+      map(rows => {
+        // Find the player by name in the actual sheet data
+        let foundRowIndex = -1;
+        let foundRow: any[] | null = null;
+        
+        for (let i = 1; i < rows.length; i++) { // Skip header row (index 0)
+          const row = rows[i];
+          if (row && row[SPELER_COLUMNS.NAME] && row[SPELER_COLUMNS.NAME].toLowerCase().trim() === playerName.toLowerCase().trim()) {
+            foundRowIndex = i;
+            foundRow = row;
+            break;
+          }
+        }
+        
+        if (!foundRow || foundRowIndex === -1) {
+          throw new Error(`Player not found in sheet: ${playerName}`);
+        }
+        
+        foundRow[SPELER_COLUMNS.PUSH_PERMISSION] = pushPermission ? 'TRUE' : 'FALSE';
+        foundRow[SPELER_COLUMNS.PUSH_SUBSCRIPTION] = pushSubscription;
+        
+        const sheetRowNumber = foundRowIndex + 1; // Convert to 1-based indexing
+        return { row: foundRow, sheetRowNumber };
+      }),
+      switchMap(({row, sheetRowNumber}) => {
+        return this.googleSheetsService.updateSheetRow(SHEET_NAMES.SPELERS, sheetRowNumber, row);
+      }),
       catchError(error => {
-        console.error('❌ PlayerService error:', error);
+        console.error('❌ PlayerService error updating push subscription:', error);
         throw error;
       }),
       tap(() => this.clearCache()) // Clear cache after update
@@ -116,13 +140,13 @@ export class PlayerService {
 
     // Skip header row (index 0)
     return rows.slice(1)
-      .filter(row => row && row[0]) // Filter out empty rows or rows without name
+      .filter(row => row && row[SPELER_COLUMNS.NAME]) // Filter out empty rows or rows without name
       .map(row => ({
-        name: this.sanitizeString(row[0]),
-        position: this.sanitizeString(row[1]) || '',
-        actief: this.parseBoolean(row[2]),
-        pushPermission: this.parseBoolean(row[3]),
-        pushSubscription: this.sanitizeString(row[4]) || undefined
+        name: this.sanitizeString(row[SPELER_COLUMNS.NAME]),
+        position: this.sanitizeString(row[SPELER_COLUMNS.POSITION]) || '',
+        actief: this.parseBoolean(row[SPELER_COLUMNS.ACTIEF]),
+        pushPermission: this.parseBoolean(row[SPELER_COLUMNS.PUSH_PERMISSION]),
+        pushSubscription: this.sanitizeString(row[SPELER_COLUMNS.PUSH_SUBSCRIPTION]) || undefined
       }))
       .sort((a, b) => a.name.localeCompare(b.name)); // Sort alphabetically
   }

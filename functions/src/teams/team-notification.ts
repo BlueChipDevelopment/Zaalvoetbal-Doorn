@@ -46,11 +46,11 @@ export async function sendTeamGenerationNotification(teamWhiteStr: string, teamR
     const row = notificatiesRows[i];
     if (row.length < 7) continue;
 
-    const endpoint = row[0];
-    const p256dh = row[1];
-    const auth = row[2];
-    const active = row[5] === 'true' || row[5] === true;
-    const playerName = row[6];
+    const endpoint = row[COLUMN_INDICES.NOTIFICATIES_ENDPOINT];
+    const p256dh = row[COLUMN_INDICES.NOTIFICATIES_P256DH];
+    const auth = row[COLUMN_INDICES.NOTIFICATIES_AUTH];
+    const active = row[COLUMN_INDICES.NOTIFICATIES_ACTIVE] === 'true' || row[COLUMN_INDICES.NOTIFICATIES_ACTIVE] === true;
+    const playerName = row[COLUMN_INDICES.NOTIFICATIES_PLAYER_NAME];
 
     if (active && playerName && activePlayersSet.has(playerName)) {
       try {

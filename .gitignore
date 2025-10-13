@@ -3,6 +3,11 @@ dist
 .angular
 .vs
 .env
+
+# Firebase debug logs
+firebase-debug.log
+firebase-debug.*.log
+
 # Environment files with sensitive data
 /src/environments/environment.ts
 /src/environments/environment.prod.ts

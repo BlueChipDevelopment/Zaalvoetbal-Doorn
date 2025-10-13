@@ -54,6 +54,12 @@ The app uses Google Sheets as the primary data store with these main sheets:
 
 **IMPORTANT**: Always skip header rows when processing Google Sheets data (first row contains column headers).
 
+**Column Index Constants**: 
+- When working in **Firebase Functions**, always use column index constants from `functions/src/config/constants.ts` (see `COLUMN_INDICES` object)
+- When working in the **Angular app**, always use column definitions from `src/app/constants/sheet-columns.ts`
+- **Never hardcode column indices** (e.g., `row[0]`, `row[1]`) - always use the named constants for maintainability and type safety
+- This ensures centralized management: if sheet structure changes, update only the constants file
+
 ### Firebase Functions Backend
 The Firebase Functions backend provides these endpoints:
 - `getSheetData` - Retrieve sheet data
