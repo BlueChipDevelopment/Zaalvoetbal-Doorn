@@ -71,8 +71,6 @@ export const scheduledAttendanceReminders = onSchedule(
           nextMatchDateStr = dateStr; // Bewaar originele datum string voor logging
           logger.info(`📧 Found next match without teams: ${nextMatchDateStr}`);
           break;
-        } else {
-          logger.info(`⏭️ Skipping match ${dateStr} - teams already generated`);
         }
       }
     }

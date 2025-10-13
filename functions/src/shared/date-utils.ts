@@ -2,24 +2,60 @@ import * as logger from "firebase-functions/logger";
 
 /**
  * Parse een datum string in verschillende formaten naar een Date object
- * Ondersteunt Nederlandse datum formaten (dd-mm-yyyy) en ISO formaten
+ * Ondersteunt Nederlandse datum formaten (dd-mm-yyyy) en ISO formaten (yyyy-mm-dd)
  */
 export function parseMatchDate(dateStr: string): Date | null {
   if (!dateStr) return null;
 
   try {
-    // Try to parse Dutch format (dd-mm-yyyy or d-m-yyyy)
+    // Try to parse format with dashes
     if (dateStr.includes('-')) {
       const parts = dateStr.split('-');
       if (parts.length === 3) {
-        const day = parseInt(parts[0], 10);
-        const month = parseInt(parts[1], 10);
-        const year = parseInt(parts[2], 10);
+        const part1 = parseInt(parts[0], 10);
+        const part2 = parseInt(parts[1], 10);
+        const part3 = parseInt(parts[2], 10);
 
         // Valideer dat de delen getallen zijn
-        if (isNaN(day) || isNaN(month) || isNaN(year)) {
+        if (isNaN(part1) || isNaN(part2) || isNaN(part3)) {
           logger.warn(`Invalid date parts in "${dateStr}"`);
           return null;
+        }
+
+        let day: number, month: number, year: number;
+
+        // Detecteer formaat: als eerste deel > 31, dan is het yyyy-mm-dd (ISO formaat)
+        // Anders is het dd-mm-yyyy (Nederlands formaat)
+        if (part1 > 31) {
+          // ISO formaat: yyyy-mm-dd
+          year = part1;
+          month = part2;
+          day = part3;
+        } else if (part3 > 31) {
+          // Nederlands formaat: dd-mm-yyyy
+          day = part1;
+          month = part2;
+          year = part3;
+        } else {
+          // Ambigue - gebruik heuristiek: als part1 > 12, dan is het een dag
+          if (part1 > 12) {
+            // Moet dd-mm-yyyy zijn
+            day = part1;
+            month = part2;
+            year = part3;
+          } else {
+            // Als het een 4-cijferig jaar is aan het begin, dan yyyy-mm-dd
+            if (part1 > 999) {
+              year = part1;
+              month = part2;
+              day = part3;
+            } else {
+              // Anders dd-mm-yyyy
+              day = part1;
+              month = part2;
+              year = part3;
+            }
+          }
         }
 
         // Create date in ISO format (year-month-day)
@@ -96,12 +132,31 @@ export function parseMatchDateWithTime(dateStr: string, timeStr: string = '20:30
     const time = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 
     // Bepaal timezone offset voor Europe/Amsterdam
-    // Zomertijd (CEST): UTC+2, van laatste zondag maart tot laatste zondag oktober
+    // Zomertijd (CEST): UTC+2, van laatste zondag maart 02:00 tot laatste zondag oktober 03:00
     // Wintertijd (CET): UTC+1
-    // Voor simplicity: april t/m september is altijd zomertijd
-    const monthNum = date.getMonth(); // 0-indexed
-    const isLikelyDST = monthNum >= 3 && monthNum <= 8; // april (3) t/m september (8)
-    const offset = isLikelyDST ? '+02:00' : '+01:00';
+    // Simpele benadering: april t/m september = altijd zomertijd, maart/oktober = check
+    const monthNum = date.getMonth(); // 0-indexed (0=januari, 9=oktober)
+    let isDST: boolean;
+    
+    if (monthNum >= 3 && monthNum <= 8) {
+      // April (3) t/m september (8) = altijd zomertijd
+      isDST = true;
+    } else if (monthNum < 2 || monthNum === 11) {
+      // Januari, februari, december = altijd wintertijd
+      isDST = false;
+    } else {
+      // Maart (2) of oktober (9) - vereenvoudigde check
+      // Zomertijd eindigt meestal eind oktober, begint eind maart
+      // Voor veiligheid: maart = zomertijd, oktober eerste 3 weken = zomertijd
+      if (monthNum === 2) {
+        isDST = true; // Maart: vanaf laatste week meestal zomertijd, maar gebruik hele maand
+      } else {
+        // Oktober: eerste 3 weken = zomertijd, laatste week = wintertijd
+        isDST = date.getDate() <= 25; // Veilige schatting
+      }
+    }
+    
+    const offset = isDST ? '+02:00' : '+01:00';
 
     // Maak ISO string met timezone en parse naar Date
     const isoString = `${year}-${month}-${day}T${time}${offset}`;
