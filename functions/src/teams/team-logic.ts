@@ -122,38 +122,39 @@ export async function performAutoTeamGeneration(dateString: string, trigger: str
         const row = spelersRows[i];
         const sheetPlayerName = row[0] || '';
 
-        if (sheetPlayerName === playerName) { // Column A = name
-          const actiefValue = row[2];
-          const isActief = actiefValue === 'TRUE' || actiefValue === true || actiefValue === 'Ja' || actiefValue === 'JA';
+        // Trim both names to handle extra spaces
+        if (sheetPlayerName.trim() === playerName.trim()) { // Column A = name
           playerData = {
-            name: playerName,
+            name: playerName.trim(),
             position: row[1] || 'PLAYER', // Column B = position
-            actief: isActief, // Column C = actief
             rating: 5 // Default rating - we'll need to get this from statistics
           };
 
-          logger.info(`👤 Found player "${playerName}": position="${playerData.position}", actiefValue="${actiefValue}", actief=${isActief}`);
+          logger.info(`✅ Found player "${playerName}": position="${playerData.position}"`);
           break;
         }
       }
 
       if (!playerData) {
-        logger.warn(`❌ Player "${playerName}" not found in Spelers sheet`);
-      } else if (!playerData.actief) {
-        logger.warn(`❌ Player "${playerName}" found but not active (actief=${playerData.actief})`);
-      } else {
-        playersWithStats.push(playerData);
-        logger.info(`✅ Added active player "${playerName}" to team generation`);
+        logger.warn(`❌ Player "${playerName}" not found in Spelers sheet - adding with default stats`);
+        // Add player anyway with default stats - if they're present, they play!
+        playerData = {
+          name: playerName.trim(),
+          position: 'PLAYER',
+          rating: 5
+        };
       }
+      
+      playersWithStats.push(playerData);
     }
 
-    logger.info(`📈 Active players with stats: ${playersWithStats.length} - ${playersWithStats.map(p => p.name).join(', ')}`);
+    logger.info(`📈 Players ready for team generation: ${playersWithStats.length} - ${playersWithStats.map(p => p.name).join(', ')}`);
 
     // For now, use simplified team generation (we can enhance this later)
     if (playersWithStats.length < 6) {
       return {
         success: false,
-        message: `Not enough active players with stats (${playersWithStats.length}/6 minimum)`
+        message: `Not enough players (${playersWithStats.length}/6 minimum)`
       };
     }
 
